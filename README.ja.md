@@ -30,22 +30,22 @@ Git をバックエンドの保存機構として利用し、強力な履歴管�
 *   Node.js 20+
 *   Git
 
-### セットアップ手順
+### Docker (推奨)
 
-1.  **Backend**
+Docker および Docker Compose を使用して、環境構築の手間なく実行できます。
+
+1.  **コンテナの起動**
     ```bash
-    cd backend
-    python -m venv .venv
-    source .venv/bin/activate  # Windows: .venv\Scripts\activate
-    pip install -r requirements.txt
-    python -m app.main
+    docker-compose up -d
     ```
 
-2.  **Frontend**
+2.  **アクセス**
+    *   Frontend: [http://localhost:3000](http://localhost:3000)
+    *   Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+3.  **停止**
     ```bash
-    cd frontend
-    npm install
-    npm run dev
+    docker-compose down
     ```
 
 ## 📐 データ構造仕様
