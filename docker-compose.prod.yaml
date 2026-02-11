@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: prod
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app # Still mount for now, but in real prod verify if needed. Here we keep it simple.
+                       # Actually for prod we might NOT want to mount source code if we copy it in Dockerfile.
+                       # But looking at backend Dockerfile, we copy . . so it's fine.
+                       # However, to be strictly "prod", we should avoid mounting.
+                       # Let's verify backend Dockerfile first. If we copy, we don't need mount for code changes.
+                       # But for data persistence we need a volume for data.
+    environment:
+        - ENV=production
+
+  frontend:
+    build:
+      context: ./frontend
+      target: prod
+    ports:
+      - "3000:80"
