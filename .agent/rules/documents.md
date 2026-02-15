@@ -25,7 +25,7 @@ trigger: always_on
   * README.ja.md
   * doc/
     * spec/
-      * parts/
+      * apis/
         * openapi_common.yaml
         * openapi_common.ja.yaml
         * openapi_「apiname」.yaml
@@ -233,10 +233,10 @@ trigger: always_on
 * ファイルパス  
   * 英語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.yaml
   * 日本語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.ja.yaml
-  * 英語版共通要素Open API仕様書:「workspace_root」/doc/spec/parts/openapi_common.yaml
-  * 日本語版共通要素Open API仕様書: 「workspace_root」/doc/spec/parts/openapi_common.ja.yaml
-  * 英語版各API個別Open API仕様書:「workspace_root」/doc/spec/parts/openapi_「apiname」.yaml
-  * 日本語版各API個別Open API仕様書:「workspace_root」/doc/spec/parts/openapi_「apiname」.ja.yaml
+  * 英語版共通要素Open API仕様書:「workspace_root」/doc/spec/apis/openapi_common.yaml
+  * 日本語版共通要素Open API仕様書: 「workspace_root」/doc/spec/apis/openapi_common.ja.yaml
+  * 英語版各API個別Open API仕様書:「workspace_root」/doc/spec/apis/openapi_「apiname」.yaml
+  * 日本語版各API個別Open API仕様書:「workspace_root」/doc/spec/apis/openapi_「apiname」.ja.yaml
 
 * ファイル構成:  
   * 英語版、日本語版の統合Open API仕様書は、共通要素Open API仕様書およびすべてのAPI個別Open API仕様書を参照して統合したOpen API仕様書とする。
