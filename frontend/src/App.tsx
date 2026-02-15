@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SettingsPage } from './presentation/pages/SettingsPage';
 import { TaskListPage } from './presentation/pages/TaskListPage';
 import './index.css';

@@ -14,7 +14,7 @@ services:
     ports:
       - "8000:8000" # Internal only via proxy
     volumes:
-      - ./backend:/app
+      - ./backend:/workspace/backend
     tty: true
 
   frontend:

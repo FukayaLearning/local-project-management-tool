@@ -36,7 +36,7 @@ Docker および Docker Compose を使用して、環境構築の手間なく実
 
 1.  **コンテナの起動**
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 2.  **アクセス**
@@ -44,7 +44,7 @@ Docker および Docker Compose を使用して、環境構築の手間なく実
     *   Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3.  **停止**
-    docker-compose down
+    docker compose down
     ```
 
 ### ローカル実行 (手動)
