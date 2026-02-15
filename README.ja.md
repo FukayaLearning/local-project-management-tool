@@ -90,23 +90,26 @@ Dockerを使用せず、個別にプロセスを起動する場合の手順で�
 
 ## 🧪 テスト
 
-フロントエンドの単体テスト・結合テストを実行するには以下のコマンドを使用します。
+### フロントエンド単体テスト
 
 ```bash
-cd frontend
-npm test
+docker compose exec frontend npm test
 ```
-テストは Vitest と React Testing Library を使用して実行されます。
 
-### 結合テスト (Docker環境)
+### フロントエンド結合テスト
 
-Docker実行中のバックエンドに対してテストを行うには以下を実行します。
-**事前に `docker-compose up` でバックエンドが起動している必要があります。**
+Dockerコンテナ上で動作しているバックエンドと通信を行い、シナリオベースのテストを実行します。
 
 ```bash
-cd frontend
-npm run test:integration
+docker compose exec frontend npm run test:integration
 ```
+
+### バックエンド単体テスト
+
+```bash
+docker compose exec backend pytest
+```
+
 
 ## 📐 データ構造仕様
 
