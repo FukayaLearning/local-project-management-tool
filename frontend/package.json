@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:integration": "vitest run src/Settings.integration.test.tsx"
   },
   "dependencies": {
     "@mantine/core": "^7.16.2",
