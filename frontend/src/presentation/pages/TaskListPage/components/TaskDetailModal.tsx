@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Task, TaskCreate, TaskUpdate } from '../../../../domain/entities/task';
-import { Modal } from '../../components/Modal';
-import { Input } from '../../components/Input';
-import { Select } from '../../components/Select';
-import { Button } from '../../components/Button';
+import { Modal } from '../../../../presentation/components/Modal';
+import { Input } from '../../../../presentation/components/Input';
+import { Select } from '../../../../presentation/components/Select';
+import { Button } from '../../../../presentation/components/Button';
 
 interface TaskDetailModalProps {
     isOpen: boolean;
@@ -51,6 +51,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ isOpen, onClos
         <Modal isOpen={isOpen} onClose={onClose} title={task ? 'Edit Task' : 'New Task'}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
+                    id="task-title"
                     label="Title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -58,6 +59,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ isOpen, onClos
                     disabled={isLoading}
                 />
                 <Select
+                    id="task-status"
                     label="Status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}

@@ -28,6 +28,7 @@ export const ProjectSettingsForm: React.FC<ProjectSettingsFormProps> = ({ settin
         <Card title="Project Settings" className="mb-6">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
+                    id="project-name"
                     label="Project Name"
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
