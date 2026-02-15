@@ -8,7 +8,7 @@ class SettingsFileRepository(ISettingsRepository):
         # Go up 3 levels from here: infrastructure/file_system -> app -> backend -> root
         # But data_dir is relative to execution context (usually backend root)
         # Better to make it absolute based on file location
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
         self.data_dir = os.path.join(base_dir, data_dir)
         self.settings_file = os.path.join(self.data_dir, "settings.json")
         os.makedirs(self.data_dir, exist_ok=True)

@@ -7,7 +7,7 @@ from backend.app.domain.repositories.task_repository import ITaskRepository
 
 class TaskFileRepository(ITaskRepository):
     def __init__(self, data_dir: str = "data"):
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
         self.data_dir = os.path.join(base_dir, data_dir)
         self.task_file = os.path.join(self.data_dir, "tasks.csv")
         os.makedirs(self.data_dir, exist_ok=True)
