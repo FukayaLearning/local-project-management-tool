@@ -36,7 +36,7 @@ Docker および Docker Compose を使用して、環境構築の手間なく実
 
 1.  **コンテナの起動**
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 2.  **アクセス**
@@ -44,9 +44,72 @@ Docker および Docker Compose を使用して、環境構築の手間なく実
     *   Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3.  **停止**
-    ```bash
-    docker-compose down
+    docker compose down
     ```
+
+### ローカル実行 (手動)
+
+Dockerを使用せず、個別にプロセスを起動する場合の手順です。
+
+#### Backend
+
+1.  **ディレクトリ移動**
+    ```bash
+    cd backend
+    ```
+2.  **仮想環境の作成と有効化**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # Linux/Mac
+    # venv\Scripts\activate   # Windows
+    ```
+3.  **依存関係のインストール**
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **サーバー起動**
+    ```bash
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    ```
+
+#### Frontend
+
+1.  **ディレクトリ移動**
+    ```bash
+    cd frontend
+    ```
+2.  **依存関係のインストール**
+    ```bash
+    npm install
+    ```
+3.  **開発サーバー起動**
+    ```bash
+    npm run dev
+    ```
+    ブラウザで [http://localhost:5173](http://localhost:5173) にアクセスします。
+
+## 🧪 テスト
+
+### フロントエンド単体テスト
+
+```bash
+docker compose exec frontend npm test
+```
+
+### フロントエンド結合テスト
+
+Dockerコンテナ上で動作しているバックエンドと通信を行い、シナリオベースのテストを実行します。
+
+```bash
+docker compose exec frontend npm run test:integration
+```
+
+### バックエンド単体テスト
+
+```bash
+docker compose exec backend pytest
+```
+
 
 ## 📐 データ構造仕様
 

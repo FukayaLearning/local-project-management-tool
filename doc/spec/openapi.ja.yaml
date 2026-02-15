@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+  title: Local Project Management Tool API
+  version: 1.0.0
+  description: オフラインプロジェクト管理ツールのAPI仕様書
+
+paths:
+  /projects/settings:
+    $ref: './apis/openapi_projects.ja.yaml#/paths/~1projects~1settings'
+  /tasks:
+    $ref: './apis/openapi_tasks.ja.yaml#/paths/~1tasks'
+  /tasks/{id}:
+    $ref: './apis/openapi_tasks.ja.yaml#/paths/~1tasks~1{id}'

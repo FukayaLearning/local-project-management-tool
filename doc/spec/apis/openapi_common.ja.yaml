@@ -1,0 +1,14 @@
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: エラーコード
+        message:
+          type: string
+          description: エラーメッセージ
+      required:
+        - code
+        - message

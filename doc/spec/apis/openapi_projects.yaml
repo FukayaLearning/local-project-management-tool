@@ -1,0 +1,58 @@
+paths:
+  /projects/settings:
+    get:
+      summary: Get Project Settings
+      operationId: getProjectSettings
+      tags:
+        - projects
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSettings'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '../apis/openapi_common.yaml#/components/schemas/Error'
+    put:
+      summary: Update Project Settings
+      operationId: updateProjectSettings
+      tags:
+        - projects
+      requestBody:
+        description: Settings to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSettings'
+      responses:
+        '200':
+          description: Update Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSettings'
+
+components:
+  schemas:
+    ProjectSettings:
+      type: object
+      properties:
+        project_name:
+          type: string
+          description: Project Name
+        start_date:
+          type: string
+          format: date
+          description: Planned Start Date
+        end_date:
+          type: string
+          format: date
+          description: Planned End Date
+      required:
+        - project_name

@@ -1,0 +1,58 @@
+paths:
+  /projects/settings:
+    get:
+      summary: プロジェクト設定取得
+      operationId: getProjectSettings
+      tags:
+        - projects
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSettings'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '../apis/openapi_common.ja.yaml#/components/schemas/Error'
+    put:
+      summary: プロジェクト設定更新
+      operationId: updateProjectSettings
+      tags:
+        - projects
+      requestBody:
+        description: 更新する設定内容
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSettings'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSettings'
+
+components:
+  schemas:
+    ProjectSettings:
+      type: object
+      properties:
+        project_name:
+          type: string
+          description: プロジェクト名
+        start_date:
+          type: string
+          format: date
+          description: 開始予定日
+        end_date:
+          type: string
+          format: date
+          description: 終了予定日
+      required:
+        - project_name
