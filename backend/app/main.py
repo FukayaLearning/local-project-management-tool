@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import settings
+from .presentation.api.v1.endpoints import projects, tasks
 
 app = FastAPI()
 
@@ -19,7 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(settings.router)
+app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
+app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 
 @app.get("/")
 def read_root():
