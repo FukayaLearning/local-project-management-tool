@@ -5,14 +5,14 @@ paths:
       tags:
         - tasks
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Task'
+                  $ref: "#/components/schemas/Task"
     post:
       summary: Create Task
       tags:
@@ -22,14 +22,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskInput'
+              $ref: "#/components/schemas/TaskInput"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: "#/components/schemas/Task"
 
   /tasks/{id}:
     get:
@@ -43,12 +43,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: "#/components/schemas/Task"
     put:
       summary: Update Task
       tags:
@@ -64,14 +64,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskInput'
+              $ref: "#/components/schemas/TaskInput"
       responses:
-        '200':
+        "200":
           description: Updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: "#/components/schemas/Task"
     delete:
       summary: Delete Task
       tags:
@@ -83,8 +83,39 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: Deleted
+
+  /tasks/undo:
+    post:
+      summary: Undo Last Change
+      tags:
+        - tasks
+      responses:
+        "200":
+          description: Undone
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /tasks/redo:
+    post:
+      summary: Redo Last Change
+      tags:
+        - tasks
+      responses:
+        "200":
+          description: Redone
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
@@ -112,14 +143,14 @@ components:
 
     TaskInput:
       allOf:
-        - $ref: '#/components/schemas/TaskBase'
+        - $ref: "#/components/schemas/TaskBase"
       required:
         - title
         - status
 
     Task:
       allOf:
-        - $ref: '#/components/schemas/TaskBase'
+        - $ref: "#/components/schemas/TaskBase"
         - type: object
           properties:
             id:

@@ -6,18 +6,18 @@ paths:
       tags:
         - projects
       responses:
-        '200':
+        "200":
           description: 成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettings'
-        '500':
+                $ref: "#/components/schemas/ProjectSettings"
+        "500":
           description: サーバーエラー
           content:
             application/json:
               schema:
-                $ref: '../apis/openapi_common.ja.yaml#/components/schemas/Error'
+                $ref: "../apis/openapi_common.ja.yaml#/components/schemas/Error"
     put:
       summary: プロジェクト設定更新
       operationId: updateProjectSettings
@@ -29,14 +29,63 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectSettings'
+              $ref: "#/components/schemas/ProjectSettings"
       responses:
-        '200':
+        "200":
           description: 更新成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettings'
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects:
+    post:
+      summary: プロジェクト新規作成
+      operationId: createProject
+      tags:
+        - projects
+      requestBody:
+        description: プロジェクト作成情報
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_name:
+                  type: string
+              required:
+                - project_name
+      responses:
+        "200":
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects/{project_id}/switch:
+    post:
+      summary: プロジェクト切替
+      operationId: switchProject
+      tags:
+        - projects
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 切替成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:

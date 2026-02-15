@@ -5,9 +5,19 @@ info:
   description: オフラインプロジェクト管理ツールのAPI仕様書
 
 paths:
+  /projects:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects"
+  /projects/{project_id}/switch:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects~1{project_id}~1switch"
   /projects/settings:
-    $ref: './apis/openapi_projects.ja.yaml#/paths/~1projects~1settings'
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects~1settings"
   /tasks:
-    $ref: './apis/openapi_tasks.ja.yaml#/paths/~1tasks'
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1tasks"
   /tasks/{id}:
-    $ref: './apis/openapi_tasks.ja.yaml#/paths/~1tasks~1{id}'
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1tasks~1{id}"
+  /tasks/undo:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1tasks~1undo"
+  /tasks/redo:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1tasks~1redo"
+  /system/status:
+    $ref: "./apis/openapi_system.ja.yaml#/paths/~1system~1status"
