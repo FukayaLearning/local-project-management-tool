@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task } from '../../../../domain/entities/task';
-import { Button } from '../../components/Button';
+import { Button } from "../../../components/Button";
 
 interface TaskListViewProps {
     tasks: Task[];
