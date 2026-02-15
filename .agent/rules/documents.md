@@ -70,7 +70,7 @@ trigger: always_on
 ## 要求定義書
 
 本ツールの要求定義書を次の通り作成すること。  
-要求を分析し、要件としてユーザとすり合わせを行い、一覧化する。
+要求(Requirement)を分析し、ユーザとすり合わせを行い、一覧化する。
 
 * ファイルパス  
   * 英語版: 「workspace_root」/doc/design/requirement.md
@@ -130,7 +130,7 @@ trigger: always_on
 
 ## システム設計
 
-要求の機能分類ごとにフロントエンド、バックエンドの要件を整理する。
+要求定義書の要求(Requirement)から、システム設計書として機能分類ごとに、フロントエンド、バックエンドの要件(Specification)に整理する。
 
 * ファイルパス
   * 英語版 `「workspace_root」/doc/design/system.md`
@@ -179,7 +179,7 @@ trigger: always_on
 
 ## トレーサビリティマトリックス
 
-要件がプロセスの漏れないことを追跡し、以下の通り作成すること。
+要件(Specification)がプロセスの漏れないことを追跡し、以下の通り作成すること。
 
 * ファイルパス
   * `「workspace_root」/doc/design/traceability_matrix.md`
