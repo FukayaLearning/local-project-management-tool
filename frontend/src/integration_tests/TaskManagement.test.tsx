@@ -1,65 +1,90 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { TaskListPage } from '../presentation/pages/TaskListPage';
+import { describe, it, expect, beforeAll } from "vitest";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  within,
+} from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { TaskListPage } from "../presentation/pages/TaskListPage";
+import { ApiClient } from "../infrastructure/api/client";
 
-describe('Integration: Task Management', () => {
-    it('Should execute Task Management Flow (Create -> Edit)', async () => {
-        render(
-            <MemoryRouter>
-                <TaskListPage />
-            </MemoryRouter>
-        );
+describe("Integration: Task Management", () => {
+  // Ensure backend is initialized with a project
+  beforeAll(async () => {
+    await ApiClient.ensureSystemInitialized();
+  });
 
-        // Wait for load
-        await waitFor(() => {
-            expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();
-        }, { timeout: 3000 });
+  it("Should execute Task Management Flow (Create -> Edit)", async () => {
+    render(
+      <MemoryRouter>
+        <TaskListPage />
+      </MemoryRouter>,
+    );
 
-        // 1. Create New Task
-        fireEvent.click(screen.getByText('+ New Task'));
-        
-        const modalTitle = await screen.findByText('New Task');
-        expect(modalTitle).toBeInTheDocument();
+    // Wait for load
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
-        const taskTitle = `Integration Task ${Date.now()}`;
-        fireEvent.change(screen.getByLabelText('Title'), { target: { value: taskTitle } });
-        fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'New' } });
-        
-        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    // 1. Create New Task
+    fireEvent.click(screen.getByText("+ New Task"));
 
-        // Wait for modal to close and task to appear
-        await waitFor(() => {
-            expect(screen.queryByText('New Task')).not.toBeInTheDocument(); // Modal closed
-            expect(screen.getByText(taskTitle)).toBeInTheDocument();
-        });
+    const modalTitle = await screen.findByText("New Task");
+    expect(modalTitle).toBeInTheDocument();
 
-        // 2. Edit Task
-        // Find the row with the task title
-        const taskRow = screen.getByText(taskTitle).closest('tr');
-        if (!taskRow) throw new Error('Task row not found');
-        
-        const editButton = within(taskRow as HTMLElement).getByRole('button', { name: 'Edit' });
-        fireEvent.click(editButton);
-
-        const editModalTitle = await screen.findByText('Edit Task');
-        expect(editModalTitle).toBeInTheDocument();
-
-        fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'Implementation' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        
-        // Wait for update
-        await waitFor(() => {
-            expect(screen.queryByText('Edit Task')).not.toBeInTheDocument();
-        });
-
-        // Verify status in list (This depends on how list renders status. 
-        // Assuming TaskListView renders status text or badge)
-        // We might need to look within the task card.
-        
-        // Verify status in list
-        const updatedTaskRow = screen.getByText(taskTitle).closest('tr');
-        if (!updatedTaskRow) throw new Error('Task row not found after update');
-        expect(within(updatedTaskRow as HTMLElement).getByText('Implementation')).toBeInTheDocument();
+    const taskTitle = `Integration Task ${Date.now()}`;
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: taskTitle },
     });
+    fireEvent.change(screen.getByLabelText("Status"), {
+      target: { value: "New" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    // Wait for modal to close and task to appear
+    await waitFor(() => {
+      expect(screen.queryByText("New Task")).not.toBeInTheDocument(); // Modal closed
+      expect(screen.getByText(taskTitle)).toBeInTheDocument();
+    });
+
+    // 2. Edit Task
+    // Find the row with the task title
+    const taskRow = screen.getByText(taskTitle).closest("tr");
+    if (!taskRow) throw new Error("Task row not found");
+
+    const editButton = within(taskRow as HTMLElement).getByRole("button", {
+      name: "Edit",
+    });
+    fireEvent.click(editButton);
+
+    const editModalTitle = await screen.findByText("Edit Task");
+    expect(editModalTitle).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Status"), {
+      target: { value: "Implementation" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    // Wait for update
+    await waitFor(() => {
+      expect(screen.queryByText("Edit Task")).not.toBeInTheDocument();
+    });
+
+    // Verify status in list (This depends on how list renders status.
+    // Assuming TaskListView renders status text or badge)
+    // We might need to look within the task card.
+
+    // Verify status in list
+    const updatedTaskRow = screen.getByText(taskTitle).closest("tr");
+    if (!updatedTaskRow) throw new Error("Task row not found after update");
+    expect(
+      within(updatedTaskRow as HTMLElement).getByText("Implementation"),
+    ).toBeInTheDocument();
+  });
 });

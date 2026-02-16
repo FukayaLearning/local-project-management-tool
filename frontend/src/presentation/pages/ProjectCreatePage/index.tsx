@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApiClient } from "../../infrastructure/api/client";
+import { ApiClient } from "../../../infrastructure/api/client";
 
 interface ProjectCreatePageProps {
   onProjectCreated: (projectName: string) => void;
