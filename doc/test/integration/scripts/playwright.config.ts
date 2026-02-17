@@ -34,7 +34,8 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:8080", // Accessing via Nginx Proxy
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL: DEMO_MODE ? "http://localhost:8080" : "http://localhost:3000",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
