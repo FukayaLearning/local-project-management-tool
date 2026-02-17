@@ -1,0 +1,13 @@
+{
+  "name": "integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for Local Project Management Tool",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

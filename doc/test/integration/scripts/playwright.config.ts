@@ -7,7 +7,11 @@ import path from "path";
  */
 // require('dotenv').config();
 
-const DEMO_MODE = process.env.DEMO_MODE === "true";
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+// require('dotenv').config();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -34,8 +38,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: DEMO_MODE ? "http://localhost:8080" : "http://localhost:3000",
+    baseURL: process.env.BASE_URL || "http://localhost:3000",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
@@ -43,18 +46,26 @@ export default defineConfig({
     screenshot: "on",
     video: "on",
 
-    /* Demo mode settings */
-    headless: !DEMO_MODE,
-    launchOptions: {
-      slowMo: DEMO_MODE ? 1000 : 0,
-    },
+    /* Demo mode settings (Host Browser) or Container Headless */
+    // If PLAYWRIGHT_WS_ENDPOINT is set, we connect to it.
+    // Otherwise we launch locally (which means inside container headlessly).
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Connect to host browser if WS endpoint is provided
+        ...(process.env.PLAYWRIGHT_WS_ENDPOINT
+          ? {
+              connectOptions: {
+                wsEndpoint: process.env.PLAYWRIGHT_WS_ENDPOINT,
+              },
+            }
+          : {}),
+      },
     },
   ],
 });
