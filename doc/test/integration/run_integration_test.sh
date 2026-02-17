@@ -136,5 +136,5 @@ else
     # Compose prod and e2e files. 
     docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm \
         -e BASE_URL=http://frontend \
-        e2e-tests
+        e2e-tests | tee "${LOG_FILE}"
 fi

@@ -1,0 +1,22 @@
+# System files
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.e2e.yaml
+
+# Test artifacts
+result/
+test-results/
+playwright-report/
+blob-report/
+
+# Docs
+*.md
+
+# Scripts not needed in container
+run_integration_test.sh
+launch_browser_server.js
+
+# Dependencies (installed in container)
+node_modules/

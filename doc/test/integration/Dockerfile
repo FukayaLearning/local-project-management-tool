@@ -7,7 +7,8 @@ COPY package.json ./
 RUN npm install
 
 # Copy configuration and scripts
-COPY . .
+COPY scripts/ ./scripts/
+COPY package.json ./
 
 # Set entrypoint to run tests
-CMD ["npx", "playwright", "test"]
+CMD ["npx", "playwright", "test", "-c", "scripts/playwright.config.ts"]
