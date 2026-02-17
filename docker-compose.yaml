@@ -25,5 +25,7 @@ services:
       - "3000:5173" # Internal only via proxy
     volumes:
       - ./frontend:/app
+      - ./doc/test/integration/scripts:/app/integration_tests
+      - ./doc/test/integration/result:/app/integration_results
       - /app/node_modules
     tty: true

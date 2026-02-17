@@ -7,8 +7,12 @@ import {
   within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { TaskListPage } from "../presentation/pages/TaskListPage";
-import { ApiClient } from "../infrastructure/api/client";
+import { TaskListPage } from "@/presentation/pages/TaskListPage";
+import { demoDelay } from "./utils/demo";
+
+// Mock CSS to avoid PostCSS/Tailwind errors in test
+vi.mock("@/index.css", () => ({}));
+import { ApiClient } from "@/infrastructure/api/client";
 
 describe("Integration: Task Management", () => {
   // Ensure backend is initialized with a project
@@ -32,20 +36,20 @@ describe("Integration: Task Management", () => {
     );
 
     // 1. Create New Task
-    fireEvent.click(screen.getByText("+ New Task"));
+    await demoDelay(); fireEvent.click(screen.getByText("+ New Task"));
 
     const modalTitle = await screen.findByText("New Task");
     expect(modalTitle).toBeInTheDocument();
 
     const taskTitle = `Integration Task ${Date.now()}`;
-    fireEvent.change(screen.getByLabelText("Title"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: taskTitle },
     });
-    fireEvent.change(screen.getByLabelText("Status"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "New" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await demoDelay(); fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     // Wait for modal to close and task to appear
     await waitFor(() => {
@@ -61,15 +65,15 @@ describe("Integration: Task Management", () => {
     const editButton = within(taskRow as HTMLElement).getByRole("button", {
       name: "Edit",
     });
-    fireEvent.click(editButton);
+    await demoDelay(); fireEvent.click(editButton);
 
     const editModalTitle = await screen.findByText("Edit Task");
     expect(editModalTitle).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Status"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "Implementation" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await demoDelay(); fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     // Wait for update
     await waitFor(() => {

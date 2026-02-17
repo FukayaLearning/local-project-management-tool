@@ -1,8 +1,12 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { SettingsPage } from "../presentation/pages/SettingsPage";
-import { ApiClient } from "../infrastructure/api/client";
+import { SettingsPage } from "@/presentation/pages/SettingsPage";
+import { ApiClient } from "@/infrastructure/api/client";
+import { demoDelay } from "./utils/demo";
+
+// Mock CSS to avoid PostCSS/Tailwind errors in test
+vi.mock("@/index.css", () => ({}));
 
 // We assume VITE_API_BASE_URL is set to the backend URL
 
@@ -35,7 +39,9 @@ describe("Integration: Project Settings", () => {
     const newName = `Updated Project ${Date.now()}`;
 
     // 2. Update
+    await demoDelay();
     fireEvent.change(input, { target: { value: newName } });
+    await demoDelay();
     fireEvent.click(screen.getByRole("button", { name: /Save Changes/i }));
 
     // 3. Verify update (Wait for button to go back to normal or refetch)

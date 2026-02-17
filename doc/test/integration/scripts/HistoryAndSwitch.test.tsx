@@ -6,10 +6,12 @@ import {
   fireEvent,
   cleanup,
 } from "@testing-library/react";
-import { ApiClient } from "../infrastructure/api/client";
+import { ApiClient } from "@/infrastructure/api/client";
+
+import { demoDelay } from "./utils/demo";
 
 // Mock CSS to avoid PostCSS/Tailwind errors in test
-vi.mock("../index.css", () => ({}));
+vi.mock("@/index.css", () => ({}));
 
 // Mock window.alert
 window.alert = vi.fn();
@@ -22,7 +24,7 @@ Object.defineProperty(window, "location", {
 });
 
 // Import App AFTER mocking CSS
-import App from "../App";
+import App from "@/App";
 
 describe("Integration: History and Switching", () => {
   const TEST_PROJECT_A = `HistoryProjectA_${Date.now()}`;
@@ -85,7 +87,7 @@ describe("Integration: History and Switching", () => {
       (projectSelect as HTMLSelectElement).value,
     );
 
-    fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
+    await demoDelay(); fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
     console.log("DEBUG: FireEvent Change called with:", TEST_PROJECT_A);
 
     // Verify switch
@@ -107,25 +109,25 @@ describe("Integration: History and Switching", () => {
 
     // Create Task in Project A
     const taskTitleA = `Task in A ${Date.now()}`;
-    fireEvent.click(screen.getByText("+ New Task"));
+    await demoDelay(); fireEvent.click(screen.getByText("+ New Task"));
 
     const modalTitle = await screen.findByText("New Task");
     expect(modalTitle).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Title"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: taskTitleA },
     });
-    fireEvent.change(screen.getByLabelText("Status"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "New" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await demoDelay(); fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(screen.getByText(taskTitleA)).toBeInTheDocument();
     });
 
     // Switch to Project B
-    fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_B } });
+    await demoDelay(); fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_B } });
 
     // Verify task list update (Task A gone)
     await waitFor(() => {
@@ -133,7 +135,7 @@ describe("Integration: History and Switching", () => {
     });
 
     // Switch back to Project A
-    fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
+    await demoDelay(); fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
 
     // Verify Task A back
     await waitFor(() => {
@@ -151,23 +153,23 @@ describe("Integration: History and Switching", () => {
 
     const projectSelect = await screen.findByRole("combobox");
     // Ensure we switch to Project A
-    fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
+    await demoDelay(); fireEvent.change(projectSelect, { target: { value: TEST_PROJECT_A } });
     await waitFor(() =>
       expect((projectSelect as HTMLSelectElement).value).toBe(TEST_PROJECT_A),
     );
 
     // Create Task to Undo
     const taskTitleUndo = `Task to Undo ${Date.now()}`;
-    fireEvent.click(screen.getByText("+ New Task"));
+    await demoDelay(); fireEvent.click(screen.getByText("+ New Task"));
 
     await screen.findByText("New Task");
-    fireEvent.change(screen.getByLabelText("Title"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: taskTitleUndo },
     });
-    fireEvent.change(screen.getByLabelText("Status"), {
+    await demoDelay(); fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "New" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await demoDelay(); fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(screen.getByText(taskTitleUndo)).toBeInTheDocument();
@@ -175,7 +177,7 @@ describe("Integration: History and Switching", () => {
 
     // Click Undo
     const undoButton = screen.getByRole("button", { name: "Undo" });
-    fireEvent.click(undoButton);
+    await demoDelay(); fireEvent.click(undoButton);
 
     // Wait for reload call
     await waitFor(() => {
@@ -206,7 +208,7 @@ describe("Integration: History and Switching", () => {
 
     // Click Redo
     const redoButton = screen.getByRole("button", { name: "Redo" });
-    fireEvent.click(redoButton);
+    await demoDelay(); fireEvent.click(redoButton);
 
     // Wait for reload call
     await waitFor(() => {
