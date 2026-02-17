@@ -19,6 +19,9 @@ done
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULT_DIR="${SCRIPT_DIR}/result"
 mkdir -p "${RESULT_DIR}"
+# Clean up previous results
+rm -rf "${RESULT_DIR:?}"/*
+
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="${RESULT_DIR}/result_${TIMESTAMP}.log"
