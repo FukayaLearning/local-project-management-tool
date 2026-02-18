@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MenuBar } from "../MenuBar";
-import { ApiClient } from "../../../infrastructure/api/client";
+import { ApiClient } from "../../../../infrastructure/api/client";
 
 // Mock ApiClient
-vi.mock("../../../infrastructure/api/client", () => ({
+vi.mock("../../../../infrastructure/api/client", () => ({
   ApiClient: {
     post: vi.fn(),
   },

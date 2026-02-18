@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SettingsPage } from "./presentation/pages/SettingsPage";
 import { TaskListPage } from "./presentation/pages/TaskListPage";
 import { ProjectCreatePage } from "./presentation/pages/ProjectCreatePage";
-import { MenuBar } from "./components/Layout/MenuBar";
+import { MenuBar } from "./presentation/components/Layout/MenuBar";
 import { ApiClient } from "./infrastructure/api/client";
 import "./index.css";
 

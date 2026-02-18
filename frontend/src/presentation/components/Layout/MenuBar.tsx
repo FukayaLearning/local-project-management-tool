@@ -1,4 +1,4 @@
-import { ApiClient } from "../../infrastructure/api/client";
+import { ApiClient } from "../../../infrastructure/api/client";
 
 interface MenuBarProps {
   currentPage: string;

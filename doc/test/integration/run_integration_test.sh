@@ -44,7 +44,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 FRONTEND_DIR="${REPO_ROOT}/frontend"
 TEST_DIR="${SCRIPT_DIR}"
-export E2E_DIR="doc/test/integration"
+export E2E_DIR="./doc/test/integration"
 
 # Function to stop containers on exit
 cleanup() {

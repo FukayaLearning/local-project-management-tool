@@ -18,7 +18,7 @@ Git をバックエンドの保存機構として利用し、強力な履歴管�
 │   ├── app/            # アプリケーションロジック
 │   └── data/           # ユーザーデータ (JSON/CSV) - .gitignore 推奨
 ├── frontend/           # React アプリケーション
-├── docs/               # 詳細ドキュメント
+├── doc/                # 詳細ドキュメント
 └── docker-compose.yml  # コンテナ実行用構成ファイル
 ```
 
