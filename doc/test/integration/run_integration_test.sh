@@ -44,6 +44,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 FRONTEND_DIR="${REPO_ROOT}/frontend"
 TEST_DIR="${SCRIPT_DIR}"
+export E2E_DIR="doc/test/integration"
 
 # Function to stop containers on exit
 cleanup() {
@@ -69,6 +70,8 @@ if [ "$DEMO_MODE" == "true" ]; then
     
     # 1. Start App (Debug/Dev mode)
     cd "${REPO_ROOT}"
+    # Ensure clean state
+    docker compose -f docker-compose.yaml down -v --remove-orphans
     docker compose -f docker-compose.yaml up -d --build
     
     echo "Waiting for App services to start..."
@@ -83,6 +86,7 @@ if [ "$DEMO_MODE" == "true" ]; then
         echo "Installing integration test dependencies on Host..."
         npm install
     fi
+    npx playwright install chromium
 
     # We need to run the node script and capture output line by line to find WS Endpoint
     # We use a temp file to store the WS Endpoint
@@ -115,10 +119,10 @@ if [ "$DEMO_MODE" == "true" ]; then
     echo "Running Tests in Container (Connected to Host)..."
     cd "${REPO_ROOT}"
     # Use -f to combine compose files. 
-    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm \
+    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm \
         -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" \
-        -e BASE_URL=http://proxy:8080 \
-        e2e-tests
+        -e BASE_URL=http://localhost:8080 \
+        e2e-tests | tee -a "${LOG_FILE}"
         
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."

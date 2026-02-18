@@ -1,0 +1,5 @@
+services:
+  e2e-tests:
+    network_mode: host
+    environment:
+      - CI=true
