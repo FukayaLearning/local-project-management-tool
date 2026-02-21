@@ -38,6 +38,18 @@ def test_create_project(usecase, mock_git):
     mock_git.create_branch.assert_called_once_with("new-proj")
     mock_git.commit.assert_called_once_with("Initialize project new-proj")
 
+def test_create_project_with_spaces(usecase, mock_git):
+    # Arrange
+    mock_git.is_initialized.return_value = True
+
+    # Act
+    result = usecase.create_project("My New Project")
+
+    # Assert
+    assert result == {"project_name": "My New Project"}
+    mock_git.create_branch.assert_called_once_with("My_New_Project")
+    mock_git.commit.assert_called_once_with("Initialize project My New Project")
+
 
 def test_create_project_auto_initialize(usecase, mock_git):
     # Arrange: not initialized yet
