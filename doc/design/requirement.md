@@ -53,19 +53,21 @@
 
 ### 2.4 History Management (HIST)
 
-| Req-ID           | Category | Feature Name | Detail & Behavior                                                                                                | Priority | Remarks |
-| :--------------- | :------- | :----------- | :--------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-HIST-001** | History  | Auto Commit  | Automatically create a Git commit upon data modification operations such as task creation, editing, or deletion. | High     |         |
-| **REQ-HIST-002** | History  | Undo/Redo    | Ability to revert task data to a previous state (Undo) or cancel the revert (Redo) using Git history.            | High     |         |
+| Req-ID           | Category | Feature Name              | Detail & Behavior                                                                                                                             | Priority | Remarks |
+| :--------------- | :------- | :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
+| **REQ-HIST-001** | History  | Auto Commit               | Automatically create a Git commit upon data modification operations through the tool such as task creation, editing, or deletion.             | High     |         |
+| **REQ-HIST-002** | History  | Manual Change Auto Commit | Detect if task data has been directly modified externally while the tool is running, and automatically create a Git commit when loading data. | High     |         |
+| **REQ-HIST-003** | History  | Undo/Redo                 | Ability to revert task data to a previous state (Undo) or cancel the revert (Redo) using Git history.                                         | High     |         |
 
 ### 2.5 Initialization & Project Creation (INIT)
 
-| Req-ID           | Category         | Feature Name         | Detail & Behavior                                                                                                                                           | Priority | Remarks |
-| :--------------- | :--------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-INIT-001** | Initialization   | Git Repo Init        | When the tool starts, if there is no Git configuration in the task data directory, initialize as a local Git repo with main branch.                         | High     |         |
-| **REQ-INIT-002** | Initialization   | Check Project Config | When the tool starts, check if a default project configuration exists.                                                                                      | High     |         |
-| **REQ-INIT-003** | Initialization   | Screen Transition    | When the tool starts, if default project config exists, show task list. If not, show new project creation screen.                                           | High     |         |
-| **REQ-INIT-004** | Project Creation | Create New Project   | Ability to enter project name and save in the new project creation screen. On save, create a branch with the project name from main and start data storage. | High     |         |
+| Req-ID           | Category         | Feature Name         | Detail & Behavior                                                                                                                                                                                                                   | Priority | Remarks |
+| :--------------- | :--------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
+| **REQ-INIT-001** | Initialization   | Git Repo Init        | When the tool starts, if there is no Git configuration in the task data directory, initialize as a local Git repo with main branch.                                                                                                 | High     |         |
+| **REQ-INIT-002** | Initialization   | Manual Sync Startup  | When the tool starts, ensure it loads and works correctly even if configuration files or task data were directly modified externally. Switch Git branches appropriately if the project has changed (create a new one if necessary). | High     |         |
+| **REQ-INIT-003** | Initialization   | Check Project Config | When the tool starts, check if a default project configuration exists.                                                                                                                                                              | High     |         |
+| **REQ-INIT-004** | Initialization   | Screen Transition    | When the tool starts, if default project config exists, show task list. If not, show new project creation screen.                                                                                                                   | High     |         |
+| **REQ-INIT-005** | Project Creation | Create New Project   | Ability to enter project name and save in the new project creation screen. On save, create a branch with the project name from main and start data storage.                                                                         | High     |         |
 
 ### 2.6 Common UI (UI)
 
@@ -85,6 +87,7 @@
 - **REQ-ENV-001**: All functions must operate in an offline environment without internet connection.
 - **REQ-ENV-002**: Data storage destination must be the local file system (JSON/CSV).
 - **REQ-ENV-003**: Must not require external database servers (MySQL, PostgreSQL, etc.).
+- **REQ-ENV-004**: Data and change history must be preserved across tool restarts and version upgrades (Docker rebuilds).
 
 ### 3.2 Performance (PERF)
 
