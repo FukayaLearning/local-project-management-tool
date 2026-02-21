@@ -65,8 +65,8 @@ cleanup() {
     else
         docker compose -f docker-compose.prod.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
         docker compose -f docker-compose.prod.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
-        # Prod mode cleanup
-        docker compose -f docker-compose.prod.yaml down -v
+        # Prod mode cleanup using root script
+        "${REPO_ROOT}/stop.sh" -v
     fi
 }
 trap cleanup EXIT
@@ -137,10 +137,15 @@ else
     cd "${REPO_ROOT}"
     
     # 1. Clean & Start App (Prod mode)
-    docker compose -f docker-compose.prod.yaml down -v
+    "${REPO_ROOT}/stop.sh" -v
     echo "Cleaning up backend data..."
     rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
-    docker compose -f docker-compose.prod.yaml up -d --build
+    
+    # Use the root build script for consistency
+    "${REPO_ROOT}/build.sh"
+    
+    # Use the root run script for consistency
+    "${REPO_ROOT}/run.sh"
     
     echo "Waiting for App services to start..."
     sleep 10
