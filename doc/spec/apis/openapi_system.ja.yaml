@@ -2,6 +2,7 @@ paths:
   /system/status:
     get:
       summary: システムステータス取得
+      description: システムの初期化状態、プロジェクト情報を取得します。起動時または呼び出し時に手動で行われたファイル変更を検知し、Gitに自動コミットします。
       operationId: getSystemStatus
       tags:
         - system
