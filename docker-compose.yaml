@@ -28,4 +28,6 @@ services:
       - ./doc/test/integration/scripts:/app/integration_tests
       - ./doc/test/integration/result:/app/integration_results
       - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=/api/v1
     tty: true

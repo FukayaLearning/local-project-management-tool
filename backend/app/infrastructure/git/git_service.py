@@ -47,7 +47,7 @@ class GitService:
     def initialize(self) -> None:
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
-        self._run_git(["init"])
+        self._run_git(["init", "-b", "main"])
         self._run_git(["config", "user.name", "Local Project Manager"])
         self._run_git(["config", "user.email", "local@example.com"])
         self._run_git(["commit", "--allow-empty", "-m", "Initial commit"])
