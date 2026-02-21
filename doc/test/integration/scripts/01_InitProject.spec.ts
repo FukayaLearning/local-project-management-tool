@@ -11,21 +11,21 @@ test.describe("Integration: Project Initialization", () => {
     await page.goto("/");
 
     // データがない場合、/create_project にリダイレクトされるはず
-    await expect(page).toHaveURL(/\/create_project/);
-    await expect(page.locator("text=Create First Project")).toBeVisible();
+    await expect(page).toHaveURL(/\/create_project/, { timeout: 10000 });
+    await expect(page.locator("text=新規プロジェクト作成")).toBeVisible();
 
     // 2. プロジェクト作成
-    const projectName = "My First Project";
-    await page.getByLabel("Project Name").fill(projectName);
-    await page.getByRole("button", { name: "Create Project" }).click();
+    const projectName = "MyFirstProject";
+    await page.getByLabel("プロジェクト名").fill(projectName);
+    await page.getByRole("button", { name: "プロジェクト作成開始" }).click();
 
-    // 作成後、Topへ遷移
-    await expect(page).toHaveURL(/\/$/); // root
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // 作成後、/tasks へ遷移
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // ヘッダー等にプロジェクト名が表示されているか確認
-    // (実装依存だが、ProjectSelectorやHeaderに表示されるはず)
-    // ここでは select の value または text を確認
     const projectSelect = page.locator("select");
     await expect(projectSelect).toContainText(projectName);
   });

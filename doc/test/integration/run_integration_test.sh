@@ -55,10 +55,15 @@ cleanup() {
     fi
     
     cd "${REPO_ROOT}"
+    echo "Saving container logs..."
     if [ "$DEMO_MODE" == "true" ]; then
+        docker compose -f docker-compose.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
+        docker compose -f docker-compose.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
         # In demo mode, we might leave app running
         :
     else
+        docker compose -f docker-compose.prod.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
+        docker compose -f docker-compose.prod.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
         # Prod mode cleanup
         docker compose -f docker-compose.prod.yaml down -v
     fi
@@ -72,6 +77,8 @@ if [ "$DEMO_MODE" == "true" ]; then
     cd "${REPO_ROOT}"
     # Ensure clean state
     docker compose -f docker-compose.yaml down -v --remove-orphans
+    echo "Cleaning up backend data..."
+    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
     docker compose -f docker-compose.yaml up -d --build
     
     echo "Waiting for App services to start..."
@@ -130,6 +137,8 @@ else
     
     # 1. Clean & Start App (Prod mode)
     docker compose -f docker-compose.prod.yaml down -v
+    echo "Cleaning up backend data..."
+    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
     docker compose -f docker-compose.prod.yaml up -d --build
     
     echo "Waiting for App services to start..."

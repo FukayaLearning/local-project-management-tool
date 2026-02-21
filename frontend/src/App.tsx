@@ -82,7 +82,7 @@ function App() {
       );
       // Reload or re-fetch tasks might be needed, but for now just stay on current page
       // largely the backend state changes
-      navigate(0); // Refresh to load new project data
+      window.location.reload(); // Full browser reload to re-fetch all data for the new project
     } catch (error) {
       console.error("Failed to switch project", error);
     }

@@ -6,7 +6,7 @@ async function ensureSystemInitialized(request: any) {
   const status = await statusRes.json();
   if (!status.is_git_initialized || !status.has_default_project) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
