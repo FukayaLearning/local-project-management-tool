@@ -27,7 +27,7 @@ graph TD
 - **Language**: TypeScript (Frontend), Python 3.12+ (Backend)
 - **Framework**: React (Frontend), FastAPI (Backend)
 - **Database**: None (Uses JSON/CSV files)
-- **Infrastructure**: Supports Docker container execution or direct execution on local PC.
+- **Infrastructure**: Supports Docker container execution or direct execution on local PC. Use Docker volumes to ensure persistence of data and history.
 
 ## 3. Functional Requirements
 
@@ -84,7 +84,8 @@ graph TD
   | :--- | :--- | :--- | :--- | :--- | :--- |
   | **SPEC-HIST-001-001** | History | Auto Commit | Trigger | Execute on successful completion of Task Add/Update/Delete APIs. | REQ-HIST-001 |
   | **SPEC-HIST-001-002** | History | Auto Commit | Log | Include operation details (e.g., "Update Task A") in commit message. | REQ-HIST-001 |
-  | **SPEC-HIST-002-001** | History | Undo/Redo | Restore Logic | `git restore` (or checkout) to the file state of the specified commit. | REQ-HIST-002 |
+  | **SPEC-HIST-002-001** | History | Manual Commit | Runtime Sync | Upon fetching task data, compare the last recorded file hash with the current file hash, and automatically commit if there are changes. | REQ-HIST-002 |
+  | **SPEC-HIST-003-001** | History | Undo/Redo | Restore Logic | `git restore` (or checkout) to the file state of the specified commit. | REQ-HIST-003 |
 
 ### 3.5 Initialization & Project Creation (INIT)
 
@@ -96,8 +97,9 @@ graph TD
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-INIT-001-001** | Init | Init Check | API | `GET /api/v1/system/status` returns whether Git is initialized and if a default project exists. | REQ-INIT-001, 002 |
-  | **SPEC-INIT-002-001** | Init | Project Create | API | `POST /api/v1/projects` creates a new project (branch) and updates the configuration file. | REQ-INIT-004 |
+  | **SPEC-INIT-001-001** | Init | Init Check | API | `GET /api/v1/system/status` returns whether Git is initialized and if a default project exists. | REQ-INIT-001, 003 |
+  | **SPEC-INIT-001-002** | Init | Manual Sync | Startup Sync | Upon startup, read config files and task data. Switch branches if current Git branch mismatch with project settings. Commit any uncommitted changes. | REQ-INIT-002 |
+  | **SPEC-INIT-002-001** | Init | Project Create | API | `POST /api/v1/projects` creates a new project (branch) and updates the configuration file. | REQ-INIT-005 |
   | **SPEC-INIT-003-001** | Init | Project Switch | API | `POST /api/v1/projects/{project_id}/switch` (or `checkout`) switches the branch. | REQ-UI-002 |
 
 ### 3.6 Common UI (UI)

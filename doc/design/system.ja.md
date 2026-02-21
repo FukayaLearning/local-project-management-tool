@@ -27,7 +27,7 @@ graph TD
 - **開発言語**: TypeScript (Frontend), Python 3.12+ (Backend)
 - **フレームワーク**: React (Frontend), FastAPI (Backend)
 - **データベース**: なし (JSON/CSVファイルを使用)
-- **インフラ**: Dockerコンテナでの動作をサポート、またはローカルPC上で直接実行。
+- **インフラ**: Dockerコンテナでの動作をサポート、またはローカルPC上で直接実行。データおよび履歴の永続化のため、Dockerボリュームを使用する。
 
 ## 3. 機能要件
 
@@ -84,7 +84,8 @@ graph TD
   | :--- | :--- | :--- | :--- | :--- | :--- |
   | **SPEC-HIST-001-001** | History | 自動コミット | トリガー | タスク追加・更新・削除APIの正常終了時に実行する。 | REQ-HIST-001 |
   | **SPEC-HIST-001-002** | History | 自動コミット | コミットログ | コミットメッセージには操作内容（例: "Update Task A"）を含める。 | REQ-HIST-001 |
-  | **SPEC-HIST-002-001** | History | Undo/Redo | 復元ロジック | 指定されたコミットのファイル状態へ `git restore` (または checkout) する。 | REQ-HIST-002 |
+  | **SPEC-HIST-002-001** | History | 手動変更コミット | 実行時同期 | タスクデータ取得時、最後に読み込んだファイルのハッシュ値と現在のファイルのハッシュ値を比較し、変更があれば自動でコミットする。 | REQ-HIST-002 |
+  | **SPEC-HIST-003-001** | History | Undo/Redo | 復元ロジック | 指定されたコミットのファイル状態へ `git restore` (または checkout) する。 | REQ-HIST-003 |
 
 ### 3.5 初期化・プロジェクト作成 (INIT)
 
@@ -96,8 +97,9 @@ graph TD
 - **要件一覧**
   | Spec-ID | 機能分類 | 機能名 | 項目名 | 内容 | 備考 |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-INIT-001-001** | Init | 初期化チェック | API | `GET /api/v1/system/status` でGit初期化済みか、デフォルトプロジェクトがあるかを返す。 | REQ-INIT-001, 002 |
-  | **SPEC-INIT-002-001** | Init | プロジェクト作成 | API | `POST /api/v1/projects` で新規プロジェクト（ブランチ）を作成し、設定ファイルを更新する。 | REQ-INIT-004 |
+  | **SPEC-INIT-001-001** | Init | 初期化チェック | API | `GET /api/v1/system/status` でGit初期化済みか、デフォルトプロジェクトがあるかを返す。 | REQ-INIT-001, 003 |
+  | **SPEC-INIT-001-002** | Init | 手動変更同期 | 起動時同期 | 起動時に設定ファイルとタスクデータを読み込み、現在のGitブランチとプロジェクト設定が不一致ならブランチを切り替える。また、未コミットの変更があればコミットする。 | REQ-INIT-002 |
+  | **SPEC-INIT-002-001** | Init | プロジェクト作成 | API | `POST /api/v1/projects` で新規プロジェクト（ブランチ）を作成し、設定ファイルを更新する。 | REQ-INIT-005 |
   | **SPEC-INIT-003-001** | Init | プロジェクト切替 | API | `POST /api/v1/projects/{project_id}/switch` (または `checkout`) でブランチを切り替える。 | REQ-UI-002 |
 
 ### 3.6 UI共通 (UI)
