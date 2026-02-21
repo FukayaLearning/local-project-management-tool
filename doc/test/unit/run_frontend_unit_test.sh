@@ -18,7 +18,7 @@ cd "${REPO_ROOT}"
 
 # Step 13: Frontend Build Confirmation
 echo "Step 13: Building frontend image..."
-docker compose -f docker-compose.yaml build frontend
+docker compose -f docker-compose.yaml build --progress=plain frontend
 
 # Step 16: Frontend Unit Test Execution
 echo "Step 16: Running frontend unit tests in container..."
@@ -27,6 +27,6 @@ echo "Step 16: Running frontend unit tests in container..."
 docker compose -f docker-compose.yaml run --rm \
     -v "${RESULT_DIR}:/app/test-results" \
     frontend \
-    npm run test -- --run --coverage --coverage.reportsDirectory=/app/test-results/coverage 2>&1 | tee "${LOG_FILE}"
+    npm run test -- --run --coverage --coverage.reportsDirectory=/app/test-results/coverage > "${LOG_FILE}" 2>&1
 
-echo "Frontend unit tests completed. Evidence saved to ${RESULT_DIR}"
+echo "Frontend unit tests COMPLETED. Evidence saved to ${RESULT_DIR}"

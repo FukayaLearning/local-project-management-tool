@@ -69,7 +69,7 @@ Confirmed as the production build using the root script.
 Starts the application in production mode using the root script.
 
 - **Run**: `./run.sh`
-- **Auto-start (WSL)**: `./run.sh --autostart` (Adds entry to `~ ~/.bashrc`)
+- **Autostart configuration**: `./run.sh --autostart` (Enables Docker's `restart: always` policy).
 - **Access**: `http://localhost:8080` (via Nginx proxy)
 
 ### Production Stop

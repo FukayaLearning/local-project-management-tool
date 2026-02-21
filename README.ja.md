@@ -30,22 +30,45 @@ Git をバックエンドの保存機構として利用し、強力な履歴管�
 - Node.js 20+
 - Git
 
-### Docker (推奨)
+### 推奨スクリプト (Docker)
 
-Docker および Docker Compose を使用して、環境構築の手間なく実行できます。
+プロジェクトのビルド、実行、停止を簡単に行うためのスクリプトを提供しています。
+
+1.  **ビルド**
+
+    ```bash
+    ./build.sh
+    ```
+
+2.  **起動**
+
+    ```bash
+    ./run.sh
+    ```
+
+    - `localhost:8080` (Nginx経由) でアプリケーションにアクセスできます。
+    - **オートスタート**: `./run.sh --autostart` を実行すると、Dockerコンテナの再起動ポリシー（`restart: always`）が有効になり、PC起動時やDockerデスクトップ起動時に自動的にアプリケーションが開始されます。
+
+3.  **停止**
+    ```bash
+    ./stop.sh
+    ```
+
+### 直接 Docker Compose を使用する場合
 
 1.  **コンテナの起動**
 
     ```bash
-    docker compose up -d
+    docker compose up -d --build
     ```
 
 2.  **アクセス**
-    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - [http://localhost:8080](http://localhost:8080) (Nginx 経由)
+    - Frontend (開発版直接): [http://localhost:3000](http://localhost:3000)
     - Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3.  **停止**
-    ```
+    ```bash
     docker compose down
     ```
 
@@ -90,27 +113,41 @@ Dockerを使用せず、個別にプロセスを起動する場合の手順で�
     ```
     ブラウザで [http://localhost:5173](http://localhost:5173) にアクセスします。
 
-## 🧪 テスト
+### バックエンド単体試験
 
-### フロントエンド単体テスト
-
-```bash
-docker compose exec frontend npm test
-```
-
-### フロントエンド結合テスト
-
-Dockerコンテナ上で動作しているバックエンドと通信を行い、シナリオベースのテストを実行します。
+ビルド確認と試験を同時に実行し、カバレッジレポートを生成します。
 
 ```bash
-docker compose exec frontend npm run test:integration
+./doc/test/unit/run_backend_unit_test.sh
 ```
 
-### バックエンド単体テスト
+### フロントエンド単体試験
+
+ビルド確認と試験を同時に実行します。
 
 ```bash
-docker compose exec backend pytest
+./doc/test/unit/run_frontend_unit_test.sh
 ```
+
+### 結合試験 (E2E)
+
+全スタックを本番モードで起動し、Playwrightによるシナリオベースのテストを実行します。
+
+```bash
+./doc/test/integration/run_integration_test.sh
+```
+
+### アプリケーションデモ (デバッグモード)
+
+アプリケーションを開発モードで起動し、データを初期化した上で結合試験（デモ用）を実行します。
+
+```bash
+./doc/test/integration/run_integration_test.sh --demo
+```
+
+### 試験結果の確認
+
+結果（ログ、スクリーンショット、カバレッジ）は、`doc/test/*/result/` ディレクトリに保存されます。
 
 ## 📐 データ構造仕様
 

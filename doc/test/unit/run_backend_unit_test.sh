@@ -18,7 +18,7 @@ cd "${REPO_ROOT}"
 
 # Step 7: Backend Build Confirmation
 echo "Step 7: Building backend image..."
-docker compose -f docker-compose.yaml build backend
+docker compose -f docker-compose.yaml build --progress=plain backend
 
 # Step 10: Backend Unit Test Execution
 echo "Step 10: Running backend unit tests in container..."
@@ -27,6 +27,6 @@ docker compose -f docker-compose.yaml run --rm \
     -v "${RESULT_DIR}:/workspace/backend/test-results" \
     -e PYTHONPATH=/workspace \
     backend \
-    pytest backend/tests/unit -v --cov=backend.app --cov-report=html:/workspace/backend/test-results/coverage 2>&1 | tee "${LOG_FILE}"
+    pytest tests/unit -v --cov=backend.app --cov-report=html:/workspace/backend/test-results/coverage > "${LOG_FILE}" 2>&1
 
-echo "Backend unit tests completed. Evidence saved to ${RESULT_DIR}"
+echo "Backend unit tests COMPLETED. Evidence saved to ${RESULT_DIR}"

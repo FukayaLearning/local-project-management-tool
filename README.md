@@ -31,7 +31,31 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 - Docker & Docker Compose (Recommended)
 - Or: Python 3.12+, Node.js 20+, Git
 
-### Docker (Recommended)
+### Recommended Scripts (Docker)
+
+We provide scripts for easy building, running, and stopping the project.
+
+1.  **Build**
+
+    ```bash
+    ./build.sh
+    ```
+
+2.  **Run**
+
+    ```bash
+    ./run.sh
+    ```
+
+    - Access the application at `http://localhost:8080` (via Nginx proxy).
+    - **Autostart**: Running `./run.sh --autostart` enables Docker's `restart: always` policy, allowing the application to start automatically with your PC or Docker Desktop.
+
+3.  **Stop**
+    ```bash
+    ./stop.sh
+    ```
+
+### Direct Docker Compose Usage
 
 1.  **Start the application**
 
@@ -40,7 +64,8 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
     ```
 
 2.  **Access**
-    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - [http://localhost:8080](http://localhost:8080) (via Nginx proxy)
+    - Frontend (Dev version): [http://localhost:3000](http://localhost:3000)
     - Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3.  **Stop**
@@ -52,27 +77,41 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 
 See `README.ja.md` for detailed manual setup instructions.
 
-## 🧪 Testing
+### Backend Unit Tests
+
+Runs build confirmation and tests together, generating a coverage report.
+
+```bash
+./doc/test/unit/run_backend_unit_test.sh
+```
 
 ### Frontend Unit Tests
 
-```bash
-docker compose exec frontend npm test
-```
-
-### Frontend Integration Tests
-
-Tests checking the interaction between Frontend and Backend (running in Docker Container).
+Runs build confirmation and tests together.
 
 ```bash
-docker compose exec frontend npm run test:integration
+./doc/test/unit/run_frontend_unit_test.sh
 ```
 
-### Backend Unit Tests
+### Integration Tests (E2E)
+
+Starts the full stack in production mode and runs scenario-based tests using Playwright.
 
 ```bash
-docker compose exec backend pytest
+./doc/test/integration/run_integration_test.sh
 ```
+
+### Application Demo (Debug Mode)
+
+Starts the application in development mode, initializes data, and runs integration tests for demonstration.
+
+```bash
+./doc/test/integration/run_integration_test.sh --demo
+```
+
+### Reviewing Test Results
+
+Logs, screenshots, and coverage reports are saved in the `doc/test/*/result/` directories.
 
 ## 🛠 Tech Stack
 

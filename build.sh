@@ -12,6 +12,6 @@ echo "Starting Production Build Confirmation..."
 cd "${REPO_ROOT}"
 
 # Build all services using the production compose file
-docker compose -f docker-compose.prod.yaml build
+docker compose -f docker-compose.prod.yaml build --progress=plain
 
 echo "Build confirmation COMPLETED."
