@@ -22,6 +22,27 @@ async function createProject(request: any, name: string) {
   }
 }
 
+// ヘルパー: プロジェクト切り替えとフルリロード完了を待機
+// handleSwitchProject は API呼び出し後に window.location.reload() でフルリロード
+async function switchProjectAndWaitForReload(
+  page: any,
+  projectSelect: any,
+  label: string,
+) {
+  // selectOption後に発生するフルブラウザリロードを待機
+  // フロントエンドがAPI(/projects/{name}/switch)呼出後にwindow.location.reload()を実行
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
+    projectSelect.selectOption({ label }),
+  ]);
+
+  // リロード後のページ安定を待機
+  await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+  await expect(page.locator("text=Loading")).not.toBeVisible({
+    timeout: 10000,
+  });
+}
+
 test.describe("Integration: History and Switching", () => {
   const TEST_PROJECT_A = `HistoryProjectA_${Date.now()}`;
   const TEST_PROJECT_B = `HistoryProjectB_${Date.now()}`;
@@ -35,60 +56,66 @@ test.describe("Integration: History and Switching", () => {
   test("IT-SCN-SW-001: Should switch projects", async ({ page }) => {
     await page.goto("/");
 
-    // Loading 待機
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // /tasks にリダイレクトされるまで待機
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // プロジェクトA選択
-    const projectSelect = page.locator("select"); // IDがあればベストだが
-    await projectSelect.selectOption({ label: TEST_PROJECT_A });
-
-    // 切り替え確認
-    await expect(projectSelect).toHaveValue(
-      process.env.TEST_PROJECT_A_ID || (await projectSelect.inputValue()),
-    );
-    // NOTE: valueがIDになるため、ラベルで選択した後のvalueの一致確認は難しいが、
-    // UI上で切り替わったかを確認する。
+    const projectSelect = page.locator("select");
+    await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_A);
 
     // タスク作成 (Project A)
     const taskTitleA = `Task in A ${Date.now()}`;
     await page.click("text=+ New Task");
-    await expect(page.locator("text=New Task")).toBeVisible(); // Modal title
-
-    await page.fill('label:has-text("Title") >> .. >> input', taskTitleA); // Label 'Title' に対応する input
-    // もしくは getByLabel を使用
-    // await page.getByLabel('Title').fill(taskTitleA);
+    await expect(page.locator('h3:has-text("New Task")')).toBeVisible();
 
     await page.getByLabel("Title").fill(taskTitleA);
     await page.getByLabel("Status").selectOption("New");
     await page.click('button:has-text("Save")');
 
     // タスク表示確認
-    await expect(page.locator(`text=${taskTitleA}`)).toBeVisible();
+    await expect(page.locator(`text=${taskTitleA}`)).toBeVisible({
+      timeout: 10000,
+    });
 
     // プロジェクトBへ切り替え
-    await projectSelect.selectOption({ label: TEST_PROJECT_B });
+    await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_B);
 
     // タスクA消滅確認
-    await expect(page.locator(`text=${taskTitleA}`)).not.toBeVisible();
+    await expect(page.locator(`text=${taskTitleA}`)).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // プロジェクトAへ戻る
-    await projectSelect.selectOption({ label: TEST_PROJECT_A });
+    await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_A);
 
     // タスクA復活確認
-    await expect(page.locator(`text=${taskTitleA}`)).toBeVisible();
+    await expect(page.locator(`text=${taskTitleA}`)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("IT-SCN-HIST-001/002/003: Should Undo and Redo task creation", async ({
     page,
   }) => {
+    // alert() ダイアログを自動的にacceptする
+    page.on("dialog", async (dialog) => {
+      await dialog.accept();
+    });
+
     await page.goto("/");
 
-    // Loading 待機
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // /tasks にリダイレクトされるまで待機
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // プロジェクトA選択
     const projectSelect = page.locator("select");
-    await projectSelect.selectOption({ label: TEST_PROJECT_A });
+    await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_A);
 
     // Undo用タスク作成
     const taskTitleUndo = `Task to Undo ${Date.now()}`;
@@ -97,26 +124,39 @@ test.describe("Integration: History and Switching", () => {
     await page.getByLabel("Status").selectOption("New");
     await page.click('button:has-text("Save")');
 
-    await expect(page.locator(`text=${taskTitleUndo}`)).toBeVisible();
+    await expect(page.locator(`text=${taskTitleUndo}`)).toBeVisible({
+      timeout: 10000,
+    });
 
-    // Undo実行
-    await page.click('button:has-text("Undo")');
-
-    // リロードが発生するため待機 (または自動reloadをPlaywrightが検知するのを待つ)
-    // リロード後、Loadingが出るかも
-    await page.waitForLoadState("networkidle");
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // Undo実行 (alert()が出るのでdialogハンドラで自動accept)
+    // Undo後にwindow.location.reload()が呼ばれるのでフルリロードを待機
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
+      page.click('button:has-text("Undo")'),
+    ]);
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // タスク消滅確認
-    await expect(page.locator(`text=${taskTitleUndo}`)).not.toBeVisible();
+    await expect(page.locator(`text=${taskTitleUndo}`)).not.toBeVisible({
+      timeout: 10000,
+    });
 
-    // Redo実行
-    await page.click('button:has-text("Redo")');
-
-    await page.waitForLoadState("networkidle");
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // Redo実行 (alert()が出るのでdialogハンドラで自動accept)
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
+      page.click('button:has-text("Redo")'),
+    ]);
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // タスク復活確認
-    await expect(page.locator(`text=${taskTitleUndo}`)).toBeVisible();
+    await expect(page.locator(`text=${taskTitleUndo}`)).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

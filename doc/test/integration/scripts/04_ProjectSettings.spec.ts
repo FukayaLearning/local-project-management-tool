@@ -21,11 +21,13 @@ test.describe("Integration: Project Settings", () => {
     await page.goto("/settings");
 
     // Loading 待機
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // Input 確認
     const nameInput = page.getByLabel("Project Name");
-    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toBeVisible({ timeout: 10000 });
 
     const originalName = await nameInput.inputValue();
     const newName = `Updated Project ${Date.now()}`;
@@ -36,12 +38,12 @@ test.describe("Integration: Project Settings", () => {
     const saveButton = page.getByRole("button", { name: "Save Changes" });
     await saveButton.click();
 
-    // Verify
-    // ボタンの非活性化などをチェックするのも良いが、ここでは値が維持されているか確認
-    // リロードしても維持されているべき
+    // Verify - リロードしても維持されているべき
     await page.reload();
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
-    await expect(nameInput).toHaveValue(newName);
+    await expect(nameInput).toHaveValue(newName, { timeout: 10000 });
   });
 });

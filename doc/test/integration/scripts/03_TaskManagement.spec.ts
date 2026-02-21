@@ -20,11 +20,15 @@ test.describe("Integration: Task Management", () => {
   }) => {
     await page.goto("/");
 
-    await expect(page.locator("text=Loading")).not.toBeVisible();
+    // /tasks にリダイレクトされるまで待機
+    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // 1. Create New Task
     await page.click("text=+ New Task");
-    await expect(page.locator("text=New Task")).toBeVisible();
+    await expect(page.locator('h3:has-text("New Task")')).toBeVisible();
 
     const taskTitle = `Integration Task ${Date.now()}`;
     await page.getByLabel("Title").fill(taskTitle);
@@ -32,16 +36,15 @@ test.describe("Integration: Task Management", () => {
 
     await page.click('button:has-text("Save")');
 
-    // Modal closed and task matches
-    // await expect(page.locator('text=New Task')).not.toBeVisible(); // "New Task" button also has text "New Task"? No, button is "+ New Task". Title is "New Task".
-    // 厳密にはモーダルのタイトル
-    await expect(page.locator('h2:has-text("New Task")')).not.toBeVisible();
-    await expect(page.locator(`text=${taskTitle}`)).toBeVisible();
+    // Modal closed and task visible
+    await expect(page.locator('h2:has-text("New Task")')).not.toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.locator(`text=${taskTitle}`)).toBeVisible({
+      timeout: 10000,
+    });
 
     // 2. Edit Task
-    // 特定のタスク行のEditボタンをクリック
-    // Playwright では locator chaining が便利
-    // 行を見つける: has-text でタイトルを含む tr を探す
     const row = page.locator(`tr:has-text("${taskTitle}")`);
     await row.getByRole("button", { name: "Edit" }).click();
 
@@ -51,10 +54,11 @@ test.describe("Integration: Task Management", () => {
     await page.getByLabel("Status").selectOption("Implementation");
     await page.click('button:has-text("Save")');
 
-    await expect(page.locator("text=Edit Task")).not.toBeVisible();
+    await expect(page.locator("text=Edit Task")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify Status in List
-    // リストの表示形式に依存するが、行の中に "Implementation" があるか確認
     await expect(row).toContainText("Implementation");
   });
 });
