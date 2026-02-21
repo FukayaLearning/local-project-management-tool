@@ -80,8 +80,9 @@ backend/app/
 - **関連Spec-ID**: `SPEC-TASK-001-001`
 - **処理フロー**:
   1.  `TaskUseCase.list_tasks(filter)` を呼び出す。
-  2.  `TaskRepository` (Pandas) がCSVを読み込み、`List[Task]` を返却する。
-  3.  階層構造の構築はフロントエンドに委譲するため、フラットなリストとして返す。
+  2.  **実行時同期**: `TaskUseCase` は、タスクCSVファイルのハッシュ値をチェックし、前回読み込み時から変更があれば `GitService.commit("Manual change detected during runtime")` を実行する。
+  3.  `TaskRepository` (Pandas) がCSVを読み込み、`List[Task]` を返却する。
+  4.  階層構造の構築はフロントエンドに委譲するため、フラットなリストとして返す。
 
 #### `POST /tasks`
 
@@ -114,9 +115,12 @@ backend/app/
 
 - **関連Spec-ID**: `SPEC-INIT-001-001`
 - **処理フロー**:
-  1.  `GitService.is_initialized()` を呼び出し、`.git` ディレクトリの存在を確認。
-  2.  `SettingsUseCase.has_default_project()` を呼び出し、設定ファイルの存在を確認。
-  3.  `GitService.get_current_branch()` を呼び出し、現在のプロジェクト名(ブランチ名)を取得。
+  1.  **起動時同期**: `SystemUseCase.sync_manual_changes()` を呼び出す。
+      - 現在のプロジェクト設定を読み込み、期待されるGitブランチと現在のブランチを比較。不一致なら `GitService.checkout_branch()`。
+      - 設定ファイルまたはタスクデータに未コミットの変更があれば `GitService.commit("Manual change detected at startup")`。
+  2.  `GitService.is_initialized()` を呼び出し、`.git` ディレクトリの存在を確認。
+  3.  `SettingsUseCase.has_default_project()` を呼び出し、設定ファイルの存在を確認。
+  4.  `GitService.get_current_branch()` を呼び出し、現在のプロジェクト名(ブランチ名)を取得。
 
 ### 4.4 プロジェクト管理 (Projects)
 
@@ -147,4 +151,14 @@ backend/app/
   - `create_branch(name: str)`: `git checkout -b name`
   - `checkout_branch(name: str)`: `git checkout name`
   - `get_current_branch() -> str`: `git branch --show-current`
+  - `has_uncommitted_changes() -> bool`: `git status --porcelain` が空でないか確認。
+
+### 5.2 手動変更同期ロジック
+
+- **ハッシュ管理**: `infrastructure/file_system/FileHashManager` 等を用いて、最後にコミットまたは読み込んだ時点のファイルのハッシュ値（SHA-256）を保持する。
+- **検知タイミング**:
+  - バックエンド起動時（`main.py` の `startup` イベント）。
+  - `GET /tasks` 等のデータ読み込みAPI実行時。
+- **ブランチ切り替え**:
+  - `projects.json` に記載された `current_project` と Git の `current_branch` が異なる場合、ツールが関与しないところでのプロジェクト変更とみなし、ブランチを切り替える。
   * `restore(commit_hash: str)`: `git restore --source commit_hash .` (※要詳細検討: 現在のワークスペースを上書きする挙動)

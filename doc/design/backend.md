@@ -80,8 +80,9 @@ backend/app/
 - **Related Spec-ID**: `SPEC-TASK-001-001`
 - **Flow**:
   1.  Call `TaskUseCase.list_tasks(filter)`.
-  2.  `TaskRepository` (Pandas) reads CSV and returns `List[Task]`.
-  3.  Hierarchy construction is delegated to the frontend; returns as a flat list.
+  2.  **Runtime Sync**: `TaskUseCase` checks the hash of the task CSV file. If it has changed since the last read, it executes `GitService.commit("Manual change detected during runtime")`.
+  3.  `TaskRepository` (Pandas) reads CSV and returns `List[Task]`.
+  4.  Hierarchy construction is delegated to the frontend; returns as a flat list.
 
 #### `POST /tasks`
 
@@ -113,9 +114,12 @@ backend/app/
 
 - **Related Spec-ID**: `SPEC-INIT-001-001`
 - **Flow**:
-  1.  Call `GitService.is_initialized()` to check for `.git` directory existence.
-  2.  Call `SettingsUseCase.has_default_project()` to check for configuration file existence.
-  3.  Call `GitService.get_current_branch()` to get the current project name (branch name).
+  1.  **Startup Sync**: Call `SystemUseCase.sync_manual_changes()`.
+      - Read current project settings and compare expected Git branch with actual branch. Checkout if mismatch.
+      - Commit any uncommitted changes in config or task data with "Manual change detected at startup".
+  2.  Call `GitService.is_initialized()` to check for `.git` directory existence.
+  3.  Call `SettingsUseCase.has_default_project()` to check for configuration file existence.
+  4.  Call `GitService.get_current_branch()` to get the current project name (branch name).
 
 ### 4.4 Project Management (Projects)
 
@@ -146,3 +150,13 @@ backend/app/
   - `create_branch(name: str)`: `git checkout -b name`
   - `checkout_branch(name: str)`: `git checkout name`
   - `get_current_branch() -> str`: `git branch --show-current`
+  - `has_uncommitted_changes() -> bool`: Returns true if `git status --porcelain` is not empty.
+
+### 5.2 Manual Change Sync Logic
+
+- **Hash Management**: Use a component like `infrastructure/file_system/FileHashManager` to store SHA-256 hashes of files at the time of last commit or read.
+- **Detection Timing**:
+  - Backend startup (`startup` event in `main.py`).
+  - Data retrieval APIs (e.g., `GET /tasks`).
+- **Branch Switching**:
+  - If `current_project` in `projects.json` differs from Git's `current_branch`, it indicates a project change made outside the tool, and the branch is switched accordingly.
