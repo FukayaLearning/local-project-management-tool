@@ -1,3 +1,4 @@
+from backend.app.infrastructure.git.git_service import GitService
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
 
 

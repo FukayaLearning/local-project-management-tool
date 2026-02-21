@@ -18,8 +18,9 @@ def mock_git():
 def usecase(mock_repo, mock_git):
     return SettingsUseCase(mock_repo, mock_git)
 
-def test_get_project_settings(usecase, mock_repo):
+def test_get_project_settings(usecase, mock_repo, mock_git):
     # Arrange
+    mock_git.has_uncommitted_changes.return_value = False
     mock_settings = Settings()
     mock_settings.project.project_name = "Mock Project"
     mock_repo.get_settings.return_value = mock_settings
@@ -29,6 +30,20 @@ def test_get_project_settings(usecase, mock_repo):
 
     # Assert
     assert project_settings.project_name == "Mock Project"
+    mock_repo.get_settings.assert_called_once()
+
+
+def test_get_settings_with_manual_change(usecase, mock_repo, mock_git):
+    # Arrange
+    mock_git.has_uncommitted_changes.return_value = True
+    mock_settings = Settings()
+    mock_repo.get_settings.return_value = mock_settings
+
+    # Act
+    settings = usecase.get_settings()
+
+    # Assert
+    mock_git.commit.assert_called_with("Manual change detected during runtime (settings)")
     mock_repo.get_settings.assert_called_once()
 
 def test_update_project_settings(usecase, mock_repo, mock_git):
