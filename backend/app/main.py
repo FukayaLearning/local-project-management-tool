@@ -8,8 +8,10 @@ from .infrastructure.git.git_service import GitService
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 起動時の処理
+    from .infrastructure.file_system.settings_repository import SettingsFileRepository
     git_service = GitService()
-    system_usecase = SystemUseCase(git_service)
+    settings_repo = SettingsFileRepository()
+    system_usecase = SystemUseCase(git_service, settings_repo)
     system_usecase.initialize_system()
     yield
 

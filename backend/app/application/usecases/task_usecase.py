@@ -10,6 +10,8 @@ class TaskUseCase:
         self.git_service = git_service
 
     def list_tasks(self) -> List[Task]:
+        if self.git_service.has_uncommitted_changes():
+            self.git_service.commit("Manual change detected during runtime (tasks)")
         return self.task_repo.get_all()
 
     def get_task(self, task_id: str) -> Optional[Task]:

@@ -9,6 +9,8 @@ class SettingsUseCase:
         self.git_service = git_service
 
     def get_settings(self) -> Settings:
+        if self.git_service.has_uncommitted_changes():
+            self.git_service.commit("Manual change detected during runtime (settings)")
         return self.settings_repo.get_settings()
     
     def get_project_settings(self) -> ProjectSettings:

@@ -94,3 +94,7 @@ class GitService:
 
     def restore(self, commit_hash: str) -> None:
         self._run_git(["restore", "--source", commit_hash, "."])
+
+    def has_uncommitted_changes(self) -> bool:
+        output = self._run_git(["status", "--porcelain"])
+        return len(output.strip()) > 0
