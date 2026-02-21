@@ -42,7 +42,7 @@ class BasicSettings(BaseModel):
     holiday_definition: HolidayDefinition = HolidayDefinition()
 
 class ProjectSettings(BaseModel):
-    project_name: str = "New Project"
+    project_name: str = "DefaultProject"
     basic_settings_override: Optional[BasicSettings] = None
 
 class Settings(BaseModel):

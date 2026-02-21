@@ -1,5 +1,6 @@
 from backend.app.infrastructure.git.git_service import GitService
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
+from backend.app.domain.helpers.string_helper import sanitize_branch_name
 
 
 class SystemUseCase:
@@ -39,7 +40,7 @@ class SystemUseCase:
         settings = self.settings_repo.get_settings()
         if settings.project.project_name:
             current_branch = self.git_service.get_current_branch()
-            expected_branch = settings.project.project_name
+            expected_branch = sanitize_branch_name(settings.project.project_name)
             
             if current_branch != expected_branch:
                 branches = self.git_service.get_branches()
