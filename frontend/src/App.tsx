@@ -1,51 +1,47 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { SettingsPage } from "./presentation/pages/SettingsPage";
 import { TaskListPage } from "./presentation/pages/TaskListPage";
 import { ProjectCreatePage } from "./presentation/pages/ProjectCreatePage";
 import { MenuBar } from "./presentation/components/Layout/MenuBar";
-import { ApiClient } from "./infrastructure/api/client";
+import { useSystemUseCase } from "./application/usecases/useSystemUseCase";
 import "./index.css";
-
-interface SystemStatus {
-  is_git_initialized: boolean;
-  has_default_project: boolean;
-  current_project: string | null;
-}
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<string[]>([]);
+  const {
+    systemStatus,
+    projects,
+    isLoading: isSystemLoading,
+    fetchSystemStatus,
+    fetchProjects,
+    switchProject,
+    createProject,
+  } = useSystemUseCase();
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const init = async () => {
       try {
-        const status = await ApiClient.get<SystemStatus>("/system/status");
-        setSystemStatus(status);
+        const status = await fetchSystemStatus();
 
         if (!status.is_git_initialized || !status.has_default_project) {
           if (location.pathname !== "/create_project") {
             navigate("/create_project");
           }
         } else {
-          const projectList = await ApiClient.get<string[]>("/projects/");
-          setProjects(projectList);
+          await fetchProjects();
           // Only redirect to tasks if we are at root
           if (location.pathname === "/") {
             navigate("/tasks");
           }
         }
       } catch (error) {
-        console.error("Failed to fetch system status", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to initialize app", error);
       }
     };
-    checkStatus();
-  }, [navigate]); // Added navigate to dependency
+    init();
+  }, [navigate, fetchSystemStatus, fetchProjects]);
 
   // Helper to determine active tab based on path
   const getCurrentPage = () => {
@@ -64,22 +60,18 @@ function App() {
     if (page === "create_project") navigate("/create_project");
   };
 
-  const handleProjectCreated = (projectName: string) => {
-    setSystemStatus({
-      is_git_initialized: true,
-      has_default_project: true,
-      current_project: projectName,
-    });
-    setProjects((prev: string[]) => [...prev, projectName]);
-    navigate("/tasks");
+  const handleProjectCreated = async (projectName: string) => {
+    try {
+      await createProject(projectName);
+      navigate("/tasks");
+    } catch (error) {
+      console.error("Failed to create project", error);
+    }
   };
 
   const handleSwitchProject = async (projectName: string) => {
     try {
-      await ApiClient.post(`/projects/${projectName}/switch`, {});
-      setSystemStatus((prev: SystemStatus | null) =>
-        prev ? { ...prev, current_project: projectName } : prev,
-      );
+      await switchProject(projectName);
       // Reload or re-fetch tasks might be needed, but for now just stay on current page
       // largely the backend state changes
       window.location.reload(); // Full browser reload to re-fetch all data for the new project
@@ -88,7 +80,7 @@ function App() {
     }
   };
 
-  if (isLoading) {
+  if (isSystemLoading && !systemStatus) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
