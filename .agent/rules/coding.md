@@ -19,33 +19,34 @@ trigger: always_on
 ## フロントエンド実装フォルダ構成
 
 frontend/
-├── domain/ # [ドメイン層] ビジネスロジックの中核（外部依存なし）
-│ ├── entities/ # 【Entity】Userクラスなど（振る舞いを持つ）
-│ ├── valueObjects/ # 【Value Object】Email, UserId など
-│ ├── repositories/ # 【Repository Interface】（抽象基底クラス）
-│ ├── helpers/ # 標準ライブラリレベルの汎用スタティック関数
-│ └── services/ # 【Domain Service】モデル単体で完結しないロジック
-│
-├── infrastructure/ # [インフラ層] 技術的な詳細実装（DB, 外部APIなど）
-│ └── 「DB種類などの技術名」/ # domainのRepository Interfaceを継承・実装
-│ └── schemas/ # 技術に依存した入出力用モデル
-│
-├── application/ # [ViewModel] Viewのための状態管理・ロジック (Custom Hooks)
-│ ├── usecases/ # ユースケース単位のフック
-│ │
-│ └── store/ # グローバルstateが必要な場合 (Zustand/Recoilなど)
-│
-├── presentation/ # [View] UIコンポーネント・ページ
-│ ├── viewModels/ # 【ViewModel】フォーム状態、バリデーション、Repo呼び出しを管理
-│ │
-│ ├── styles/ # グローバルスタイル
-│ │
-│ └── pages/ # ページコンポーネント (Routerの宛先)
-│ ├── common/
-│ │ └── components/ # 共通UI部品 (Button, Inputなど)
-│ └── <ページ名>/
-│ └── components/ # ページ固有の分解されたコンポーネント
-└── tests/ # ドメイン層、アプリケーション層の単体テスト
+├── src/
+│   ├── domain/ # [ドメイン層] ビジネスロジックの中核（外部依存なし）
+│   │   ├── entities/ # 【Entity】Userクラスなど（振る舞いを持つ）
+│   │   ├── valueObjects/ # 【Value Object】Email, UserId など
+│   │   ├── repositories/ # 【Repository Interface】（抽象基底クラス）
+│   │   ├── helpers/ # 標準ライブラリレベルの汎用スタティック関数
+│   │   └── services/ # 【Domain Service】モデル単体で完結しないロジック
+│   │
+│   ├── infrastructure/ # [インフラ層] 技術的な詳細実装（DB, 外部APIなど）
+│   │   └── 「DB種類などの技術名」/ # domainのRepository Interfaceを継承・実装
+│   │       └── schemas/ # 技術に依存した入出力用モデル
+│   │
+│   ├── application/ # [アプリケーション層] ビジネスルールを組み合わせたユースケースと状態管理
+│   │   ├── usecases/ # 【UseCase】コンポーネントから呼び出されるビジネスロジック (Custom Hooks等)
+│   │   │
+│   │   └── store/ # グローバルstate (Zustand/Recoilなど)
+│   │
+│   └── presentation/ # [プレゼンテーション層] UIコンポーネント・ページ
+│       ├── viewModels/ # 【ViewModel】フォーム状態、バリデーション、UseCase呼び出しを管理
+│       │
+│       ├── styles/ # グローバルスタイル
+│       │
+│       └── pages/ # ページコンポーネント (Routerの宛先)
+│       ├── common/
+│       │ └── components/ # 共通UI部品 (Button, Inputなど)
+│       └── <ページ名>/
+│        └── components/ # ページ固有の分解されたコンポーネント
+└── tests/ # ドメイン層、アプリケーション層の単体テスト (結合試験等は doc/test/integration/ を参照)
 
 ```
 
@@ -54,28 +55,28 @@ frontend/
 ```
 
 backend/
-├── domain/ # [ドメイン層] ビジネスロジックの中核（外部依存なし）
-│ ├── entities/ # 【Entity】Userクラスなど（振る舞いを持つ）
-│ ├── valueObjects/ # 【Value Object】Email, UserId など
-│ ├── repositories/ # 【Repository Interface】（抽象基底クラス）
-│ ├── helpers/ # 標準ライブラリレベルの汎用スタティック関数
-│ └── services/ # 【Domain Service】モデル単体で完結しないロジック
+├── src/
+│   ├── domain/ # [ドメイン層] ビジネスロジックの中核（外部依存なし）
+│   │   ├── entities/ # 【Entity】Userクラスなど（振る舞いを持つ）
+│   │   ├── valueObjects/ # 【Value Object】Email, UserId など
+│   │   ├── repositories/ # 【Repository Interface】（抽象基底クラス）
+│   │   ├── helpers/ # 標準ライブラリレベルの汎用スタティック関数
+│   │   └── services/ # 【Domain Service】モデル単体で完結しないロジック
+│   │
+│   ├── application/ # [アプリケーション層] ユースケース（ドメイン層を使って処理をまとめる）
+│   │   └── usecases/ # 【UseCase】
+│   │
+│   ├── infrastructure/ # [インフラ層] 技術的な詳細実装（DB, 外部APIなど）
+│   │   └── 「DB種類などの技術名」/ # domainのRepository Interfaceを継承・実装
+│   │       └── schemas/ # 技術に依存した入出力用モデル
+│   │
+│   └── presentation/ # [プレゼンテーション層] APIエンドポイント (FastAPI/Flask/Django)
+│       └── api/
+│           └── v1/
+│               ├── endpoints/ # ルータ定義
+│               └── schemas/ # 【DTO】Pydanticモデル（リクエスト/レスポンス用スキーマ）
 │
-├── application/ # [アプリケーション層] ユースケース（ドメイン層を使って処理をまとめる）
-│ └── usecases/ # 【UseCase】
-│
-├── infrastructure/ # [インフラ層] 技術的な詳細実装（DB, 外部APIなど）
-│ └── 「DB種類などの技術名」/ # domainのRepository Interfaceを継承・実装
-│ └── schemas/ # 技術に依存した入出力用モデル
-│
-├── presentation/ # [プレゼンテーション層] APIエンドポイント (FastAPI/Flask/Django)
-│ └── api/
-│ └── v1/
-│ ├── endpoints/ # ルータ定義
-│ └── schemas/ # 【DTO】Pydanticモデル（リクエスト/レスポンス用スキーマ）
-│
-└── tests/ # ドメイン層、アプリケーション層の単体テスト
+└── tests/ # ドメイン層、アプリケーション層の単体テスト (結合試験等は doc/test/integration/ を参照)
 
 ```
 
-```
