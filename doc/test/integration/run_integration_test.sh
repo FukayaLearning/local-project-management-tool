@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULT_DIR="${SCRIPT_DIR}/result"
 mkdir -p "${RESULT_DIR}"
 # Clean up previous results
-rm -rf "${RESULT_DIR:?}"/*
+docker run --rm -v "${RESULT_DIR}:/result" alpine sh -c "rm -rf /result/*"
 
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -44,7 +44,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 FRONTEND_DIR="${REPO_ROOT}/frontend"
 TEST_DIR="${SCRIPT_DIR}"
-export E2E_DIR="./doc/test/integration"
+export E2E_DIR="${SCRIPT_DIR}"
 
 # Function to stop containers on exit
 cleanup() {
@@ -119,10 +119,10 @@ if [ "$DEMO_MODE" == "true" ]; then
     echo "Running Tests in Container (Connected to Host)..."
     cd "${REPO_ROOT}"
     # Use -f to combine compose files. 
-    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm \
+    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm --build \
         -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" \
         -e BASE_URL=http://localhost:8080 \
-        e2e-tests | tee -a "${LOG_FILE}"
+        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee -a "${LOG_FILE}"
         
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."
@@ -138,7 +138,7 @@ else
     # 2. Run Tests in Container (Headless)
     echo "Running Tests in Container (Self-contained)..."
     # Compose prod and e2e files. 
-    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm \
+    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm --build \
         -e BASE_URL=http://frontend \
-        e2e-tests | tee "${LOG_FILE}"
+        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee "${LOG_FILE}"
 fi
