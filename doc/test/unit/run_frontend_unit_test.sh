@@ -17,11 +17,11 @@ echo "Starting Frontend Unit Tests..."
 cd "${REPO_ROOT}/frontend"
 
 # Ensure dependencies are installed
-npm install
+npm install --quiet --no-progress
 
 # Run vitest
 echo "Running vitest..."
-npx vitest run --coverage | tee "${LOG_FILE}"
+npx vitest run --coverage 2>&1 | tee "${LOG_FILE}"
 
 # move coverage report
 if [ -d "coverage" ]; then

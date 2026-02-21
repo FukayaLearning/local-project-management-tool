@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import MagicMock
 from backend.app.application.usecases.project_usecase import ProjectUseCase
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 
 
 @pytest.fixture
 def mock_git():
-    return MagicMock(spec=GitService)
+    return MagicMock(spec=IGitRepository)
 
 
 @pytest.fixture

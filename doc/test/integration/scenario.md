@@ -40,7 +40,7 @@
 | 1    | First launch application (no data)            | Redirected to `/create_project` and project creation screen is displayed | **IT-SCN-INIT-001** |
 | 2    | Input project name and click "Create Project" | Redirected to TOP page, created project name is displayed in menu bar    | **IT-SCN-INIT-002** |
 
-### Scenario 4: Undo/Redo Flow (Undo/Redo)
+### Scenario 5: Undo/Redo Flow (Undo/Redo)
 
 - **Related Requirements**: REQ-HIST-002
 
@@ -50,7 +50,7 @@
 | 2    | Click "Undo" button | Created task disappears from list  | **IT-SCN-HIST-002** |
 | 3    | Click "Redo" button | Disappeared task reappears in list | **IT-SCN-HIST-003** |
 
-### Scenario 5: Switch Project Flow (Switch Project)
+### Scenario 6: Switch Project Flow (Switch Project)
 
 - **Related Requirements**: REQ-UI-002
 

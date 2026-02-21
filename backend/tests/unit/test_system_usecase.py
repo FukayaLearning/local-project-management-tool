@@ -1,14 +1,14 @@
 import pytest
 from unittest.mock import MagicMock
 from backend.app.application.usecases.system_usecase import SystemUseCase
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
 from backend.app.domain.entities.settings import Settings
 
 
 @pytest.fixture
 def mock_git():
-    return MagicMock(spec=GitService)
+    return MagicMock(spec=IGitRepository)
 
 
 @pytest.fixture
@@ -97,10 +97,9 @@ def test_sync_manual_changes_no_git(usecase, mock_git):
 def test_sync_manual_changes_with_uncommitted(usecase, mock_git, mock_settings_repo):
     # Arrange
     mock_git.is_initialized.return_value = True
-    # First call returns True, subsequent calls return False
     mock_git.has_uncommitted_changes.side_effect = [True, False, False]
     mock_settings_repo.get_settings.return_value = Settings()
-    mock_git.get_current_branch.return_value = "New Project" # Matches default
+    mock_git.get_current_branch.return_value = "DefaultProject"
 
     # Act
     usecase.sync_manual_changes()

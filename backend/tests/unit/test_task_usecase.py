@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from backend.app.application.usecases.task_usecase import TaskUseCase
 from backend.app.domain.repositories.task_repository import ITaskRepository
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.entities.task import Task
 from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO
 
@@ -12,7 +12,7 @@ def mock_repo():
 
 @pytest.fixture
 def mock_git():
-    return MagicMock(spec=GitService)
+    return MagicMock(spec=IGitRepository)
 
 @pytest.fixture
 def usecase(mock_repo, mock_git):
@@ -51,7 +51,6 @@ def test_list_tasks_with_manual_change(usecase, mock_repo, mock_git):
 def test_create_task(usecase, mock_repo, mock_git):
     # Arrange
     dto = TaskCreateDTO(title="New Task", status="New")
-    # Simulate repo.save returning the task passed to it (or similar)
     def save_side_effect(task):
         return task
     mock_repo.save.side_effect = save_side_effect
@@ -71,7 +70,6 @@ def test_update_task(usecase, mock_repo, mock_git):
     existing_task = Task(id=task_id, title="Old Title", status="New")
     mock_repo.get_by_id.return_value = existing_task
     
-    # Simulate update returning the modified task
     def update_side_effect(task):
         return task
     mock_repo.update.side_effect = update_side_effect
@@ -134,4 +132,3 @@ def test_redo(usecase, mock_git):
     # Assert
     assert result == "Redo successful"
     mock_git.redo.assert_called_once()
-

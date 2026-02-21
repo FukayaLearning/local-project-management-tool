@@ -42,6 +42,7 @@ echo "Setting up environment..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Root is 3 levels up
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+export REPO_ROOT
 FRONTEND_DIR="${REPO_ROOT}/frontend"
 TEST_DIR="${SCRIPT_DIR}"
 export E2E_DIR="${SCRIPT_DIR}"
@@ -91,7 +92,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     cd "${TEST_DIR}"
     if [ ! -d "node_modules" ]; then
         echo "Installing integration test dependencies on Host..."
-        npm install
+        npm install --quiet --no-progress 2>&1 | tee -a "${LOG_FILE}"
     fi
     npx playwright install chromium
 
@@ -128,8 +129,8 @@ if [ "$DEMO_MODE" == "true" ]; then
     # Use -f to combine compose files. 
     docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm --build \
         -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" \
-        -e BASE_URL=http://localhost:8080 \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee -a "${LOG_FILE}"
+        -e BASE_URL=http://proxy \
+        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
         
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."
@@ -149,5 +150,5 @@ else
     # Compose prod and e2e files. 
     docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm --build \
         -e BASE_URL=http://frontend \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee "${LOG_FILE}"
+        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee "${LOG_FILE}"
 fi

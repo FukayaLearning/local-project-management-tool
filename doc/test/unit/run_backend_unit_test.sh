@@ -21,11 +21,12 @@ if [ ! -d ".venv" ]; then
     python3 -m venv .venv
 fi
 source .venv/bin/activate
-pip install -r requirements.txt pytest pytest-cov httpx
+pip install --quiet -r requirements.txt pytest pytest-cov httpx
 
-# Run pytest with coverage
+# Run pytest with coverage. Use PYTHONUNBUFFERED=1 to prevent buffering when piping to tee.
 echo "Running pytest..."
 export PYTHONPATH="${REPO_ROOT}"
-pytest tests/ -v --cov=app --cov-report=html:"${RESULT_DIR}/coverage" | tee "${LOG_FILE}"
+export PYTHONUNBUFFERED=1
+pytest tests/ -v --cov=app --cov-report=html:"${RESULT_DIR}/coverage" 2>&1 | tee "${LOG_FILE}"
 
 echo "Backend unit tests completed. Evidence saved to ${RESULT_DIR}"

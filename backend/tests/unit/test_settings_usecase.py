@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from backend.app.application.usecases.settings_usecase import SettingsUseCase
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.entities.settings import Settings
 from backend.app.application.dtos.task_dto import SettingsUpdateDTO
 
@@ -12,7 +12,7 @@ def mock_repo():
 
 @pytest.fixture
 def mock_git():
-    return MagicMock(spec=GitService)
+    return MagicMock(spec=IGitRepository)
 
 @pytest.fixture
 def usecase(mock_repo, mock_git):
@@ -57,8 +57,6 @@ def test_update_project_settings(usecase, mock_repo, mock_git):
 
     # Assert
     assert updated_project.project_name == "Updated Project"
-    # Verify save was called with updated name
     saved_settings = mock_repo.save_settings.call_args[0][0]
     assert saved_settings.project.project_name == "Updated Project"
-    # Verify commit
     mock_git.commit.assert_called_once()

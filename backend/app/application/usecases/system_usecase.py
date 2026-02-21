@@ -1,19 +1,19 @@
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
 from backend.app.domain.helpers.string_helper import sanitize_branch_name
 
 
 class SystemUseCase:
-    def __init__(self, git_service: GitService, settings_repo: ISettingsRepository):
-        self.git_service = git_service
-        self.settings_repo = settings_repo
+    def __init__(self, git_repository: IGitRepository, settings_repository: ISettingsRepository):
+        self.git_repository = git_repository
+        self.settings_repository = settings_repository
 
     def get_system_status(self) -> dict:
-        is_initialized = self.git_service.is_initialized()
+        is_initialized = self.git_repository.is_initialized()
         current_project = None
         if is_initialized:
             try:
-                current_project = self.git_service.get_current_branch()
+                current_project = self.git_repository.get_current_branch()
             except RuntimeError:
                 pass
         return {
@@ -23,32 +23,29 @@ class SystemUseCase:
         }
 
     def initialize_system(self) -> None:
-        if not self.git_service.is_initialized():
-            self.git_service.initialize()
+        if not self.git_repository.is_initialized():
+            self.git_repository.initialize()
         self.sync_manual_changes()
 
     def sync_manual_changes(self) -> None:
         """起動時や必要時に手動変更を検知して同期する。"""
-        if not self.git_service.is_initialized():
+        if not self.git_repository.is_initialized():
             return
 
-        # 1. 未コミットの変更があればコミット
-        if self.git_service.has_uncommitted_changes():
-            self.git_service.commit("Manual change detected at startup")
+        if self.git_repository.has_uncommitted_changes():
+            self.git_repository.commit("Manual change detected at startup")
 
-        # 2. プロジェクト設定とGitブランチの同期
-        settings = self.settings_repo.get_settings()
+        settings = self.settings_repository.get_settings()
         if settings.project.project_name:
-            current_branch = self.git_service.get_current_branch()
+            current_branch = self.git_repository.get_current_branch()
             expected_branch = sanitize_branch_name(settings.project.project_name)
-            
+
             if current_branch != expected_branch:
-                branches = self.git_service.get_branches()
+                branches = self.git_repository.get_branches()
                 if expected_branch in branches:
-                    self.git_service.checkout_branch(expected_branch)
+                    self.git_repository.checkout_branch(expected_branch)
                 else:
-                    self.git_service.create_branch(expected_branch)
-                
-                # ブランチ切り替え後、もし切り替え先で未コミットの変更があればコミット（基本はないはずだが）
-                if self.git_service.has_uncommitted_changes():
-                    self.git_service.commit("Manual change detected after branch switch")
+                    self.git_repository.create_branch(expected_branch)
+
+                if self.git_repository.has_uncommitted_changes():
+                    self.git_repository.commit("Manual change detected after branch switch")

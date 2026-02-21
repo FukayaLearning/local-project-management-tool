@@ -1,19 +1,21 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dependency_injector.wiring import inject, Provide
 from .presentation.api.v1.endpoints import projects, tasks, system
 from .application.usecases.system_usecase import SystemUseCase
-from .infrastructure.git.git_service import GitService
+from .container import Container
+
+
+container = Container()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 起動時の処理
-    from .infrastructure.file_system.settings_repository import SettingsFileRepository
-    git_service = GitService()
-    settings_repo = SettingsFileRepository()
-    system_usecase = SystemUseCase(git_service, settings_repo)
+    system_usecase = container.system_usecase()
     system_usecase.initialize_system()
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 
