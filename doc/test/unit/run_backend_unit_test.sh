@@ -12,21 +12,21 @@ mkdir -p "${RESULT_DIR}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="${RESULT_DIR}/result_${TIMESTAMP}.log"
 
-echo "Starting Backend Unit Tests..."
+echo "Starting Backend Unit Tests (Dockerized)..."
 
-cd "${REPO_ROOT}/backend"
+cd "${REPO_ROOT}"
 
-# Ensure python venv
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
-source .venv/bin/activate
-pip install --quiet -r requirements.txt pytest pytest-cov httpx
+# Step 7: Backend Build Confirmation
+echo "Step 7: Building backend image..."
+docker compose -f docker-compose.yaml build backend
 
-# Run pytest with coverage. Use PYTHONUNBUFFERED=1 to prevent buffering when piping to tee.
-echo "Running pytest..."
-export PYTHONPATH="${REPO_ROOT}"
-export PYTHONUNBUFFERED=1
-pytest tests/ -v --cov=app --cov-report=html:"${RESULT_DIR}/coverage" 2>&1 | tee "${LOG_FILE}"
+# Step 10: Backend Unit Test Execution
+echo "Step 10: Running backend unit tests in container..."
+# We mount the result directory to capture the coverage report
+docker compose -f docker-compose.yaml run --rm \
+    -v "${RESULT_DIR}:/workspace/backend/test-results" \
+    -e PYTHONPATH=/workspace \
+    backend \
+    pytest backend/tests/unit -v --cov=backend.app --cov-report=html:/workspace/backend/test-results/coverage 2>&1 | tee "${LOG_FILE}"
 
 echo "Backend unit tests completed. Evidence saved to ${RESULT_DIR}"

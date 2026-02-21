@@ -12,20 +12,21 @@ mkdir -p "${RESULT_DIR}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="${RESULT_DIR}/result_${TIMESTAMP}.log"
 
-echo "Starting Frontend Unit Tests..."
+echo "Starting Frontend Unit Tests (Dockerized)..."
 
-cd "${REPO_ROOT}/frontend"
+cd "${REPO_ROOT}"
 
-# Ensure dependencies are installed
-npm install --quiet --no-progress
+# Step 13: Frontend Build Confirmation
+echo "Step 13: Building frontend image..."
+docker compose -f docker-compose.yaml build frontend
 
-# Run vitest
-echo "Running vitest..."
-npx vitest run --coverage 2>&1 | tee "${LOG_FILE}"
-
-# move coverage report
-if [ -d "coverage" ]; then
-    mv coverage "${RESULT_DIR}/coverage"
-fi
+# Step 16: Frontend Unit Test Execution
+echo "Step 16: Running frontend unit tests in container..."
+# We run vitest inside the container. 
+# Note: Since volumes are removed for app code, the container uses the code copied during build.
+docker compose -f docker-compose.yaml run --rm \
+    -v "${RESULT_DIR}:/app/test-results" \
+    frontend \
+    npm run test -- --run --coverage --coverage.reportsDirectory=/app/test-results/coverage 2>&1 | tee "${LOG_FILE}"
 
 echo "Frontend unit tests completed. Evidence saved to ${RESULT_DIR}"

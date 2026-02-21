@@ -5,11 +5,12 @@
 - **ツール**: `pytest`
 - **対象**:
   - **Domain Layer** (Entities): バリデーションロジックなど
-  - **Application Layer** (UseCases): ビジネスロジック、リポジトリ呼び出し、Git連携
+  - **Application Layer** (UseCases): ビジネスロジック、リポジトリ・各種サービス呼び出し
+    - **Dependency Injection**: `dependency-injector` または手動のコンストラクタ注入により、インターフェースを介した依存関係を解決する。
   - **Presentation Layer** (Schemas): 入力データの型チェック
 - **Mock化**:
   - `Infrastructure Layer` (Repository, GitService, FileSystem) はMockを使用し、テストの独立性と速度を確保する。
-  - インフラ層自体のテストは、結合試験にてカバーする（または別途Integration Testとして実施）。
+  - ユニットテストでは、UseCase のコンストラクタに Mock インスタンスを直接注入することで、インフラ層への依存を完全に排除する。
 
 ## 2. API/ロジック別テスト仕様
 
