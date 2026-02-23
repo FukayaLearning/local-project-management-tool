@@ -11,7 +11,7 @@ LOG_FILE="${RESULT_DIR}/result_${TIMESTAMP}.log"
 cd "${REPO_ROOT}"
 
 # Clean previous results
-docker compose -f docker-compose.yaml down
+docker compose -f docker-compose.yaml down frontend
 docker run --rm -v "${RESULT_DIR}:/app/test-results" alpine sh -c "rm -rf /app/test-results 2>/dev/null || true"
 rm -rf "${RESULT_DIR}"
 mkdir -p "${RESULT_DIR}"
@@ -30,5 +30,7 @@ docker compose -f docker-compose.yaml run --rm \
     -v "${RESULT_DIR}:/app/test-results" \
     frontend \
     npm run test -- --run --coverage --coverage.reportsDirectory=/app/test-results/coverage > "${LOG_FILE}" 2>&1
+
+docker compose -f docker-compose.yaml down frontend
 
 echo "Frontend unit tests COMPLETED. Evidence saved to ${RESULT_DIR}"

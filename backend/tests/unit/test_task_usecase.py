@@ -64,6 +64,23 @@ def test_create_task(usecase, mock_repo, mock_git):
     mock_repo.save.assert_called_once()
     mock_git.commit.assert_called_once()
 
+def test_create_task_with_parent_id(usecase, mock_repo, mock_git):
+    # Arrange
+    dto = TaskCreateDTO(title="Sub Task", status="New", parent_id="parent-1")
+    def save_side_effect(task):
+        return task
+    mock_repo.save.side_effect = save_side_effect
+
+    # Act
+    created_task = usecase.create_task(dto)
+
+    # Assert
+    assert created_task.title == "Sub Task"
+    assert created_task.parent_id == "parent-1"
+    assert created_task.id is not None
+    mock_repo.save.assert_called_once()
+    mock_git.commit.assert_called_once()
+
 def test_update_task(usecase, mock_repo, mock_git):
     # Arrange
     task_id = "task-1"

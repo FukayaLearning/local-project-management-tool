@@ -12,7 +12,8 @@ echo "Starting Backend Unit Tests (Dockerized)..."
 
 cd "${REPO_ROOT}"
 # Clean previous results
-docker run --rm -v "${REPO_ROOT}/backend:/backend" alpine sh -c "rm -f /backend/.coverage"
+docker compose -f docker-compose.yaml down backend
+docker run --rm -v "${RESULT_DIR}:/workspace/backend/test-results" alpine sh -c "rm -rf /workspace/backend/test-results/coverage /workspace/backend/test-results/*.log"
 docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
 rm -rf "${RESULT_DIR}"
 mkdir -p "${RESULT_DIR}"
@@ -30,4 +31,5 @@ echo "Step 10: Running backend unit tests in container..."
         backend \
     pytest tests/unit -v --cov=backend.app --cov-report=term --cov-report=html:/workspace/backend/test-results/coverage > "${LOG_FILE}" 2>&1
 
+docker compose -f docker-compose.yaml down backend
 echo "Backend unit tests COMPLETED. Evidence saved to ${RESULT_DIR}"

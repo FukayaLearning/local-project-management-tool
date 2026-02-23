@@ -39,6 +39,7 @@
 | **UNIT-BE-TASK-006** | Undo                        | None                                          | Git.undo() -> "Undo successful"                                          | Git.undo called once, returns result string.                                      |
 | **UNIT-BE-TASK-007** | Redo                        | None                                          | Git.redo() -> "Redo successful"                                          | Git.redo called once, returns result string.                                      |
 | **UNIT-BE-TASK-008** | Task List Get (Manual Sync) | None                                          | Git.has_uncommitted_changes() -> True                                    | Auto commit executed                                                              |
+| **UNIT-BE-TASK-009** | Create Task (with parent)   | `TaskCreateDTO(title="Sub", parent_id="P1")`  | Repo.save() -> Task, Git.commit() -> Success                             | Task is created with parent_id assigned.                                          |
 
 ### 2.3 SystemUseCase
 

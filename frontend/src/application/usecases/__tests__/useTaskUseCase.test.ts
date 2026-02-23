@@ -85,4 +85,22 @@ describe("useTaskUseCase", () => {
     });
     expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
   });
+
+  it("creates task with parent successfully", async () => {
+    const newTask = { title: "Sub Task", status: "New", parent_id: "parent-1" };
+    const createdTask = { id: "3", ...newTask };
+    // @ts-ignore
+    TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.createTask(newTask as any);
+    });
+
+    await waitFor(() => {
+      expect(result.current.tasks).toContainEqual(createdTask);
+    });
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+  });
 });
