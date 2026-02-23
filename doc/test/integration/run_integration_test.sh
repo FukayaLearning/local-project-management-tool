@@ -126,8 +126,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     # 3. Run Tests in Container, Connected to Host
     echo "Running Tests in Container (Connected to Host)..."
     cd "${REPO_ROOT}"
-    # Use -f to combine compose files. 
-    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run -T --rm --build -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" -e BASE_URL=http://proxy e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
+    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run -T --rm --build -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" -e BASE_URL=http://localhost:8080 e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."
     cd "${REPO_ROOT}"
