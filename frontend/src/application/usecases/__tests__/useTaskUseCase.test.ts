@@ -1,7 +1,10 @@
-import { DependencyProvider } from "../providers/DependencyProvider";
-
+import { DependencyProvider } from "../../providers/DependencyProvider";
+import { TaskApiRepository } from "../../../infrastructure/api/repositories/taskApiRepository";
+import { useTaskUseCase } from "../useTaskUseCase";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mock the dependencies provider
-vi.mock("../providers/DependencyProvider", () => ({
+vi.mock("../../providers/DependencyProvider", () => ({
   useDependencies: () => ({
     taskRepository: new TaskApiRepository(),
   }),
@@ -35,7 +38,9 @@ describe("useTaskUseCase", () => {
     expect(result.current.isLoading).toBe(false);
 
     // Trigger fetch
-    await result.current.fetchTasks();
+    await act(async () => {
+      await result.current.fetchTasks();
+    });
 
     expect(result.current.isLoading).toBe(false);
     await waitFor(() => {
@@ -52,7 +57,9 @@ describe("useTaskUseCase", () => {
 
     const { result } = renderHook(() => useTaskUseCase());
 
-    await result.current.fetchTasks();
+    await act(async () => {
+      await result.current.fetchTasks();
+    });
 
     expect(result.current.isLoading).toBe(false);
     await waitFor(() => {
@@ -69,7 +76,9 @@ describe("useTaskUseCase", () => {
 
     const { result } = renderHook(() => useTaskUseCase());
 
-    await result.current.createTask(newTask as any);
+    await act(async () => {
+      await result.current.createTask(newTask as any);
+    });
 
     await waitFor(() => {
       expect(result.current.tasks).toContainEqual(createdTask);

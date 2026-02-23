@@ -79,7 +79,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     # Ensure clean state
     docker compose -f docker-compose.yaml down -v --remove-orphans
     echo "Cleaning up backend data..."
-    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
+    docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
     docker compose -f docker-compose.yaml up -d --build
     
     echo "Waiting for App services to start..."
@@ -127,11 +127,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     echo "Running Tests in Container (Connected to Host)..."
     cd "${REPO_ROOT}"
     # Use -f to combine compose files. 
-    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm --build \
-        -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" \
-        -e BASE_URL=http://proxy \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
-        
+    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run -T --rm --build -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" -e BASE_URL=http://proxy e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."
     cd "${REPO_ROOT}"
@@ -139,7 +135,7 @@ else
     # 1. Clean & Start App (Prod mode)
     "${REPO_ROOT}/stop.sh" -v
     echo "Cleaning up backend data..."
-    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
+    docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
     
     # Use the root build script for consistency
     "${REPO_ROOT}/build.sh"
@@ -153,7 +149,5 @@ else
     # 2. Run Tests in Container (Headless)
     echo "Running Tests in Container (Self-contained)..."
     # Compose prod and e2e files. 
-    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm --build \
-        -e BASE_URL=http://frontend \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee "${LOG_FILE}"
+    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run -T --rm --build -e BASE_URL=http://frontend e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee "${LOG_FILE}"
 fi

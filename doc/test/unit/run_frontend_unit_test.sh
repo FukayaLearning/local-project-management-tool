@@ -5,16 +5,18 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULT_DIR="${SCRIPT_DIR}/result/frontend"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-# Clean previous results
-rm -rf "${RESULT_DIR}"
-mkdir -p "${RESULT_DIR}"
-
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="${RESULT_DIR}/result_${TIMESTAMP}.log"
 
-echo "Starting Frontend Unit Tests (Dockerized)..."
-
 cd "${REPO_ROOT}"
+
+# Clean previous results
+docker compose -f docker-compose.yaml down
+docker run --rm -v "${RESULT_DIR}:/app/test-results" alpine sh -c "rm -rf /app/test-results 2>/dev/null || true"
+rm -rf "${RESULT_DIR}"
+mkdir -p "${RESULT_DIR}"
+
+echo "Starting Frontend Unit Tests (Dockerized)..."
 
 # Step 13: Frontend Build Confirmation
 echo "Step 13: Building frontend image..."

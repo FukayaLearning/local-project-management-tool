@@ -1,7 +1,10 @@
-import { DependencyProvider } from "../providers/DependencyProvider";
-
+import { DependencyProvider } from "../../providers/DependencyProvider";
+import { SettingsApiRepository } from "../../../infrastructure/api/repositories/settingsApiRepository";
+import { useSettingsUseCase } from "../useSettingsUseCase";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mock the dependencies provider
-vi.mock("../providers/DependencyProvider", () => ({
+vi.mock("../../providers/DependencyProvider", () => ({
   useDependencies: () => ({
     settingsRepository: new SettingsApiRepository(),
   }),
@@ -36,7 +39,9 @@ describe("useSettingsUseCase", () => {
 
     const { result } = renderHook(() => useSettingsUseCase());
 
-    await result.current.fetchSettings();
+    await act(async () => {
+      await result.current.fetchSettings();
+    });
 
     await waitFor(() => {
       expect(result.current.settings).toEqual(mockSettings);
@@ -57,10 +62,15 @@ describe("useSettingsUseCase", () => {
     const { result } = renderHook(() => useSettingsUseCase());
 
     // Initial fetch
-    await result.current.fetchSettings();
+    await act(async () => {
+      await result.current.fetchSettings();
+    });
 
     // Update
-    const res = await result.current.updateProjectSettings(updatedProject);
+    let res;
+    await act(async () => {
+      res = await result.current.updateProjectSettings(updatedProject);
+    });
 
     expect(res).toEqual(updatedProject);
 
