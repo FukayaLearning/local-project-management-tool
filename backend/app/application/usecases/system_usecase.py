@@ -9,6 +9,7 @@ class SystemUseCase:
         self.settings_repository = settings_repository
 
     def get_system_status(self) -> dict:
+        self.sync_manual_changes()
         is_initialized = self.git_repository.is_initialized()
         current_project = None
         if is_initialized:

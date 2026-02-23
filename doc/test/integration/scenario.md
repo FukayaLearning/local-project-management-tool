@@ -30,6 +30,7 @@
 | 3    | Input title and status, click "Save"             | Modal closes and new task is added to the list                     | **IT-SCN-TASK-003** |
 | 4    | Click the added task                             | Task detail (edit) modal opens and registered content is displayed | **IT-SCN-TASK-004** |
 | 5    | Change status and click "Save"                   | Status of the corresponding task in the list is updated            | **IT-SCN-TASK-005** |
+| 6    | Select a specific status in the status filter    | Only tasks with the selected status are displayed                  | **IT-SCN-TASK-006** |
 
 ### Scenario 3: Initialization & Project Creation Flow (Init/Create Project)
 
@@ -39,6 +40,17 @@
 | :--- | :-------------------------------------------- | :----------------------------------------------------------------------- | :------------------ |
 | 1    | First launch application (no data)            | Redirected to `/create_project` and project creation screen is displayed | **IT-SCN-INIT-001** |
 | 2    | Input project name and click "Create Project" | Redirected to TOP page, created project name is displayed in menu bar    | **IT-SCN-INIT-002** |
+
+### Scenario 4: Manual Sync and Persistence (Manual Sync)
+
+- **Related Requirements**: REQ-HIST-002, REQ-INIT-002, REQ-ENV-004
+
+| Step | Operation/Procedure                              | Expected Result                                                       | Verification Point (DB/Logs)            | Test-ID               |
+| :--- | :----------------------------------------------- | :-------------------------------------------------------------------- | :-------------------------------------- | :-------------------- |
+| 1    | Manually edit `tasks.csv` while app is running   | App state doesn't instantly reflect the change (memory/file mismatch) | None                                    | **IT-SCN-SYNC-001-1** |
+| 2    | Reload the task list (API call)                  | Manually edited content is displayed in the list                      | Auto commit is created in History (Git) | **IT-SCN-SYNC-001-2** |
+| 3    | Manually rewrite project name in `settings.json` | None                                                                  | None                                    | **IT-SCN-SYNC-001-3** |
+| 4    | Reload the browser                               | Rewritten project name is displayed in the header, etc.               | Git branch is automatically switched    | **IT-SCN-SYNC-001-4** |
 
 ### Scenario 5: Undo/Redo Flow (Undo/Redo)
 
@@ -57,3 +69,12 @@
 | Step | Operation/Procedure                  | Expected Result                                               | Test-ID           |
 | :--- | :----------------------------------- | :------------------------------------------------------------ | :---------------- |
 | 1    | Change project selection in menu bar | Screen reloads and task list of selected project is displayed | **IT-SCN-SW-001** |
+
+### Scenario 7: Common UI Layout and Navigation (UI Layout)
+
+- **Related Requirements**: REQ-UI-001, REQ-UI-003
+
+| Step | Operation/Procedure                       | Expected Result                                                                     | Test-ID           |
+| :--- | :---------------------------------------- | :---------------------------------------------------------------------------------- | :---------------- |
+| 1    | Access the application                    | Header and Sidebar (navigation) are displayed properly, with logo and menus present | **IT-SCN-UI-001** |
+| 2    | Click on each link in the navigation menu | Transitions to corresponding pages (Tasks, Gantt Chart, Settings, etc.) properly    | **IT-SCN-UI-001** |

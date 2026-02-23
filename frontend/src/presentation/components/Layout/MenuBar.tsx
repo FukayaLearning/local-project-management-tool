@@ -46,8 +46,8 @@ export const MenuBar = ({
   };
 
   return (
-    <nav className="bg-white shadow">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-white shadow">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
@@ -108,7 +108,7 @@ export const MenuBar = ({
             </button>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 };

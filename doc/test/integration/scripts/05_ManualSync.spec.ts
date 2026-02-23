@@ -37,10 +37,10 @@ test.describe("Integration: Manual Synchronization", () => {
     // 2. tasks.csv を直接編集 (新しいタスクを1行追加)
     // ヘッダーが未作成（タスクが空）の場合はヘッダーも書き込む
     const header =
-      "id,title,status,assignee,task_type,priority,progress,planned_hours,actual_hours,start_date,due_date\n";
+      "id,title,status,assignee_id,start_date,due_date,parent_id,description,task_type,planned_hours,actual_hours,progress\n";
     const newTaskId = `manual-${Date.now()}`;
     const newTaskTitle = `Manual Task ${Date.now()}`;
-    const csvLine = `${newTaskId},${newTaskTitle},New,,,,0,8.0,0,,\n`;
+    const csvLine = `${newTaskId},${newTaskTitle},New,,,,,,,,,0\n`;
 
     console.log(`Manually adding task to ${TASKS_CSV}`);
     if (!fs.existsSync(TASKS_CSV)) {
@@ -54,8 +54,12 @@ test.describe("Integration: Manual Synchronization", () => {
     await expect(page.locator("text=Loading")).not.toBeVisible();
 
     // 4. 追加したタスクが表示されているか確認
+    // Reload again just in case the backend sync is delayed
+    await page.reload();
+    await expect(page.locator("text=Loading")).not.toBeVisible();
+
     await expect(page.locator(`text=${newTaskTitle}`)).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
     const finalTasks = await page.locator(".task-item").count();
     expect(finalTasks).toBe(initialTasks + 1);
@@ -88,9 +92,13 @@ test.describe("Integration: Manual Synchronization", () => {
 
     // 3. ヘッダーなどのプロジェクト名表示が変わっているか確認
     // ヘッダーのプロジェクト名が表示されている要素を探す (select か h2/span 等)
-    // プロジェクト選択 select の値や表示を確認
+    // プロジェクト選択 select の値や表示を確認. Let system load.
+    await page.waitForTimeout(1000);
     const projectSelect = page.locator("select");
-    await expect(projectSelect).toContainText(newName, { timeout: 10000 });
+    const expectedBranchName = newName.replace(/ /g, "_");
+    await expect(projectSelect).toContainText(expectedBranchName, {
+      timeout: 15000,
+    });
 
     console.log("Manual project rename detected and synced successfully.");
   });

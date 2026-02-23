@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { ApiClient } from "../../../infrastructure/api/client";
 
 interface ProjectCreatePageProps {
-  onProjectCreated: (projectName: string) => void;
+  onProjectCreated: (projectName: string) => Promise<void>;
 }
 
 export const ProjectCreatePage = ({
@@ -18,8 +17,7 @@ export const ProjectCreatePage = ({
     setError(null);
 
     try {
-      await ApiClient.post("/projects/", { project_name: projectName });
-      onProjectCreated(projectName);
+      await onProjectCreated(projectName);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
