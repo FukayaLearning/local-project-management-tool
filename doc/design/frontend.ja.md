@@ -92,6 +92,25 @@ frontend/src/
   - `ProjectNameInput`: プロジェクト名を入力。
   - `CreateButton`: 作成を実行。成功時はタスク一覧へ遷移。
 
+### 3.6 ガントチャートページ (`presentation/pages/GanttChartPage`)
+
+`TaskUseCase` でタスクデータを取得し、`GanttChartService` で描画用データに変換して表示します。
+
+- `GanttChartPage`: ルートコンポーネント。タスク取得、ズーム制御（dayWidth）、イナズマ線表示ON/OFF、基準日選択の状態管理。
+  - `GanttChart`: チャート領域全体。タスクラベル列＋タイムライン列を横並びで描画。
+    - `TimelineHeader`: 日付列ヘッダー。ズームレベルに応じて日付ラベルを表示。
+    - `GanttBar`: 各タスクの計画バー。開始日〜終了日に基づくバー描画。親タスクはサマリースタイル（別色）で子の期間を包含。進捗率の視覚表現を含む。
+    - `InazumaLine`: SVG `<path>` で進捗率に基づく折れ線を描画。赤い破線スタイル。基準日時点での各タスクの進捗状況を視覚化。
+
+### 3.7 ドメインサービス (`domain/services`)
+
+- `GanttChartService`: ガントチャート描画に必要な計算ロジックを純粋関数として提供。
+  - `calculateParentDateRange(parentTask, childTasks)`: 親タスクの期間を子タスクの最小start_date〜最大due_dateに集約。
+  - `calculateBarPosition(startDate, dueDate, timelineStart, dayWidth)`: バーのleft/widthをピクセル単位で計算。
+  - `calculateInazumaLinePoints(tasks, referenceDate, timelineStart, dayWidth, rowHeight)`: 各タスクの進捗率と基準日からイナズマ線の折れ線座標を算出。
+  - `generateTimelineDates(start, end)`: タイムライン表示用の日付配列を生成。
+  - `flattenTasksWithHierarchy(tasks)`: 親子関係を考慮した表示順序にタスクを並び替え。
+
 ## 4. データ・状態管理
 
 ### 4.1 アプリケーション状態 (Application State)
