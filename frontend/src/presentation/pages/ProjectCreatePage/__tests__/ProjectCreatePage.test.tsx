@@ -1,20 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ProjectCreatePage } from "../index";
-import { ApiClient } from "../../../../infrastructure/api/client";
-
-// Mock ApiClient
-vi.mock("../../../../infrastructure/api/client", () => ({
-  ApiClient: {
-    post: vi.fn(),
-  },
-}));
 
 describe("ProjectCreatePage", () => {
-  const mockOnProjectCreated = vi.fn();
+  let mockOnProjectCreated: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockOnProjectCreated = vi.fn().mockResolvedValue(undefined);
   });
 
   it("UNIT-FE-PG-PCP-001: Should render correctly", () => {
@@ -28,8 +20,6 @@ describe("ProjectCreatePage", () => {
   });
 
   it("UNIT-FE-PG-PCP-002: Should create project and call onProjectCreated", async () => {
-    (ApiClient.post as any).mockResolvedValue({});
-
     render(<ProjectCreatePage onProjectCreated={mockOnProjectCreated} />);
 
     const input = screen.getByLabelText("プロジェクト名");
@@ -45,16 +35,13 @@ describe("ProjectCreatePage", () => {
     expect(submitButton).toHaveTextContent("作成中...");
 
     await waitFor(() => {
-      expect(ApiClient.post).toHaveBeenCalledWith("/projects/", {
-        project_name: "New Project",
-      });
       expect(mockOnProjectCreated).toHaveBeenCalledWith("New Project");
     });
   });
 
   it("Should display error message on API failure", async () => {
     const errorMessage = "Failed to create project";
-    (ApiClient.post as any).mockRejectedValue(new Error(errorMessage));
+    mockOnProjectCreated = vi.fn().mockRejectedValue(new Error(errorMessage));
 
     render(<ProjectCreatePage onProjectCreated={mockOnProjectCreated} />);
 
@@ -67,7 +54,7 @@ describe("ProjectCreatePage", () => {
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
-      expect(mockOnProjectCreated).not.toHaveBeenCalled();
+      expect(mockOnProjectCreated).toHaveBeenCalledWith("Error Project");
     });
   });
 });

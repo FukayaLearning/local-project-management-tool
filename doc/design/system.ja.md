@@ -101,6 +101,7 @@ graph TD
   | **SPEC-INIT-001-002** | Init | 手動変更同期 | 起動時同期 | 起動時に設定ファイルとタスクデータを読み込み、現在のGitブランチとプロジェクト設定が不一致ならブランチを切り替える。また、未コミットの変更があればコミットする。 | REQ-INIT-002 |
   | **SPEC-INIT-002-001** | Init | プロジェクト作成 | API | `POST /api/v1/projects` で新規プロジェクト（ブランチ）を作成し、設定ファイルを更新する。 | REQ-INIT-005 |
   | **SPEC-INIT-003-001** | Init | プロジェクト切替 | API | `POST /api/v1/projects/{project_id}/switch` (または `checkout`) でブランチを切り替える。 | REQ-UI-002 |
+  | **SPEC-INIT-004-001** | Init | 画面遷移振分 | ルーティング | 起動時のシステムステータスAPIの結果に基づき、デフォルトプロジェクト未設定なら`/create_project`へ、設定済みなら`/tasks`へ遷移する。 | REQ-INIT-004 |
 
 ### 3.6 UI共通 (UI)
 
