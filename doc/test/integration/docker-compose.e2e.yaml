@@ -10,6 +10,7 @@ services:
       - ${E2E_DIR:-.}/result:/app/result
       - ${E2E_DIR:-.}/package.json:/app/package.json
       - ${REPO_ROOT}/backend/data:/app/backend/data
+      - /var/run/docker.sock:/var/run/docker.sock
       - /app/node_modules
     # Network: When run with other compose files, it joins their default network.
     # Depends_on: Will be handled by the fact we bring up app first or use depends_on here if we know service names.

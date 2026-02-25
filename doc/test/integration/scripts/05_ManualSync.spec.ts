@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
+// @ts-ignore
 import * as fs from "fs";
+// @ts-ignore
 import * as path from "path";
 
 // 実行コンテナ内でのデータパス (docker-compose.e2e.yaml でマウント)
@@ -49,6 +51,9 @@ test.describe("Integration: Manual Synchronization", () => {
       fs.appendFileSync(TASKS_CSV, csvLine);
     }
 
+    // Wait for docker volume propagation between containers
+    await page.waitForTimeout(2000);
+
     // 3. ページをリロード (これにより API GET /tasks が呼ばれ、バックエンドが検知・コミットする)
     await page.reload();
     await expect(page.locator("text=Loading")).not.toBeVisible();
@@ -82,6 +87,9 @@ test.describe("Integration: Manual Synchronization", () => {
     settings.project.project_name = newName;
     console.log(`Manually renaming project from ${oldName} to ${newName}`);
     fs.writeFileSync(SETTINGS_JSON, JSON.stringify(settings, null, 2));
+
+    // Wait for docker volume propagation between containers
+    await page.waitForTimeout(2000);
 
     // 2. ページをリロード (これにより API GET /system/status や /projects/settings が呼ばれる)
     // バックエンドの SystemUseCase.sync_manual_changes が走るはずだが、
