@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
 import { useSystemUseCase } from "../application/usecases/useSystemUseCase";
@@ -46,7 +47,17 @@ describe("App Routing and Layout", () => {
   };
 
   it("UNIT-FE-APP-001: Should show loading screen initially", () => {
-    setupMock(null, [], true);
+    // Return a promise that never resolves to simulate loading state indefinitely for the test
+    const unresolvedPromise = new Promise(() => {});
+    (useSystemUseCase as any).mockReturnValue({
+      systemStatus: null,
+      projects: [],
+      isLoading: true,
+      fetchSystemStatus: vi.fn().mockReturnValue(unresolvedPromise),
+      fetchProjects: mockFetchProjects,
+      switchProject: mockSwitchProject,
+      createProject: mockCreateProject,
+    });
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
@@ -69,9 +80,10 @@ describe("App Routing and Layout", () => {
     );
 
     // In our mock, ProjectCreatePage will just render its content.
-    // Let's assume there is something specific we can check, or we can mock ProjectCreatePage.
-    // Instead of mocking the individual pages, we can just check if MenuBar is NOT there,
-    // because MenuBar is hidden on /create_project.
+    // We need to wait for the async navigation to complete.
+    expect(
+      await screen.findByText("Create Project Page Content"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Local PM")).not.toBeInTheDocument();
   });
 

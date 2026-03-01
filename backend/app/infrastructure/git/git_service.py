@@ -1,10 +1,13 @@
 import subprocess
 import os
+import threading
 from typing import List
 from backend.app.domain.repositories.git_repository import IGitRepository
 
 # Default data directory name, same as used by TaskFileRepository and SettingsFileRepository
 DEFAULT_DATA_DIR = "data"
+
+_git_lock = threading.Lock()
 
 
 class GitService(IGitRepository):
@@ -29,17 +32,18 @@ class GitService(IGitRepository):
             self.data_dir = os.path.join(project_root, DEFAULT_DATA_DIR)
 
     def _run_git(self, args: list) -> str:
-        try:
-            result = subprocess.run(
-                ["git"] + args,
-                cwd=self.data_dir,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return result.stdout.strip()
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Git command failed: {e.stderr.strip()}")
+        with _git_lock:
+            try:
+                result = subprocess.run(
+                    ["git"] + args,
+                    cwd=self.data_dir,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                return result.stdout.strip()
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Git command failed: {e.stderr.strip()}")
 
     def is_initialized(self) -> bool:
         git_dir = os.path.join(self.data_dir, ".git")
