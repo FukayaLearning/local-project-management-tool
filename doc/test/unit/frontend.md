@@ -23,14 +23,15 @@
 
 ### 2.2 UseCases (Application Layer)
 
-| Hook                   | Test-ID             | Test Summary            | Expected Behavior                             |
-| :--------------------- | :------------------ | :---------------------- | :-------------------------------------------- |
-| **useTaskUseCase**     | UNIT-FE-UC-TASK-001 | Fetch Tasks Success     | Tasks fetched from API are reflected in state |
-|                        | UNIT-FE-UC-TASK-002 | Fetch Tasks Failure     | Error state is updated                        |
-|                        | UNIT-FE-UC-TASK-003 | Create Task Success     | Newly created task is added to the list       |
-|                        | UNIT-FE-UC-TASK-004 | Create Subtask Success  | Task created with parent_id reflects properly |
-| **useSettingsUseCase** | UNIT-FE-UC-SET-001  | Fetch Settings Success  | Project settings are reflected in state       |
-|                        | UNIT-FE-UC-SET-002  | Update Settings Success | Updated settings are reflected in state       |
+| Hook                   | Test-ID             | Test Summary            | Expected Behavior                               |
+| :--------------------- | :------------------ | :---------------------- | :---------------------------------------------- |
+| **useTaskUseCase**     | UNIT-FE-UC-TASK-001 | Fetch Tasks Success     | Tasks fetched from API are reflected in state   |
+|                        | UNIT-FE-UC-TASK-002 | Fetch Tasks Failure     | Error state is updated                          |
+|                        | UNIT-FE-UC-TASK-003 | Create Task Success     | Newly created task is added to the list         |
+|                        | UNIT-FE-UC-TASK-004 | Create Subtask Success  | Task created with parent_id reflects properly   |
+|                        | UNIT-FE-UC-TASK-005 | Reorder Tasks Success   | Reorder API is called and task array is fetched |
+| **useSettingsUseCase** | UNIT-FE-UC-SET-001  | Fetch Settings Success  | Project settings are reflected in state         |
+|                        | UNIT-FE-UC-SET-002  | Update Settings Success | Updated settings are reflected in state         |
 
 ### 2.3 Page Components
 
@@ -51,10 +52,11 @@
 
 ### 2.4 Domain Services (Domain Layer)
 
-| Service               | Test-ID               | Test Summary              | Expected Behavior                                                  |
-| :-------------------- | :-------------------- | :------------------------ | :----------------------------------------------------------------- |
-| **GanttChartService** | UNIT-FE-SVC-GANTT-001 | Parent Date Aggregation   | Returns DateRange with min start_date and max due_date of children |
-|                       | UNIT-FE-SVC-GANTT-002 | Bar Position Calculation  | Returns correct left and width based on date difference × dayWidth |
-|                       | UNIT-FE-SVC-GANTT-003 | Inazuma Line Calculation  | Returns correct polyline coordinate array based on progress rate   |
-|                       | UNIT-FE-SVC-GANTT-004 | Timeline Date Generation  | Returns array of consecutive date strings from start to end        |
-|                       | UNIT-FE-SVC-GANTT-005 | Task Hierarchy Flattening | Tasks sorted parent-first with correct depth values                |
+| Service               | Test-ID               | Test Summary              | Expected Behavior                                                      |
+| :-------------------- | :-------------------- | :------------------------ | :--------------------------------------------------------------------- |
+| **GanttChartService** | UNIT-FE-SVC-GANTT-001 | Parent Date Aggregation   | Returns DateRange with min start_date and max due_date of children     |
+|                       | UNIT-FE-SVC-GANTT-002 | Bar Position Calculation  | Returns correct left and width based on date difference × dayWidth     |
+|                       | UNIT-FE-SVC-GANTT-003 | Inazuma Line Calculation  | Returns correct polyline coordinate array based on progress rate       |
+|                       | UNIT-FE-SVC-GANTT-004 | Timeline Date Generation  | Returns array of consecutive date strings from start to end            |
+|                       | UNIT-FE-SVC-GANTT-005 | Task Hierarchy Flattening | Tasks sorted parent-first with correct depth values                    |
+|                       | UNIT-FE-SVC-GANTT-006 | Task Hierarchy Sorting    | Hierarchical tasks correctly sorted by display_order before flattening |

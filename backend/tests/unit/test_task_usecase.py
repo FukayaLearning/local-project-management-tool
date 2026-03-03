@@ -4,7 +4,7 @@ from backend.app.application.usecases.task_usecase import TaskUseCase
 from backend.app.domain.repositories.task_repository import ITaskRepository
 from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.entities.task import Task
-from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO
+from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO
 
 @pytest.fixture
 def mock_repo():
@@ -149,3 +149,24 @@ def test_redo(usecase, mock_git):
     # Assert
     assert result == "Redo successful"
     mock_git.redo.assert_called_once()
+
+def test_reorder_tasks(usecase, mock_repo, mock_git):
+    # Arrange
+    mock_repo.update_orders.return_value = True
+    orders = [
+        TaskOrderUpdateDTO(id="t1", display_order=2),
+        TaskOrderUpdateDTO(id="t2", display_order=1)
+    ]
+
+    # Act
+    result = usecase.reorder_tasks(orders)
+
+    # Assert
+    assert result is True
+    # The use case constructs a list of dicts to pass to the repo:
+    expected_task_orders = [
+        {"id": "t1", "display_order": 2},
+        {"id": "t2", "display_order": 1}
+    ]
+    mock_repo.update_orders.assert_called_with(expected_task_orders)
+    mock_git.commit.assert_called_once_with("Reorder tasks")

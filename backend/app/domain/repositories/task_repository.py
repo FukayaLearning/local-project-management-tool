@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict
 from backend.app.domain.entities.task import Task
 
 class ITaskRepository(ABC):
@@ -21,4 +21,8 @@ class ITaskRepository(ABC):
 
     @abstractmethod
     def delete(self, task_id: str) -> bool:
+        pass
+
+    @abstractmethod
+    def update_orders(self, task_orders: List[Dict]) -> bool:
         pass

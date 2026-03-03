@@ -134,6 +134,7 @@ This document is the operation manual and screen specification for the "Local Pr
 </div>
 
 - **Operations**
+  - **Reorder Tasks**: Drag and drop task rows to reorder them.
   - **Add Task**: Clicking "Add Task" opens the Task Creation Modal.
   - **Search/Filter**: Search by title text and filter by status using the dropdown.
   - **Hierarchy**: Toggle subtask visibility by clicking the ▶ icon left of the title.
@@ -251,5 +252,6 @@ This document is the operation manual and screen specification for the "Local Pr
 </div>
 
 - **Operations**
+  - **Reorder Tasks**: Drag and drop task rows on the left side to reorder them.
   - **Toggle View**: Zoom in/out and toggle the Inazuma line visibility.
   - **Bar Operations**: (Future extension) Potential to change duration by dragging bars. Currently display only.

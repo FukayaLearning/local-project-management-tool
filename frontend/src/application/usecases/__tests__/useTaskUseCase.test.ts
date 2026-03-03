@@ -18,6 +18,7 @@ vi.mock("../../../infrastructure/api/repositories/taskApiRepository", () => {
   TaskApiRepository.prototype.create = vi.fn();
   TaskApiRepository.prototype.update = vi.fn();
   TaskApiRepository.prototype.delete = vi.fn();
+  TaskApiRepository.prototype.updateOrders = vi.fn();
   return { TaskApiRepository };
 });
 
@@ -102,5 +103,23 @@ describe("useTaskUseCase", () => {
       expect(result.current.tasks).toContainEqual(createdTask);
     });
     expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+  });
+
+  it("reorders tasks successfully", async () => {
+    // @ts-ignore
+    TaskApiRepository.prototype.updateOrders.mockResolvedValue(undefined);
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue([]);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.reorderTasks([{ id: "1", display_order: 1 }]);
+    });
+
+    expect(TaskApiRepository.prototype.updateOrders).toHaveBeenCalledWith([
+      { id: "1", display_order: 1 },
+    ]);
+    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalled();
   });
 });

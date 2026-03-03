@@ -44,7 +44,7 @@ backend/app/
 
 ### 3.1 Entities/Value Objects (Domain)
 
-- `Task`: Holds ID, Title, Status, Dates, ParentID, etc.
+- `Task`: Holds ID, Title, Status, Dates, ParentID, display_order, etc.
 - `ProjectSettings`: Holds project name, duration, etc.
 - `BasicSettings`: Holds status definitions, assignee definitions, etc.
 
@@ -100,6 +100,14 @@ backend/app/
   1.  Call `TaskUseCase.update_task(id, dto)`.
   2.  Update record with corresponding ID via `TaskRepository`.
   3.  **Git Commit**: Execute `GitService.commit(f"Update task {title}")`.
+
+#### `PUT /tasks/reorder`
+
+- **Related Spec-ID**: `SPEC-TASK-004-001`, `SPEC-HIST-001-001`
+- **Flow**:
+  1.  Call `TaskUseCase.reorder_tasks(orders)`.
+  2.  Update and save multiple task orders at once via `TaskRepository.update_orders(orders)`.
+  3.  **Git Commit**: Execute `GitService.commit("Reorder tasks")`.
 
 #### `DELETE /tasks/{id}`
 

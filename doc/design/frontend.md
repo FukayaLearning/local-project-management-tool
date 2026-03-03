@@ -44,6 +44,7 @@ frontend/src/
 - **Styling**: TailwindCSS (Standard compliance) or CSS Modules
 - **State Management**: React Context + Custom Hooks (Local state uses useState)
 - **Routing**: React Router (Recommended for scalability)
+- **Other Libraries**: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` for drag and drop task reordering.
 
 ## 3. Component Design
 
@@ -69,9 +70,9 @@ Uses `TaskUseCase` for task operations.
 
 - `TaskListPage`: Root component.
   - `TaskToolbar`: New Task button, Filtering, View Switcher (List/Gantt).
-  - `TaskListView`: Task list in table format.
+  - `TaskListView`: Task list in table format. Supports drag and drop reordering using SortableContext.
     - `TaskRow`: Row for each task. Includes Edit/Delete actions.
-  - `GanttChartView`: Display in Gantt Chart format.
+  - `GanttChartView`: Display in Gantt Chart format. Supports drag and drop reordering.
     - `GanttBar`: Bar representing task duration.
   - `TaskDetailModal`: Modal for creating/editing tasks.
     - `TaskForm`: Input form for Title, Assignee, Duration, etc.

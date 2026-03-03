@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from dependency_injector.wiring import inject, Provide
-from ..schemas.task import Task, TaskCreateDTO, TaskUpdateDTO
+from ..schemas.task import Task, TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO
 from backend.app.application.usecases.task_usecase import TaskUseCase
 from backend.app.container import Container
 
@@ -35,6 +35,18 @@ def create_task(
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
     return usecase.create_task(dto)
+
+
+@router.put("/reorder")
+@inject
+def reorder_tasks(
+    orders: List[TaskOrderUpdateDTO],
+    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
+):
+    success = usecase.reorder_tasks(orders)
+    if not success:
+        raise HTTPException(status_code=400, detail="Failed to reorder tasks")
+    return {"message": "Tasks reordered successfully"}
 
 
 @router.put("/{task_id}", response_model=Task)

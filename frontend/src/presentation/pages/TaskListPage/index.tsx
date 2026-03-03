@@ -14,6 +14,7 @@ export const TaskListPage: React.FC = () => {
     createTask,
     updateTask,
     deleteTask,
+    reorderTasks,
   } = useTaskUseCase();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -81,6 +82,8 @@ export const TaskListPage: React.FC = () => {
         )}
         onEdit={handleEditClick}
         onDelete={handleDelete}
+        onReorder={reorderTasks}
+        isReorderable={searchTerm === ""}
       />
 
       <TaskDetailModal
