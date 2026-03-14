@@ -34,14 +34,19 @@ class TaskFileRepository(ITaskRepository):
         
         # Convert date strings back to date objects if needed, but Pydantic handles str -> date
         # Convert numeric fields
-        if data.get("planned_hours"):
+        if data.get("planned_hours") is not None:
             data["planned_hours"] = float(data["planned_hours"])
-        if data.get("actual_hours"):
+        if data.get("actual_hours") is not None:
             data["actual_hours"] = float(data["actual_hours"])
-        if data.get("progress"):
+        if data.get("progress") is not None:
             data["progress"] = int(float(data["progress"])) # handle potential float string "0.0"
-        if data.get("display_order"):
+        if data.get("display_order") is not None:
             data["display_order"] = int(float(data["display_order"]))
+            
+        # Remove None values for non-optional fields so Pydantic uses default
+        for f in ["progress", "display_order"]:
+            if f in data and data[f] is None:
+                del data[f]
 
         return Task(**data)
 

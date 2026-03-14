@@ -9,6 +9,7 @@
 | **SPEC-TASK-002-001** | Task Data - CSV              | タスクデータCSV保存        |   Task   | REQ-TASK-004         | System Design 3.2 | UNIT-BE-TASK-002, 003                            | IT-SCN-TASK-003               | Complete |
 | **SPEC-TASK-002-002** | Task Create - ID Gen         | タスクID自動生成           |   Task   | REQ-TASK-002         | System Design 3.2 | UNIT-FE-UC-TASK-003, UNIT-BE-TASK-002            | IT-SCN-002-1, IT-SCN-TASK-003 | Complete |
 | **SPEC-TASK-003-001** | Task Hierarchy - Data        | 親子階層データ保持         |   Task   | REQ-TASK-003         | System Design 3.2 | UNIT-FE-UC-TASK-004, UNIT-BE-TASK-009            | IT-SCN-TASK-003               | Complete |
+| **SPEC-TASK-004-001** | Task Reordering - API        | タスク並び替えAPI          |   Task   | REQ-TASK-005         | System Design 3.2 | UNIT-FE-UC-TASK-005, UNIT-BE-TASK-010            | IT-SCN-REORDER-001, 002       | Complete |
 | **SPEC-VIEW-001-001** | Gantt Chart - Logic          | ガントチャート表示ロジック |   View   | REQ-VIEW-001         | System Design 3.3 | UNIT-FE-SVC-GANTT-001, 002, 004, 005             | IT-SCN-GANTT-001, 002         | Complete |
 | **SPEC-VIEW-002-001** | Inazuma Line - Logic         | イナズマ線計算ロジック     |   View   | REQ-VIEW-002         | System Design 3.3 | UNIT-FE-SVC-GANTT-003                            | IT-SCN-GANTT-003              | Complete |
 | **SPEC-HIST-001-001** | Auto Commit - Trigger        | 自動コミットトリガー       | History  | REQ-HIST-001         | System Design 3.4 | UNIT-BE-SETTINGS-002, UNIT-BE-TASK-002, 003, 005 | IT-SCN-SYNC-001-2             | Complete |

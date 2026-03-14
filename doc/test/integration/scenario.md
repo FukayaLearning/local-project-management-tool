@@ -88,3 +88,12 @@
 | 1    | Access Gantt Chart page                   | Gantt Chart page is displayed with \"Gantt Chart\" title | **IT-SCN-GANTT-001** |
 | 2    | Create a task with dates and save         | A bar is displayed on the Gantt Chart                    | **IT-SCN-GANTT-002** |
 | 3    | Toggle \"Show Progress Line\" checkbox ON | Inazuma line (red dashed line) is displayed              | **IT-SCN-GANTT-003** |
+
+### Scenario 9: Task Reorder Flow (Task Reorder)
+
+- **Related Requirements**: REQ-TASK-005
+
+| Step | Operation/Procedure                          | Expected Result                                                     | Test-ID                |
+| :--- | :------------------------------------------- | :------------------------------------------------------------------ | :--------------------- |
+| 1    | Drag and drop a task row on Task List page   | Task moves to dropped position and order is maintained after reload | **IT-SCN-REORDER-001** |
+| 2    | Drag and drop a task row on Gantt Chart page | Task moves to dropped position and order is maintained after reload | **IT-SCN-REORDER-002** |
