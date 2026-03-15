@@ -60,14 +60,12 @@ cleanup() {
     if [ "$DEMO_MODE" == "true" ]; then
         docker compose -f docker-compose.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
         docker compose -f docker-compose.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
-        # In demo mode, we might leave app running
-        :
     else
         docker compose -f docker-compose.prod.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
         docker compose -f docker-compose.prod.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
-        # Prod mode cleanup using root script
-        "${REPO_ROOT}/stop.sh" -v
     fi
+    # Always call stop script to ensure all containers (including proxy) are cleaned up
+    "${REPO_ROOT}/stop.sh" -v
 }
 trap cleanup EXIT
 
