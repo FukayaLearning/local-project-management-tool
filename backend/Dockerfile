@@ -3,6 +3,9 @@ FROM python:3.12-slim AS base
 WORKDIR /workspace
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN git config --global --add safe.directory /workspace/backend/data
+RUN git config --global user.name "System" && \
+    git config --global user.email "system@example.com"
 
 # Copy requirements first for caching
 COPY requirements.txt ./backend/
