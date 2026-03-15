@@ -6,9 +6,11 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 
 ## ✨ Features
 
-*   **Offline First**: No internet connection required. Runs entirely on your local machine.
-*   **File-Based**: Data is stored in human-readable JSON and CSV formats, managed by Git.
-*   **Powerful History**: Robust Undo/Redo functionality powered by Git integration.
+- **Offline First**: No internet connection required. Runs entirely on your local machine.
+- **File-Based**: Data is stored in human-readable JSON and CSV formats, managed by Git.
+- **Powerful History**: Robust Undo/Redo functionality powered by Git integration.
+- **Project Management**: Create and switch between multiple projects. Each project is managed as a separate Git branch.
+- **Smart Initialization**: Automatically guides you to project creation on first launch.
 
 ## 📂 Directory Structure
 
@@ -26,19 +28,20 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 
 ### Prerequisites
 
-*   Docker & Docker Compose (Recommended)
-*   Or: Python 3.12+, Node.js 20+, Git
+- Docker & Docker Compose (Recommended)
+- Or: Python 3.12+, Node.js 20+, Git
 
 ### Docker (Recommended)
 
 1.  **Start the application**
+
     ```bash
     docker compose up -d --build
     ```
 
 2.  **Access**
-    *   Frontend: [http://localhost:3000](http://localhost:3000)
-    *   Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3.  **Stop**
     ```bash
@@ -73,7 +76,7 @@ docker compose exec backend pytest
 
 ## 🛠 Tech Stack
 
-*   **Backend**: Python (FastAPI), Pandas
-*   **Frontend**: React + TypeScript (Vite), Mantine
-*   **Storage**: Local Files (JSON/CSV)
-*   **Version Control**: Git
+- **Backend**: Python (FastAPI), Pandas
+- **Frontend**: React + TypeScript (Vite), Mantine
+- **Storage**: Local Files (JSON/CSV)
+- **Version Control**: Git

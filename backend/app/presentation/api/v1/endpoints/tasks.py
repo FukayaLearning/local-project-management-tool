@@ -7,15 +7,17 @@ from backend.app.infrastructure.git.git_service import GitService
 
 router = APIRouter()
 
-# Simple Dependency Injection (Manual for now, can be moved to dependencies.py)
+
 def get_task_usecase():
     repo = TaskFileRepository()
     git = GitService()
     return TaskUseCase(repo, git)
 
+
 @router.get("/", response_model=List[Task])
 def list_tasks(usecase: TaskUseCase = Depends(get_task_usecase)):
     return usecase.list_tasks()
+
 
 @router.get("/{task_id}", response_model=Task)
 def get_task(task_id: str, usecase: TaskUseCase = Depends(get_task_usecase)):
@@ -24,9 +26,11 @@ def get_task(task_id: str, usecase: TaskUseCase = Depends(get_task_usecase)):
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
+
 @router.post("/", response_model=Task, status_code=201)
 def create_task(dto: TaskCreateDTO, usecase: TaskUseCase = Depends(get_task_usecase)):
     return usecase.create_task(dto)
+
 
 @router.put("/{task_id}", response_model=Task)
 def update_task(task_id: str, dto: TaskUpdateDTO, usecase: TaskUseCase = Depends(get_task_usecase)):
@@ -35,7 +39,26 @@ def update_task(task_id: str, dto: TaskUpdateDTO, usecase: TaskUseCase = Depends
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
+
 @router.delete("/{task_id}", status_code=204)
 def delete_task(task_id: str, usecase: TaskUseCase = Depends(get_task_usecase)):
     if not usecase.delete_task(task_id):
         raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.post("/undo")
+def undo_task_change(usecase: TaskUseCase = Depends(get_task_usecase)):
+    try:
+        result = usecase.undo()
+        return {"message": result}
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/redo")
+def redo_task_change(usecase: TaskUseCase = Depends(get_task_usecase)):
+    try:
+        result = usecase.redo()
+        return {"message": result}
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))

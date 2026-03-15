@@ -95,3 +95,26 @@ def test_delete_task(usecase, mock_repo, mock_git):
     assert result is True
     mock_repo.delete.assert_called_with("task-1")
     mock_git.commit.assert_called_once()
+
+def test_undo(usecase, mock_git):
+    # Arrange
+    mock_git.undo.return_value = "Undo successful"
+
+    # Act
+    result = usecase.undo()
+
+    # Assert
+    assert result == "Undo successful"
+    mock_git.undo.assert_called_once()
+
+def test_redo(usecase, mock_git):
+    # Arrange
+    mock_git.redo.return_value = "Redo successful"
+
+    # Act
+    result = usecase.redo()
+
+    # Assert
+    assert result == "Redo successful"
+    mock_git.redo.assert_called_once()
+

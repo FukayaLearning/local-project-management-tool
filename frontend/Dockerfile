@@ -11,6 +11,8 @@ CMD ["npm", "run", "dev", "--", "--host"]
 
 # Build stage for production
 FROM base AS build
+ARG VITE_API_BASE_URL=/api/v1
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 RUN npm run build
 
 # Production stage

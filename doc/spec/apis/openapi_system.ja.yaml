@@ -1,0 +1,33 @@
+paths:
+  /system/status:
+    get:
+      summary: システムステータス取得
+      operationId: getSystemStatus
+      tags:
+        - system
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+
+components:
+  schemas:
+    SystemStatus:
+      type: object
+      properties:
+        is_git_initialized:
+          type: boolean
+          description: Gitリポジトリが初期化されているか
+        has_default_project:
+          type: boolean
+          description: 既定のプロジェクト設定が存在するか
+        current_project:
+          type: string
+          nullable: true
+          description: 現在のプロジェクト名（ブランチ名）
+      required:
+        - is_git_initialized
+        - has_default_project

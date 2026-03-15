@@ -52,3 +52,10 @@ class TaskUseCase:
         if result:
             self.git_service.commit(f"Delete task {task_id}")
         return result
+
+    def undo(self) -> str:
+        return self.git_service.undo()
+
+    def redo(self) -> str:
+        return self.git_service.redo()
+

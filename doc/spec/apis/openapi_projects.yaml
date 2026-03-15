@@ -6,18 +6,18 @@ paths:
       tags:
         - projects
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettings'
-        '500':
+                $ref: "#/components/schemas/ProjectSettings"
+        "500":
           description: Server Error
           content:
             application/json:
               schema:
-                $ref: '../apis/openapi_common.yaml#/components/schemas/Error'
+                $ref: "../apis/openapi_common.yaml#/components/schemas/Error"
     put:
       summary: Update Project Settings
       operationId: updateProjectSettings
@@ -29,14 +29,63 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectSettings'
+              $ref: "#/components/schemas/ProjectSettings"
       responses:
-        '200':
+        "200":
           description: Update Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettings'
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects:
+    post:
+      summary: Create New Project
+      operationId: createProject
+      tags:
+        - projects
+      requestBody:
+        description: Project creation data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_name:
+                  type: string
+              required:
+                - project_name
+      responses:
+        "200":
+          description: Creation Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects/{project_id}/switch:
+    post:
+      summary: Switch Project
+      operationId: switchProject
+      tags:
+        - projects
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Switch Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:

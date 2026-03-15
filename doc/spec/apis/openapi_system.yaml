@@ -1,0 +1,30 @@
+paths:
+  /system/status:
+    get:
+      summary: Get System Status
+      operationId: getSystemStatus
+      tags:
+        - system
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+
+components:
+  schemas:
+    SystemStatus:
+      type: object
+      properties:
+        is_git_initialized:
+          type: boolean
+        has_default_project:
+          type: boolean
+        current_project:
+          type: string
+          nullable: true
+      required:
+        - is_git_initialized
+        - has_default_project

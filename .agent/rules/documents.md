@@ -6,65 +6,65 @@ trigger: always_on
 
 ## 本書内表記
 
-* (例:～)は、例示である。
-* 「~」 は、「」内の内容に置き換えて読む。
-  * (例:「workspace_root」は、本ワークスペースにおけるルートディレクトリを指す。)
+- (例:～)は、例示である。
+- 「~」 は、「」内の内容に置き換えて読む。
+  - (例:「workspace_root」は、本ワークスペースにおけるルートディレクトリを指す。)
 
 ## ドキュメント作成共通ルール
 
-* 英語版と日本語版のドキュメントをそれぞれ作成する。
-* 英語版と日本語版のドキュメントの表現内容は同じとなるようにする。
-* あいまいな表現を避け、再現性が保てるようにする。
+- 英語版と日本語版のドキュメントをそれぞれ作成する。
+- 英語版と日本語版のドキュメントの表現内容は同じとなるようにする。
+- あいまいな表現を避け、再現性が保てるようにする。
 
 ## ドキュメント配置
 
 次のファイルツリー構成で作成すること。
 
-* 「workspace_root」/
-  * README.md
-  * README.ja.md
-  * doc/
-    * spec/
-      * apis/
-        * openapi_common.yaml
-        * openapi_common.ja.yaml
-        * openapi_「apiname」.yaml
-        * openapi_「apiname」.ja.yaml
-      * manual.md
-      * manual.ja.md
-      * openapi.yaml
-      * openapi.ja.yaml
-    * design/
-      * pages/
-        * 「pagename」.html
-        * 「pagename」.ja.html
-      * requirement.md
-      * requirement.ja.md
-      * traceability_matrix.md
-      * system.md
-      * system.ja.md
-      * frontend.md
-      * frontend.ja.md
-      * backend.md
-      * backend.ja.md
-    * test/
-      * unit/
-        * frontend.md
-        * frontend.ja.md
-        * backend.md
-        * backend.ja.md
-      * integration/
-        * scenario.md
+- 「workspace_root」/
+  - README.md
+  - README.ja.md
+  - doc/
+    - spec/
+      - apis/
+        - openapi_common.yaml
+        - openapi_common.ja.yaml
+        - openapi\_「apiname」.yaml
+        - openapi\_「apiname」.ja.yaml
+      - manual.md
+      - manual.ja.md
+      - openapi.yaml
+      - openapi.ja.yaml
+    - design/
+      - pages/
+        - 「pagename」.html
+        - 「pagename」.ja.html
+      - requirement.md
+      - requirement.ja.md
+      - traceability_matrix.md
+      - system.md
+      - system.ja.md
+      - frontend.md
+      - frontend.ja.md
+      - backend.md
+      - backend.ja.md
+    - test/
+      - unit/
+        - frontend.md
+        - frontend.ja.md
+        - backend.md
+        - backend.ja.md
+      - integration/
+        - scenario.md
 
 ## README
 
 本ツールの仕様概要をREADMEとしてまとめること。
 
-* ファイルパス  
-  * 英語版: 「workspace_root」/README.md
-  * 日本語版: 「workspace_root」/README.ja.md
+- ファイルパス
+  - 英語版: 「workspace_root」/README.md
+  - 日本語版: 「workspace_root」/README.ja.md
 
-* ファイル内容:  
+- ファイル内容:  
   詳細は仕様書へのリンクを示しつつ、README内だけでも本ツールの概要、使い方、特徴、制限事項、展望などがわかるように記載する。
 
 ## 要求定義書
@@ -72,13 +72,13 @@ trigger: always_on
 本ツールの要求定義書を次の通り作成すること。  
 要求(Requirement)を分析し、ユーザとすり合わせを行い、一覧化する。
 
-* ファイルパス  
-  * 英語版: 「workspace_root」/doc/design/requirement.md
-  * 日本語版: 「workspace_root」/doc/design/requirement.ja.md
+- ファイルパス
+  - 英語版: 「workspace_root」/doc/design/requirement.md
+  - 日本語版: 「workspace_root」/doc/design/requirement.ja.md
 
-* ファイル記載例:  
-  以下は日本語版での記載例である。  
-  
+- ファイル記載例:  
+   以下は日本語版での記載例である。
+
   ```
   # 要件定義書
   ## 1. システム概要
@@ -115,7 +115,7 @@ trigger: always_on
 
   ---
   ## 3. 非機能要求 (Non-Functional Requirements)
-システム品質に関わる要件を定義します。
+  システム品質に関わる要件を定義します。
   ### 3.1 性能・パフォーマンス (PERF)
   *   **REQ-PERF-001**: ページロード時間は主要画面で2秒以内とすること（Wifi環境下）。
   *   **REQ-PERF-002**: 同時アクセス数 100ユーザーに耐えうること。
@@ -132,12 +132,13 @@ trigger: always_on
 
 要求定義書の要求(Requirement)から、システム設計書として機能分類ごとに、フロントエンド、バックエンドの要件(Specification)に整理する。
 
-* ファイルパス
-  * 英語版 `「workspace_root」/doc/design/system.md`
-  * 日本語版 `「workspace_root」/doc/design/system.ja.md`
+- ファイルパス
+  - 英語版 `「workspace_root」/doc/design/system.md`
+  - 日本語版 `「workspace_root」/doc/design/system.ja.md`
 
-* ファイル構成:  
+- ファイル構成:  
   以下は日本語版の説明である。以下は記載例である。
+
   ```
   # システム設計
   ## 1. システム概要
@@ -163,7 +164,7 @@ trigger: always_on
 
   ### 3.1 認証・ユーザー管理 (AUTH)
 
-  * シーケンス図  
+  * シーケンス図
     「mermaidで作ったシーケンス図。ユーザ、フロントエンド、バックエンドで整理する」
   * 実現方針
     * ログインはOSSの「OSS名」を使用する。
@@ -181,26 +182,27 @@ trigger: always_on
 
 要件(Specification)がプロセスの漏れないことを追跡し、以下の通り作成すること。
 
-* ファイルパス
-  * `「workspace_root」/doc/design/traceability_matrix.md`
+- ファイルパス
+  - `「workspace_root」/doc/design/traceability_matrix.md`
 
-* ファイル構成:
+- ファイル構成:
   以下の通り英語と日本語を1ファイルでまとめた形とする。
+
 ```
-|Spec ID|Specification|要件|Category|API/manual|Design|Unit test|Integration test|Status|
-|:-----|:-------------|:---|:------:|:------------|:-----|:-------|:------------|:-----------|:----:|
-|(例:SPEC-AUTH-001-001)|(例:User can input ID and password on th e login page)|(例:ログイン画面でユーザIDとパスワードを入力できる。)| (例:login page) | (例:manual 2.2) | (例:frontend 2.2) | (例:frontend UNIT-AUTH-001-001-CASE001) | (例:SCENE-AUTH-001-CASE001) | (例:Complete) |
+|Req ID|Spec ID|Specification|要件|Category|API/manual|Design|Unit test|Integration test|Status|
+|:---|:-----|:-------------|:---|:------:|:------------|:-----|:-------|:------------|:-----------|:----:|
+|(例:REQ-AUTH-001)|(例:SPEC-AUTH-001-001)|(例:User can input ID and password on the login page)|(例:ログイン画面でユーザIDとパスワードを入力できる。)| (例:login page) | (例:manual 2.2) | (例:frontend 2.2) | (例:frontend UNIT-AUTH-001-001-CASE001) | (例:SCENE-AUTH-001-CASE001) | (例:Complete) |
 ```
 
 ## 操作マニュアル
 
 本ツールの操作マニュアルを次の通り作成すること。
 
-* ファイルパス  
-  * 英語版: 「workspace_root」/doc/spec/manual.md
-  * 日本語版: 「workspace_root」/doc/spec/manual.ja.md
+- ファイルパス
+  - 英語版: 「workspace_root」/doc/spec/manual.md
+  - 日本語版: 「workspace_root」/doc/spec/manual.ja.md
 
-* ファイル内構成:  
+- ファイル内構成:  
   以下は日本語版での説明である。
 
   ```
@@ -230,38 +232,40 @@ trigger: always_on
 
 バックエンドのAPI仕様をOpenAPI仕様書として作成すること。
 
-* ファイルパス  
-  * 英語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.yaml
-  * 日本語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.ja.yaml
-  * 英語版共通要素Open API仕様書:「workspace_root」/doc/spec/apis/openapi_common.yaml
-  * 日本語版共通要素Open API仕様書: 「workspace_root」/doc/spec/apis/openapi_common.ja.yaml
-  * 英語版各API個別Open API仕様書:「workspace_root」/doc/spec/apis/openapi_「apiname」.yaml
-  * 日本語版各API個別Open API仕様書:「workspace_root」/doc/spec/apis/openapi_「apiname」.ja.yaml
+- ファイルパス
+  - 英語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.yaml
+  - 日本語版統合Open API仕様書:「workspace_root」/doc/spec/openapi.ja.yaml
+  - 英語版共通要素Open API仕様書:「workspace_root」/doc/spec/apis/openapi_common.yaml
+  - 日本語版共通要素Open API仕様書: 「workspace_root」/doc/spec/apis/openapi_common.ja.yaml
+  - 英語版各API個別Open API仕様書:「workspace*root」/doc/spec/apis/openapi*「apiname」.yaml
+  - 日本語版各API個別Open API仕様書:「workspace*root」/doc/spec/apis/openapi*「apiname」.ja.yaml
 
-* ファイル構成:  
-  * 英語版、日本語版の統合Open API仕様書は、共通要素Open API仕様書およびすべてのAPI個別Open API仕様書を参照して統合したOpen API仕様書とする。
-  * 英語版、日本語版の共通要素Open API仕様書は、オブジェクト、エラーなどのAPIで共通要素を定義する。
-  * 英語版、日本語版の各API個別Open API仕様書は、それぞれのAPIの仕様書とする。ただし、冗長とならないように、共通要素Open API仕様書を参照する形で実現する。
- 
+- ファイル構成:
+  - 英語版、日本語版の統合Open API仕様書は、共通要素Open API仕様書およびすべてのAPI個別Open API仕様書を参照して統合したOpen API仕様書とする。
+  - 英語版、日本語版の共通要素Open API仕様書は、オブジェクト、エラーなどのAPIで共通要素を定義する。
+  - 英語版、日本語版の各API個別Open API仕様書は、それぞれのAPIの仕様書とする。ただし、冗長とならないように、共通要素Open API仕様書を参照する形で実現する。
+
 ## フロントエンド設計書
 
 フロントエンド設計書を次の通り作成すること。
 
-* ファイルパス  
-  * 英語版: 「workspace_root」/doc/design/frontend.md
-  * 日本語版: 「workspace_root」/doc/design/frontend.ja.md
+- ファイルパス
+  - 英語版: 「workspace_root」/doc/design/frontend.md
+  - 日本語版: 「workspace_root」/doc/design/frontend.ja.md
 
-* ファイル内構成:  
-  以下は日本語版での説明である。  
+- ファイル内構成:  
+  以下は日本語版での説明である。
+
   ```markdown
   # 概要
+
   本書は「ツール名」のフロントエンド設計書です。実装の背景や全体の方針について記述します。
 
   ## 全体方針
 
-  * 使用技術スタック（言語、フレームワーク、状態管理ライブラリ等）
-  * ディレクトリ構成の意図
-  * 共通コーディング規約（コンポーネント分割指針、命名規則等）
+  - 使用技術スタック（言語、フレームワーク、状態管理ライブラリ等）
+  - ディレクトリ構成の意図
+  - 共通コーディング規約（コンポーネント分割指針、命名規則等）
 
   ## コンポーネント設計
 
@@ -269,36 +273,37 @@ trigger: always_on
 
   ### 「コンポーネント名」
 
-  * 役割
+  - 役割
     「このコンポーネントが何を担当するかを簡潔に記載する。」
-  * Props / State
-    * Props: 「外部から受け取るデータの型と用途」
-    * State: 「コンポーネント内部で保持する状態の定義」
-  * イベント / メソッド
+  - Props / State
+    - Props: 「外部から受け取るデータの型と用途」
+    - State: 「コンポーネント内部で保持する状態の定義」
+  - イベント / メソッド
     「ユーザー操作に伴う処理内容。API呼び出しやバリデーションロジック等。」
 
   ## データ・状態管理
 
-  * グローバルステート定義
+  - グローバルステート定義
     「アプリ全体で共有するデータの構造。Redux/Zustand等のストア定義。」
-  * ライフサイクル・副作用
+  - ライフサイクル・副作用
     「画面初期表示時やデータ更新時に実行される非同期処理のフロー。」
 
   ## API連携
 
-  * データマッピング
+  - データマッピング
     「バックエンドAPIのレスポンスをフロントエンドの型に変換する際の定義。」
-  * エラーハンドリング方針
+  - エラーハンドリング方針
     「通信エラー時、バリデーションエラー時のユーザーへのフィードバック方法。」
 
   ## 画面・UI設計の補足
 
-  * 画面遷移図
+  - 画面遷移図
     「画面間の移動トリガーと遷移先。」
-  * 特殊なUI挙動
+  - 特殊なUI挙動
     「アニメーション、レスポンシブ対応、アクセシビリティ上の留意点等。」
+  ```
 
-```
+````
 
 ## バックエンド設計書
 
@@ -308,7 +313,7 @@ trigger: always_on
   * 英語版: `「workspace_root」/doc/design/backend.md`
   * 日本語版: `「workspace_root」/doc/design/backend.ja.md`
 
-* ファイル内構成:  
+* ファイル内構成:
   以下は日本語版での説明である。
   ```markdown
   # 概要
@@ -349,18 +354,19 @@ trigger: always_on
   * パフォーマンス考慮
     「キャッシュ戦略（Redis等）、N+1問題の対策、大量データ処理の方針。」
 
-  ```
+````
 
 ## フロントエンド単体試験仕様書
 
 フロントエンド単体試験仕様書を次の通り作成すること。  
 画面コンポーネントやユーティリティ関数ごとの挙動を定義する。
 
-* ファイルパス
-  * 英語版: `「workspace_root」/doc/test/unit/frontend.md`
-  * 日本語版: `「workspace_root」/doc/test/unit/frontend.ja.md`
-* ファイル記載例:  
+- ファイルパス
+  - 英語版: `「workspace_root」/doc/test/unit/frontend.md`
+  - 日本語版: `「workspace_root」/doc/test/unit/frontend.ja.md`
+- ファイル記載例:  
   以下は日本語版での記載例である。
+
 ```
 # フロントエンド単体試験仕様書
 
@@ -392,11 +398,12 @@ trigger: always_on
 バックエンド単体試験仕様書を次の通り作成すること。  
 APIエンドポイント、ビジネスロジック、DBアクセス層の挙動を定義する。
 
-* ファイルパス
-  * 英語版: `「workspace_root」/doc/test/unit/backend.md`
-  * 日本語版: `「workspace_root」/doc/test/unit/backend.ja.md`
-* ファイル記載例:  
+- ファイルパス
+  - 英語版: `「workspace_root」/doc/test/unit/backend.md`
+  - 日本語版: `「workspace_root」/doc/test/unit/backend.ja.md`
+- ファイル記載例:  
   以下は日本語版での記載例である。
+
 ```
 # バックエンド単体試験仕様書
 
@@ -428,11 +435,12 @@ APIエンドポイント、ビジネスロジック、DBアクセス層の挙動
 
 システム全体を通したユーザーシナリオ形式で記述します。フロントエンドとバックエンドが結合し、ユーザが実行する環境を模倣した状態でのE2EテストやAPI結合テストに相当します。
 
-* ファイルパス
-  * 英語版: `「workspace_root」/doc/test/integration/scenario.md`
-  * 日本語版: `「workspace_root」/doc/test/integration/scenario.ja.md`
-* ファイル記載例:  
+- ファイルパス
+  - 英語版: `「workspace_root」/doc/test/integration/scenario.md`
+  - 日本語版: `「workspace_root」/doc/test/integration/scenario.ja.md`
+- ファイル記載例:  
   以下は日本語版での記載例である。
+
 ```
 # 結合試験仕様書
 
