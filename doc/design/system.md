@@ -16,10 +16,21 @@
 
 ```mermaid
 graph TD
-    User[User] -->|Browser Operation| FE[Frontend (React/Vite)]
-    FE -->|HTTP API| BE[Backend (Python/FastAPI)]
-    BE -->|Read/Write| FS[File System (JSON/CSV)]
-    BE -->|Commit/Restore| Git[Git Repository]
+    User[User] -->|Browser Operation| FE[Frontend - React/Vite]
+    FE -->|HTTP API| BE[Backend - Python/FastAPI]
+    BE -->|Read/Write| FS["File System (JSON/CSV)"]
+    BE -->|Commit/Restore| Git["Git Repositories (per project)"]
+```
+
+### 1.4 Directory Structure
+
+```
+data/
+  setting.json          # Global basic settings (not under Git management)
+  <project-name>/
+    .git/               # Project-specific Git repository
+    setting.json         # Project-specific settings (under Git management)
+    tasks.csv            # Project-specific task data (under Git management)
 ```
 
 ## 2. Environment
@@ -34,33 +45,97 @@ graph TD
 ### 3.1 Configuration Management (CNFG)
 
 - **Implementation Strategy**
-  - Configuration files are saved in JSON format in directories like `data/`.
+  - Global basic settings are saved in JSON format at `data/setting.json`. Not under Git management.
+  - Project-specific settings are saved in JSON format at `data/<project-name>/setting.json`. Under Git management.
   - Use Pydantic models for validation to prevent invalid configuration values.
+
+- **Sequence Diagram (Save Basic Settings)**
+
+```mermaid
+sequenceDiagram
+    actor User as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant FS as File System
+
+    User->>FE: Change values on basic settings page and save
+    FE->>BE: PUT /api/v1/settings
+    BE->>FS: Write to data/setting.json
+    FS-->>BE: Complete
+    BE-->>FE: 200 OK (updated settings)
+    FE-->>User: Display save confirmation
+```
+
+- **Sequence Diagram (Save Project Settings)**
+
+```mermaid
+sequenceDiagram
+    actor User as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant FS as File System
+    participant Git as Git
+
+    User->>FE: Change values on project settings page and save
+    FE->>BE: PUT /api/v1/projects/{project_name}/settings
+    BE->>FS: Write to data/{project_name}/setting.json
+    FS-->>BE: Complete
+    BE->>Git: git add . && git commit (project repository)
+    Git-->>BE: Commit complete
+    BE-->>FE: 200 OK (updated settings)
+    FE-->>User: Display save confirmation
+```
 
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-CNFG-001-001** | Config | Basic Settings | File | Store in `data/settings.json` in JSON format. | REQ-CNFG-001 |
-  | **SPEC-CNFG-001-002** | Config | Basic Settings | Model | Define `BasicSettings` class to manage task statuses, types, assignees etc. | REQ-CNFG-001 |
-  | **SPEC-CNFG-002-001** | Config | Project Settings | File | Store in `data/projects.json` (or individual files). | REQ-CNFG-002 |
-  | **SPEC-CNFG-002-002** | Config | Project Settings | Override | Allow overriding basic settings on a per-project basis. | REQ-CNFG-002 |
+  | **SPEC-CNFG-001-001** | Config | Global Basic Settings | File Save | Store in `data/setting.json` in JSON format. Not under Git management. | REQ-CNFG-001, REQ-DATA-003 |
+  | **SPEC-CNFG-001-002** | Config | Global Basic Settings | Model | Define `BasicSettings` class to manage task statuses, types, assignees etc. | REQ-CNFG-001 |
+  | **SPEC-CNFG-001-003** | Config | Global Basic Settings | API | `GET /api/v1/settings` and `PUT /api/v1/settings` for retrieving and updating global basic settings. | REQ-CNFG-001 |
+  | **SPEC-CNFG-002-001** | Config | Project Settings | File Save | Store in `data/<project-name>/setting.json`. Under Git management. | REQ-CNFG-002, REQ-DATA-002 |
+  | **SPEC-CNFG-002-002** | Config | Project Settings | Override | Allow overriding global basic settings on a per-project basis. | REQ-CNFG-002 |
+  | **SPEC-CNFG-002-003** | Config | Project Settings | API | `GET /api/v1/projects/{project_name}/settings` and `PUT /api/v1/projects/{project_name}/settings` for retrieving and updating project settings. Changes are Git committed. | REQ-CNFG-002, REQ-HIST-001 |
 
 ### 3.2 Task Management (TASK)
 
 - **Implementation Strategy**
-  - Task data is processed using `pandas` DataFrame and saved as CSV files.
+  - Task data is processed using `pandas` DataFrame and saved as CSV files within project directories.
   - Task IDs use UUID v4 to ensure uniqueness.
-  - Hierarchical structure is represented by `ParentID` in each task data, and reconstructed into a tree structure on the frontend.
+  - Hierarchical structure is represented by `parent_id` in each task data, and reconstructed into a tree structure on the frontend.
+  - All task APIs receive the project name as a path parameter.
+
+- **Sequence Diagram (Task Operations)**
+
+```mermaid
+sequenceDiagram
+    actor User as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant FS as File System
+    participant Git as Git
+
+    User->>FE: Create/Edit/Delete task
+    FE->>BE: POST/PUT/DELETE /api/v1/projects/{project_name}/tasks
+    BE->>FS: Update data/{project_name}/tasks.csv
+    FS-->>BE: Complete
+    BE->>Git: git add . && git commit (project repository)
+    Git-->>BE: Commit complete
+    BE-->>FE: 200 OK (task data)
+    FE-->>User: Update screen
+```
 
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-TASK-001-001** | Task | Task List | API | `GET /api/v1/tasks` reads from CSV and returns all task data. | REQ-TASK-001 |
+  | **SPEC-TASK-001-001** | Task | Task List | API | `GET /api/v1/projects/{project_name}/tasks` reads from CSV and returns all task data for the specified project. | REQ-TASK-001 |
   | **SPEC-TASK-001-002** | Task | Task List | Filter | Filter by status, assignee etc. via query params or frontend. | REQ-TASK-001 |
-  | **SPEC-TASK-002-001** | Task | Task Data | Data Format | Tasks are saved in `data/tasks.csv`. | REQ-TASK-004 |
+  | **SPEC-TASK-002-001** | Task | Task Data | Data Format | Tasks are saved in `data/<project-name>/tasks.csv`. | REQ-TASK-004, REQ-DATA-002 |
   | **SPEC-TASK-002-002** | Task | Task Create | ID Gen | Automatically generate UUID v4 for ID on creation. | REQ-TASK-002 |
+  | **SPEC-TASK-002-003** | Task | Task Create | API | `POST /api/v1/projects/{project_name}/tasks` creates a new task. Git commit after creation. | REQ-TASK-002, REQ-HIST-001 |
+  | **SPEC-TASK-002-004** | Task | Task Edit | API | `PUT /api/v1/projects/{project_name}/tasks/{task_id}` updates a task. Git commit after update. | REQ-TASK-002, REQ-HIST-001 |
+  | **SPEC-TASK-002-005** | Task | Task Delete | API | `DELETE /api/v1/projects/{project_name}/tasks/{task_id}` deletes a task. Git commit after deletion. | REQ-TASK-001, REQ-HIST-001 |
   | **SPEC-TASK-003-001** | Task | Hierarchy | Data Structure | Has `parent_id` column to hold parent task ID. | REQ-TASK-003 |
-  | **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/tasks/reorder` updates the `display_order` of multiple tasks at once. | REQ-TASK-005 |
+  | **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` updates the `display_order` of multiple tasks at once. Git commit after update. | REQ-TASK-005, REQ-HIST-001 |
 
 ### 3.3 Visualization & Charts (VIEW)
 
@@ -77,43 +152,110 @@ graph TD
 ### 3.4 History Management (HIST)
 
 - **Implementation Strategy**
-  - Issue `git add .`, `git commit` commands from the backend immediately after data save operations.
-  - Restore files to specific commit hash state for Undo/Redo.
+  - Issue `git add .`, `git commit` commands to the target project's Git repository immediately after data save operations.
+  - Restore files to specific commit hash state in the target project's Git repository for Undo/Redo.
+  - Git operations are executed with the project directory (`data/<project-name>/`) as the current directory.
+
+- **Sequence Diagram (Undo/Redo)**
+
+```mermaid
+sequenceDiagram
+    actor User as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant Git as Git
+
+    User->>FE: Press Undo button
+    FE->>BE: POST /api/v1/projects/{project_name}/undo
+    BE->>Git: git reset --hard HEAD^ (project repository)
+    Git-->>BE: Restore complete
+    BE-->>FE: 200 OK
+    FE->>BE: GET /api/v1/projects/{project_name}/tasks
+    BE-->>FE: Restored task data
+    FE-->>User: Update screen
+```
 
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-HIST-001-001** | History | Auto Commit | Trigger | Execute on successful completion of Task Add/Update/Delete APIs. | REQ-HIST-001 |
+  | **SPEC-HIST-001-001** | History | Auto Commit | Trigger | Execute on successful completion of task add/update/delete and project settings update APIs, in the target project's Git repository. | REQ-HIST-001 |
   | **SPEC-HIST-001-002** | History | Auto Commit | Log | Include operation details (e.g., "Update Task A") in commit message. | REQ-HIST-001 |
-  | **SPEC-HIST-002-001** | History | Manual Commit | Runtime Sync | Upon fetching task data, compare the last recorded file hash with the current file hash, and automatically commit if there are changes. | REQ-HIST-002 |
-  | **SPEC-HIST-003-001** | History | Undo/Redo | Restore Logic | `git restore` (or checkout) to the file state of the specified commit. | REQ-HIST-003 |
+  | **SPEC-HIST-002-001** | History | Manual Commit | Runtime Sync | Upon fetching task data, automatically commit if there are uncommitted changes in the target project's Git repository. | REQ-HIST-002 |
+  | **SPEC-HIST-003-001** | History | Undo/Redo | Restore Logic | Restore using `git reset --hard` in the target project's Git repository. | REQ-HIST-003 |
+  | **SPEC-HIST-003-002** | History | Undo | API | `POST /api/v1/projects/{project_name}/undo` executes Undo. | REQ-HIST-003 |
+  | **SPEC-HIST-003-003** | History | Redo | API | `POST /api/v1/projects/{project_name}/redo` executes Redo. | REQ-HIST-003 |
 
-### 3.5 Initialization & Project Creation (INIT)
+### 3.5 Project Management (PROJ)
 
 - **Implementation Strategy**
-  - Check for the existence of `.git` directory in the data directory (e.g., `./data`) upon backend startup.
-  - Manage current project and default project in a project configuration file (e.g., `projects.json`).
-  - When creating a new project, perform Git branch operations (`git checkout -b <project_name>`) and manage task data on that branch.
+  - Projects are managed as subdirectories under the `data/` directory. Each directory corresponds to one project.
+  - Project list is obtained from the directory listing under `data/`.
+  - When creating a new project: create directory → Git init → initialize `setting.json`/`tasks.csv` → initial commit.
+  - Project name validation is performed on both frontend and backend for directory name validity.
+
+- **Sequence Diagram (Project Creation)**
+
+```mermaid
+sequenceDiagram
+    actor User as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant FS as File System
+    participant Git as Git
+
+    User->>FE: Enter project name and press "Create"
+    FE->>FE: Validation (empty, prohibited chars, duplicate check)
+    FE->>BE: POST /api/v1/projects
+    BE->>BE: Server-side validation
+    BE->>FS: Create data/{project_name}/ directory
+    BE->>FS: Initialize setting.json, tasks.csv
+    BE->>Git: git init (data/{project_name}/)
+    BE->>Git: git add . && git commit -m "Initial commit"
+    Git-->>BE: Commit complete
+    BE-->>FE: 201 Created
+    FE->>FE: Navigate to /projects/{encoded_name} (task list page)
+    FE-->>User: Display task list page
+```
 
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-INIT-001-001** | Init | Init Check | API | `GET /api/v1/system/status` returns whether Git is initialized and if a default project exists. | REQ-INIT-001, 003 |
-  | **SPEC-INIT-001-002** | Init | Manual Sync | Startup Sync | Upon startup, read config files and task data. Switch branches if current Git branch mismatch with project settings. Commit any uncommitted changes. | REQ-INIT-002 |
-  | **SPEC-INIT-002-001** | Init | Project Create | API | `POST /api/v1/projects` creates a new project (branch) and updates the configuration file. | REQ-INIT-005 |
-  | **SPEC-INIT-003-001** | Init | Project Switch | API | `POST /api/v1/projects/{project_id}/switch` (or `checkout`) switches the branch. | REQ-UI-002 |
-  | **SPEC-INIT-004-001** | Init | Screen Transition | Routing | Based on the system status API result at startup, navigate to `/create_project` if no default project is set, or to `/tasks` if set. | REQ-INIT-004 |
+  | **SPEC-PROJ-001-001** | Project | Project List | API | `GET /api/v1/projects` returns the list of projects (directories) under `data/`. | REQ-PROJ-001 |
+  | **SPEC-PROJ-002-001** | Project | Project Create | API | `POST /api/v1/projects` receives a project name, creates directory, initializes Git, initializes files, and creates initial commit. | REQ-PROJ-002 |
+  | **SPEC-PROJ-002-002** | Project | Project Create | Git Init | Execute `git init -b main` in the project directory, create initial commit including `setting.json` and `tasks.csv`. | REQ-PROJ-002, REQ-DATA-001 |
+  | **SPEC-PROJ-003-001** | Project | Validation | Server-side | Return HTTP 400 error if project name is empty (after trim), contains OS-prohibited characters, or duplicates an existing project. | REQ-PROJ-003 |
+  | **SPEC-PROJ-003-002** | Project | Validation | Client-side | Perform project name validation on the frontend before API call and display error messages immediately. | REQ-PROJ-003 |
+  | **SPEC-PROJ-004-001** | Project | Auto Git Init | On Data Change | When a project's task is changed and no Git repository exists, perform Git init and initial commit on the pre-change state, then commit the change. | REQ-PROJ-004 |
+  | **SPEC-PROJ-005-001** | Project | External Change Detection | On Data Load | When fetching task data, automatically commit if there are uncommitted changes in the project's Git repository. | REQ-PROJ-005 |
 
 ### 3.6 Common UI (UI)
 
 - **Implementation Strategy**
-  - Create a `Layout` component to display a common header (menu bar) on all pages.
-  - Create a `ProjectSelect` component to fetch the project list from the API and display it as a dropdown.
+  - Create `GlobalLayout` and `ProjectLayout` components to display context-appropriate menu bars.
+  - Global context: Display links to "Project Management" and "Basic Settings".
+  - Project context: Display links to "Project Management", "Task List", "Gantt Chart", "Project Settings", project switch dropdown, and Undo/Redo buttons.
 
 - **Requirement List**
   | Spec-ID | Category | Name | Item | Detail | Remarks |
   | :--- | :--- | :--- | :--- | :--- | :--- |
-  | **SPEC-UI-001-001** | UI | Layout | Component | Implement a layout component with `Header`, `Main`, `Footer`. | REQ-UI-001 |
-  | **SPEC-UI-002-001** | UI | Menu | Project Select | Place a select box for project switching in the header. | REQ-UI-002 |
-  | **SPEC-UI-003-001** | UI | Menu | Navigation | Place links to "Task List" and "Gantt Chart" in the header. | REQ-UI-003 |
-  | **SPEC-UI-004-001** | UI | Menu | Undo/Redo | Place "Undo" and "Redo" buttons in the header, calling the API on click. | REQ-UI-004 |
+  | **SPEC-UI-001-001** | UI | GlobalLayout | Component | Layout component for global context screens. Displays header with navigation to "Project Management" and "Basic Settings". | REQ-UI-001 |
+  | **SPEC-UI-001-002** | UI | ProjectLayout | Component | Layout component for project context screens. Displays header with navigation to "Project Management", "Task List", "Gantt Chart", "Project Settings", project switch dropdown, and Undo/Redo buttons. | REQ-UI-002, REQ-UI-003, REQ-UI-004 |
+  | **SPEC-UI-002-001** | UI | ProjectSelect | Project Select | Place a project switch dropdown list in the project context header. Navigate to `/projects/<encoded-name>` on selection. | REQ-UI-003 |
+  | **SPEC-UI-003-001** | UI | Menu | Navigation | Place links to "Task List", "Gantt Chart", "Project Settings" in the project context header. | REQ-UI-002 |
+  | **SPEC-UI-004-001** | UI | Menu | Undo/Redo | Place "Undo" and "Redo" buttons in the project context header, calling the target project's API on click. | REQ-UI-004 |
+
+### 3.7 Routing (ROUTE)
+
+- **Implementation Strategy**
+  - Implement URL-based routing using React Router.
+  - Use different layouts for global context and project context.
+  - Project name is used as a URL-encoded path parameter.
+
+- **Requirement List**
+  | Spec-ID | Category | Name | Item | Detail | Remarks |
+  | :--- | :--- | :--- | :--- | :--- | :--- |
+  | **SPEC-ROUTE-001-001** | Route | Project Mgmt | Route Def | Display project management page at `/projects` and `/`. Use `GlobalLayout`. | REQ-ROUTE-001 |
+  | **SPEC-ROUTE-002-001** | Route | Basic Settings | Route Def | Display basic settings page at `/settings`. Use `GlobalLayout`. | REQ-ROUTE-002 |
+  | **SPEC-ROUTE-003-001** | Route | Task List | Route Def | Display task list page at `/projects/:projectName`. Use `ProjectLayout`. | REQ-ROUTE-003 |
+  | **SPEC-ROUTE-004-001** | Route | Gantt Chart | Route Def | Display Gantt chart page at `/projects/:projectName/gantts`. Use `ProjectLayout`. | REQ-ROUTE-004 |
+  | **SPEC-ROUTE-005-001** | Route | Project Settings | Route Def | Display project settings page at `/projects/:projectName/settings`. Use `ProjectLayout`. | REQ-ROUTE-005 |

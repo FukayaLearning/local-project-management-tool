@@ -12,3 +12,77 @@ components:
       required:
         - code
         - message
+    BasicSettings:
+      type: object
+      properties:
+        task_statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskStatusDef"
+        task_types:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskTypeDef"
+        assignees:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssigneeDef"
+        daily_work_hours:
+          type: number
+          description: 1日あたりの投入時間
+        holiday_definition:
+          $ref: "#/components/schemas/HolidayDefinition"
+    TaskStatusDef:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        is_completed_state:
+          type: boolean
+      required:
+        - name
+    TaskTypeDef:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+    AssigneeDef:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        productivity_ratio:
+          type: number
+          default: 1.0
+        commitment_ratio:
+          type: number
+          default: 1.0
+      required:
+        - name
+    HolidayDefinition:
+      type: object
+      properties:
+        holiday_csv_url:
+          type: string
+        weekend_days:
+          type: array
+          items:
+            type: integer
+        extra_holidays:
+          type: array
+          items:
+            type: string
+            format: date
+        extra_workdays:
+          type: array
+          items:
+            type: string
+            format: date

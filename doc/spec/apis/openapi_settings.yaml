@@ -1,0 +1,35 @@
+paths:
+  /settings:
+    get:
+      summary: Get Global Basic Settings
+      description: Retrieve global basic settings from data/setting.json.
+      operationId: getGlobalSettings
+      tags:
+        - settings
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.yaml#/components/schemas/BasicSettings"
+    put:
+      summary: Update Global Basic Settings
+      description: Update global basic settings in data/setting.json. Not under Git management.
+      operationId: updateGlobalSettings
+      tags:
+        - settings
+      requestBody:
+        description: Basic settings to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../apis/openapi_common.yaml#/components/schemas/BasicSettings"
+      responses:
+        "200":
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.yaml#/components/schemas/BasicSettings"

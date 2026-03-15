@@ -1,0 +1,35 @@
+paths:
+  /settings:
+    get:
+      summary: グローバル基本設定取得
+      description: data/setting.json からグローバル基本設定を取得する。
+      operationId: getGlobalSettings
+      tags:
+        - settings
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.ja.yaml#/components/schemas/BasicSettings"
+    put:
+      summary: グローバル基本設定更新
+      description: data/setting.json のグローバル基本設定を更新する。Git管理対象外。
+      operationId: updateGlobalSettings
+      tags:
+        - settings
+      requestBody:
+        description: 更新する基本設定内容
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../apis/openapi_common.ja.yaml#/components/schemas/BasicSettings"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.ja.yaml#/components/schemas/BasicSettings"

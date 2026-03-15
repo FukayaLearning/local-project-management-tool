@@ -1,9 +1,18 @@
 paths:
-  /tasks:
+  /projects/{project_name}/tasks:
     get:
       summary: タスク一覧取得
+      description: 指定プロジェクトの全タスクデータをCSVから読み込み返却する。
+      operationId: listTasks
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
       responses:
         "200":
           description: 成功
@@ -13,10 +22,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Task"
+        "404":
+          description: プロジェクトが見つからない
     post:
       summary: タスク作成
+      description: 指定プロジェクトにタスクを新規作成し、Gitコミットする。
+      operationId: createTask
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
       requestBody:
         required: true
         content:
@@ -31,13 +51,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/Task"
 
-  /tasks/{id}:
+  /projects/{project_name}/tasks/{task_id}:
     get:
       summary: タスク詳細取得
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
@@ -49,12 +74,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
+        "404":
+          description: タスクが見つからない
     put:
       summary: タスク更新
+      description: 指定プロジェクトのタスクを更新し、Gitコミットする。
+      operationId: updateTask
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
@@ -74,10 +108,17 @@ paths:
                 $ref: "#/components/schemas/Task"
     delete:
       summary: タスク削除
+      description: 指定プロジェクトのタスクを削除し、Gitコミットする。
+      operationId: deleteTask
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
@@ -86,11 +127,19 @@ paths:
         "204":
           description: 削除成功
 
-  /tasks/reorder:
+  /projects/{project_name}/tasks/reorder:
     put:
       summary: タスク順序の一括更新
+      description: 指定プロジェクトの複数タスクの display_order を一括更新し、Gitコミットする。
+      operationId: reorderTasks
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -111,37 +160,6 @@ paths:
       responses:
         "200":
           description: 更新成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-
-  /tasks/undo:
-    post:
-      summary: 直前の変更を取り消す
-      tags:
-        - tasks
-      responses:
-        "200":
-          description: 取り消し成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /tasks/redo:
-    post:
-      summary: 取り消した変更をやり直す
-      tags:
-        - tasks
-      responses:
-        "200":
-          description: やり直し成功
           content:
             application/json:
               schema:
@@ -176,6 +194,30 @@ components:
         display_order:
           type: integer
           default: 0
+        planned_hours:
+          type: number
+          nullable: true
+        actual_hours:
+          type: number
+          nullable: true
+        progress:
+          type: integer
+          default: 0
+          description: 進捗率（0-100）
+        description:
+          type: string
+          nullable: true
+        task_type:
+          type: string
+          nullable: true
+        actual_start_date:
+          type: string
+          format: date
+          nullable: true
+        actual_end_date:
+          type: string
+          format: date
+          nullable: true
 
     TaskInput:
       allOf:
