@@ -6,13 +6,12 @@ import * as path from "path";
 
 // 実行コンテナ内でのデータパス (docker-compose.e2e.yaml でマウント)
 const DATA_DIR = "/app/backend/data";
-const TASKS_CSV = path.join(DATA_DIR, "tasks.csv");
-const SETTINGS_JSON = path.join(DATA_DIR, "settings.json");
+const TASKS_CSV = path.join(DATA_DIR, "ManualSyncTest", "tasks.csv");
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("ManualSyncTest")) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "ManualSyncTest" },
     });
@@ -28,8 +27,7 @@ test.describe("Integration: Manual Synchronization", () => {
     page,
     request,
   }) => {
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/);
+    await page.goto("/projects/ManualSyncTest");
     await expect(page.locator("text=Loading")).not.toBeVisible();
 
     // 1. 現在のタスク数を取得
@@ -72,42 +70,33 @@ test.describe("Integration: Manual Synchronization", () => {
     console.log("Manual task detected and synced successfully.");
   });
 
-  test("IT-SCN-SYNC-001-3/4: Should detect manual change in settings.json (Project Name)", async ({
+  test("IT-SCN-SYNC-001-3/4: Should detect manual directory creation", async ({
     page,
   }) => {
     await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/);
+    await expect(page).toHaveURL(/\/projects/);
 
-    // 1. settings.json を読み込み、プロジェクト名を書き換える
-    const settingsRaw = fs.readFileSync(SETTINGS_JSON, "utf-8");
-    const settings = JSON.parse(settingsRaw);
-    const oldName = settings.project.project_name;
-    const newName = `Renamed Project ${Date.now()}`;
-
-    settings.project.project_name = newName;
-    console.log(`Manually renaming project from ${oldName} to ${newName}`);
-    fs.writeFileSync(SETTINGS_JSON, JSON.stringify(settings, null, 2));
+    // 1. data/ 配下に新しいディレクトリを作成する
+    const newProjectName = `ManualProject_${Date.now()}`;
+    const newProjectDir = path.join(DATA_DIR, newProjectName);
+    console.log(`Manually creating new project directory: ${newProjectDir}`);
+    fs.mkdirSync(newProjectDir, { recursive: true });
 
     // Wait for docker volume propagation between containers
     await page.waitForTimeout(2000);
 
-    // 2. ページをリロード (これにより API GET /system/status や /projects/settings が呼ばれる)
-    // バックエンドの SystemUseCase.sync_manual_changes が走るはずだが、
-    // 現在の実装では lifespan または明示的な呼び出しが必要。
-    // 今回の実装では UseCase の読み込み時にもフックが入っている。
+    // 2. ページをリロードしてプロジェクト一覧へ遷移
     await page.reload();
     await expect(page.locator("text=Loading")).not.toBeVisible();
 
-    // 3. ヘッダーなどのプロジェクト名表示が変わっているか確認
-    // ヘッダーのプロジェクト名が表示されている要素を探す (select か h2/span 等)
-    // プロジェクト選択 select の値や表示を確認. Let system load.
+    // 3. プロジェクトがリストに表示されているか確認
     await page.waitForTimeout(1000);
-    const projectSelect = page.locator("select");
-    const expectedBranchName = newName.replace(/ /g, "_");
-    await expect(projectSelect).toContainText(expectedBranchName, {
+    await expect(page.locator(`text=${newProjectName}`)).toBeVisible({
       timeout: 15000,
     });
 
-    console.log("Manual project rename detected and synced successfully.");
+    console.log(
+      "Manual project directory creation detected and synced successfully.",
+    );
   });
 });

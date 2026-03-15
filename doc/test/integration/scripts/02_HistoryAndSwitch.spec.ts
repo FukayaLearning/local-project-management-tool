@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 // ヘルパー: システム初期化とプロジェクト作成
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (projects.length === 0) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "DefaultProject" },
     });
@@ -30,14 +30,12 @@ async function switchProjectAndWaitForReload(
   label: string,
 ) {
   // selectOption後に発生するフルブラウザリロードを待機
-  // フロントエンドがAPI(/projects/{name}/switch)呼出後にwindow.location.reload()を実行
   await Promise.all([
     page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
     projectSelect.selectOption({ label }),
   ]);
 
   // リロード後のページ安定を待機
-  await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
   await expect(page.locator("text=Loading")).not.toBeVisible({
     timeout: 10000,
   });
@@ -54,10 +52,8 @@ test.describe("Integration: History and Switching", () => {
   });
 
   test("IT-SCN-SW-001: Should switch projects", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(`/projects/${TEST_PROJECT_A}`);
 
-    // /tasks にリダイレクトされるまで待機
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -105,10 +101,8 @@ test.describe("Integration: History and Switching", () => {
       await dialog.accept();
     });
 
-    await page.goto("/");
+    await page.goto(`/projects/${TEST_PROJECT_A}`);
 
-    // /tasks にリダイレクトされるまで待機
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -134,7 +128,6 @@ test.describe("Integration: History and Switching", () => {
       page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
       page.click('button:has-text("Undo")'),
     ]);
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -149,7 +142,6 @@ test.describe("Integration: History and Switching", () => {
       page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
       page.click('button:has-text("Redo")'),
     ]);
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });

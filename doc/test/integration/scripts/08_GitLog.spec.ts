@@ -6,9 +6,9 @@ import * as path from "path";
 
 // ヘルパー: システム初期化とプロジェクト作成
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "DefaultProject" },
     });
@@ -39,13 +39,10 @@ test.describe("Integration: Auto Commit Log Format", () => {
     request,
   }) => {
     // 1. Switch to test project
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
-    const projectSelect = page.locator("select");
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
-      projectSelect.selectOption({ label: TEST_PROJECT_LOG }),
-    ]);
+    await page.goto(`/projects/${TEST_PROJECT_LOG}`);
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // 2. Perform an action that creates a commit
     const taskTitle = `CommitLogTask ${Date.now()}`;
@@ -73,7 +70,8 @@ test.describe("Integration: Auto Commit Log Format", () => {
     // @ts-ignore
     const projectRoot = process.env.CI
       ? "/app"
-      : path.resolve(__dirname, "../../../..");
+      : // @ts-ignore
+        path.resolve(__dirname, "../../../..");
     const repoPath = path.join(
       projectRoot,
       "backend",

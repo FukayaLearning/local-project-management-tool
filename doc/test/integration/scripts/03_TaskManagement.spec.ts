@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("Default Project")) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "Default Project" },
     });
@@ -18,10 +18,9 @@ test.describe("Integration: Task Management", () => {
   test("Should execute Task Management Flow (Create -> Edit)", async ({
     page,
   }) => {
-    await page.goto("/");
+    // URL Encode "Default Project" appropriately or fetch default project
+    await page.goto("/projects/Default Project");
 
-    // /tasks にリダイレクトされるまで待機
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -63,7 +62,7 @@ test.describe("Integration: Task Management", () => {
   });
 
   test("IT-SCN-TASK-006: Should filter tasks by status", async ({ page }) => {
-    await page.goto("/tasks");
+    await page.goto("/projects/Default Project");
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });

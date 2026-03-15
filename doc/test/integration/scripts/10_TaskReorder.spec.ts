@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("Default Project")) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "Default Project" },
     });
@@ -52,14 +52,14 @@ test.describe("Integration: Task Reorder", () => {
     const taskTitle2 = `T2 ${Date.now()}`;
 
     // Create tasks via API since form usage is verified in other tests
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/Default%20Project/tasks/", {
       data: { title: taskTitle1, status: "New" },
     });
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/Default%20Project/tasks/", {
       data: { title: taskTitle2, status: "New" },
     });
 
-    await page.goto("/tasks");
+    await page.goto("/projects/Default Project");
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -116,7 +116,7 @@ test.describe("Integration: Task Reorder", () => {
       .split("T")[0];
 
     // Create Tasks via API to set dates properly
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/Default%20Project/tasks/", {
       data: {
         title: taskTitle1,
         status: "New",
@@ -124,7 +124,7 @@ test.describe("Integration: Task Reorder", () => {
         due_date: dueDate,
       },
     });
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/Default%20Project/tasks/", {
       data: {
         title: taskTitle2,
         status: "New",
@@ -133,7 +133,7 @@ test.describe("Integration: Task Reorder", () => {
       },
     });
 
-    await page.goto("/gantt");
+    await page.goto("/projects/Default Project/gantt");
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });

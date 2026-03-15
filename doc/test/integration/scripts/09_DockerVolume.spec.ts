@@ -5,9 +5,9 @@ import { execSync } from "child_process";
 import * as path from "path";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
       data: { project_name: "DefaultProject" },
     });
@@ -38,13 +38,10 @@ test.describe("Integration: Docker Volume Persistence", () => {
     page,
   }) => {
     // 1. Switch to test project
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
-    const projectSelect = page.locator("select");
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: "load", timeout: 30000 }),
-      projectSelect.selectOption({ label: TEST_PROJECT_VOL }),
-    ]);
+    await page.goto(`/projects/${TEST_PROJECT_VOL}`);
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // 2. Create a task
     const taskTitle = `PersistTask ${Date.now()}`;
@@ -84,7 +81,7 @@ test.describe("Integration: Docker Volume Persistence", () => {
       .poll(
         async () => {
           try {
-            const res = await page.request.get("/api/v1/system/status");
+            const res = await page.request.get("/api/v1/projects/");
             return res.ok();
           } catch {
             return false;

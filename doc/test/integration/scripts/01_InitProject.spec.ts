@@ -10,22 +10,30 @@ test.describe("Integration: Project Initialization", () => {
     // 1. 初回アクセス -> リダイレクト確認
     await page.goto("/");
 
-    // データがない場合、/create_project にリダイレクトされるはず
-    await expect(page).toHaveURL(/.*\/create_project/, { timeout: 10000 });
+    // データがない場合でも、/projects にリダイレクトされる
+    await expect(page).toHaveURL(/.*\/projects/);
+
+    // 空の場合は New Project ボタンが存在する
+    await page.getByRole("button", { name: "+ New Project" }).click();
+
+    // /projects/new への遷移
+    await expect(page).toHaveURL(/.*\/projects\/new/);
     await expect(page.locator("text=新規プロジェクト作成")).toBeVisible();
 
     // 2. プロジェクト作成
     const projectName = "MyFirstProject";
-    await page.getByLabel("プロジェクト名").fill(projectName);
+    await page.locator("#project-name").fill(projectName);
     await page.getByRole("button", { name: "プロジェクト作成開始" }).click();
 
-    // 作成後、/tasks へ遷移
-    await expect(page).toHaveURL(/.*\/tasks/, { timeout: 10000 });
+    // 作成後、該当プロジェクトのタスク一覧ページへ遷移
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectName}`), {
+      timeout: 10000,
+    });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
 
-    // ヘッダー等にプロジェクト名が表示されているか確認
+    // メニューバー（ヘッダー等）にプロジェクト名が表示されているか確認
     const projectSelect = page.locator("select");
     await expect(projectSelect).toContainText(projectName);
   });
