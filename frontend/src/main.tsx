@@ -13,7 +13,7 @@ import App from "./App.tsx";
 // Infrastructure implementations
 import { SettingsApiRepository } from "./infrastructure/api/repositories/settingsApiRepository";
 import { TaskApiRepository } from "./infrastructure/api/repositories/taskApiRepository";
-import { SystemApiRepository } from "./infrastructure/api/repositories/systemApiRepository";
+import { ProjectApiRepository } from "./infrastructure/api/repositories/projectApiRepository";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -23,7 +23,7 @@ const theme = createTheme({
 const dependencies: DependencyContextType = {
   settingsRepository: new SettingsApiRepository(),
   taskRepository: new TaskApiRepository(),
-  systemRepository: new SystemApiRepository(),
+  projectRepository: new ProjectApiRepository(),
 };
 
 createRoot(document.getElementById("root")!).render(

@@ -8,55 +8,70 @@ export const useTaskUseCase = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchTasks = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await repository.getAll();
-      setTasks(data);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch tasks"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const createTask = useCallback(async (task: TaskCreate) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newTask = await repository.create(task);
-      setTasks((prev) => [...prev, newTask]);
-      return newTask;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to create task"));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const updateTask = useCallback(async (id: string, task: TaskUpdate) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const updatedTask = await repository.update(id, task);
-      setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
-      return updatedTask;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to update task"));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const deleteTask = useCallback(
-    async (id: string) => {
+  const fetchTasks = useCallback(
+    async (projectName: string) => {
       setIsLoading(true);
       setError(null);
       try {
-        await repository.delete(id);
+        const data = await repository.getAll(projectName);
+        setTasks(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch tasks"),
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [repository],
+  );
+
+  const createTask = useCallback(
+    async (projectName: string, task: TaskCreate) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const newTask = await repository.create(projectName, task);
+        setTasks((prev) => [...prev, newTask]);
+        return newTask;
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to create task"),
+        );
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [repository],
+  );
+
+  const updateTask = useCallback(
+    async (projectName: string, id: string, task: TaskUpdate) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const updatedTask = await repository.update(projectName, id, task);
+        setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
+        return updatedTask;
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to update task"),
+        );
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [repository],
+  );
+
+  const deleteTask = useCallback(
+    async (projectName: string, id: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await repository.delete(projectName, id);
         setTasks((prev) => prev.filter((t) => t.id !== id));
       } catch (err) {
         setError(
@@ -71,12 +86,15 @@ export const useTaskUseCase = () => {
   );
 
   const reorderTasks = useCallback(
-    async (orders: { id: string; display_order: number }[]) => {
+    async (
+      projectName: string,
+      orders: { id: string; display_order: number }[],
+    ) => {
       setIsLoading(true);
       setError(null);
       try {
-        await repository.updateOrders(orders);
-        fetchTasks();
+        await repository.updateOrders(projectName, orders);
+        fetchTasks(projectName);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Failed to reorder tasks"),

@@ -36,7 +36,7 @@ export const ProjectCreatePage = ({
         padding: "20px",
         fontFamily: "'Segoe UI', sans-serif",
         color: "#333",
-        minHeight: "100vh",
+        minHeight: "80vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -73,7 +73,7 @@ export const ProjectCreatePage = ({
         >
           プロジェクト名を入力して開始してください。
           <br />
-          Gitブランチが作成され、履歴管理が始まります。
+          プロジェクトが作成され、Git履歴管理が始まります。
         </p>
         {error && (
           <div className="mb-4 text-red-600 text-sm text-center">{error}</div>

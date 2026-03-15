@@ -1,7 +1,11 @@
-import { ProjectSettings, Settings } from "../entities/settings";
+import { BasicSettings, ProjectSettings } from "../entities/settings";
 
 export interface ISettingsRepository {
-    getSettings(): Promise<Settings>;
-    getProjectSettings(): Promise<ProjectSettings>; // For V1 Project endpoint
-    updateProjectSettings(settings: Partial<ProjectSettings>): Promise<ProjectSettings>;
+  getGlobalSettings(): Promise<BasicSettings>;
+  updateGlobalSettings(settings: BasicSettings): Promise<BasicSettings>;
+  getProjectSettings(projectName: string): Promise<ProjectSettings>;
+  updateProjectSettings(
+    projectName: string,
+    settings: Partial<ProjectSettings>,
+  ): Promise<ProjectSettings>;
 }

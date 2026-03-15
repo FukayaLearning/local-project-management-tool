@@ -3,15 +3,18 @@ import { ITaskRepository } from "../../../domain/repositories/taskRepository";
 import { ApiClient } from "../client";
 
 export class TaskApiRepository implements ITaskRepository {
-  async getAll(): Promise<Task[]> {
-    return ApiClient.get<Task[]>("/tasks/");
+  async getAll(projectName: string): Promise<Task[]> {
+    return ApiClient.get<Task[]>(
+      `/projects/${encodeURIComponent(projectName)}/tasks`,
+    );
   }
 
-  async getById(id: string): Promise<Task | null> {
+  async getById(projectName: string, id: string): Promise<Task | null> {
     try {
-      return await ApiClient.get<Task>(`/tasks/${id}`);
+      return await ApiClient.get<Task>(
+        `/projects/${encodeURIComponent(projectName)}/tasks/${id}`,
+      );
     } catch (error) {
-      // Treat 404 as null
       if (error instanceof Error && error.message.includes("404")) {
         return null;
       }
@@ -19,21 +22,37 @@ export class TaskApiRepository implements ITaskRepository {
     }
   }
 
-  async create(task: TaskCreate): Promise<Task> {
-    return ApiClient.post<Task>("/tasks/", task);
+  async create(projectName: string, task: TaskCreate): Promise<Task> {
+    return ApiClient.post<Task>(
+      `/projects/${encodeURIComponent(projectName)}/tasks`,
+      task,
+    );
   }
 
-  async update(id: string, task: TaskUpdate): Promise<Task> {
-    return ApiClient.put<Task>(`/tasks/${id}`, task);
+  async update(
+    projectName: string,
+    id: string,
+    task: TaskUpdate,
+  ): Promise<Task> {
+    return ApiClient.put<Task>(
+      `/projects/${encodeURIComponent(projectName)}/tasks/${id}`,
+      task,
+    );
   }
 
-  async delete(id: string): Promise<void> {
-    return ApiClient.delete<void>(`/tasks/${id}`);
+  async delete(projectName: string, id: string): Promise<void> {
+    return ApiClient.delete<void>(
+      `/projects/${encodeURIComponent(projectName)}/tasks/${id}`,
+    );
   }
 
   async updateOrders(
+    projectName: string,
     orders: { id: string; display_order: number }[],
   ): Promise<void> {
-    return ApiClient.put<void>("/tasks/reorder", orders);
+    return ApiClient.put<void>(
+      `/projects/${encodeURIComponent(projectName)}/tasks/reorder`,
+      orders,
+    );
   }
 }

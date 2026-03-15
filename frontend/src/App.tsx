@@ -1,127 +1,157 @@
 import { useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  useParams,
+  Navigate,
+} from "react-router-dom";
 import { SettingsPage } from "./presentation/pages/SettingsPage";
 import { TaskListPage } from "./presentation/pages/TaskListPage";
 import { ProjectCreatePage } from "./presentation/pages/ProjectCreatePage";
 import { GanttChartPage } from "./presentation/pages/GanttChartPage";
+import { GlobalSettingsPage } from "./presentation/pages/GlobalSettingsPage";
+import { ProjectManagementPage } from "./presentation/pages/ProjectManagementPage";
 import { MenuBar } from "./presentation/components/Layout/MenuBar";
-import { useSystemUseCase } from "./application/usecases/useSystemUseCase";
+import { useProjectUseCase } from "./application/usecases/useProjectUseCase";
 import "./index.css";
 
-function App() {
+function ProjectLayout() {
+  const { projectName } = useParams<{ projectName: string }>();
+  const { projects, fetchProjects, undo, redo } = useProjectUseCase();
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    systemStatus,
-    projects,
-    isLoading: isSystemLoading,
-    fetchSystemStatus,
-    fetchProjects,
-    switchProject,
-    createProject,
-  } = useSystemUseCase();
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const status = await fetchSystemStatus();
+    fetchProjects();
+  }, [fetchProjects]);
 
-        if (!status.is_git_initialized || !status.has_default_project) {
-          if (location.pathname !== "/create_project") {
-            navigate("/create_project");
-          }
-        } else {
-          await fetchProjects();
-          // Only redirect to tasks if we are at root
-          if (location.pathname === "/") {
-            navigate("/tasks");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to initialize app", error);
-      }
-    };
-    init();
-  }, [navigate, fetchSystemStatus, fetchProjects]);
+  if (!projectName) {
+    return <Navigate to="/projects" replace />;
+  }
 
-  // Helper to determine active tab based on path
+  const decodedProjectName = decodeURIComponent(projectName);
+
   const getCurrentPage = () => {
-    if (location.pathname.startsWith("/tasks")) return "tasks";
-    if (location.pathname.startsWith("/settings")) return "settings";
-    if (location.pathname.startsWith("/gantt")) return "gantt";
-    if (location.pathname.startsWith("/create_project"))
-      return "create_project";
+    if (location.pathname.includes("/gantts")) return "gantt";
+    if (location.pathname.includes("/settings")) return "project_settings";
     return "tasks";
   };
 
   const handleNavigate = (page: string) => {
-    if (page === "tasks") navigate("/tasks");
-    if (page === "settings") navigate("/settings");
-    if (page === "gantt") navigate("/gantt");
-    if (page === "create_project") navigate("/create_project");
+    const encoded = encodeURIComponent(decodedProjectName);
+    if (page === "tasks") navigate(`/projects/${encoded}`);
+    if (page === "gantt") navigate(`/projects/${encoded}/gantts`);
+    if (page === "project_settings") navigate(`/projects/${encoded}/settings`);
+    if (page === "projects") navigate("/projects");
   };
 
-  const handleProjectCreated = async (projectName: string) => {
+  const handleSwitchProject = (newProject: string) => {
+    const encoded = encodeURIComponent(newProject);
+    navigate(`/projects/${encoded}`);
+  };
+
+  const handleUndo = async () => {
     try {
-      await createProject(projectName);
-      navigate("/tasks");
+      await undo(decodedProjectName);
+      window.location.reload();
     } catch (error) {
-      console.error("Failed to create project", error);
+      console.error(error);
+      alert("Undo failed");
     }
   };
 
-  const handleSwitchProject = async (projectName: string) => {
+  const handleRedo = async () => {
     try {
-      await switchProject(projectName);
-      // Reload or re-fetch tasks might be needed, but for now just stay on current page
-      // largely the backend state changes
-      window.location.reload(); // Full browser reload to re-fetch all data for the new project
+      await redo(decodedProjectName);
+      window.location.reload();
     } catch (error) {
-      console.error("Failed to switch project", error);
+      console.error(error);
+      alert("Redo failed");
     }
   };
-
-  if (isSystemLoading && !systemStatus) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  // If on create_project, show full page without standard layout?
-  // Design says MenuBar includes links, but checking implementation of ProjectCreatePage
-  // it seems to be a standalone page in the code we saw earlier.
-  // We will keep it simple.
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Show MenuBar unless on create_project which might act as initial setup */}
-      {location.pathname !== "/create_project" && (
-        <MenuBar
-          currentPage={getCurrentPage()}
-          onNavigate={handleNavigate}
-          currentProject={systemStatus?.current_project || null}
-          projects={projects}
-          onSwitchProject={handleSwitchProject}
-        />
-      )}
-
-      <main className={location.pathname !== "/create_project" ? "py-10" : ""}>
+      <MenuBar
+        context="project"
+        currentPage={getCurrentPage()}
+        onNavigate={handleNavigate}
+        currentProject={decodedProjectName}
+        projects={projects}
+        onSwitchProject={handleSwitchProject}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+      />
+      <main className="py-10">
         <Routes>
           <Route
-            path="/create_project"
-            element={
-              <ProjectCreatePage onProjectCreated={handleProjectCreated} />
-            }
+            path="/"
+            element={<TaskListPage projectName={decodedProjectName} />}
           />
-          <Route path="/tasks" element={<TaskListPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/gantt" element={<GanttChartPage />} />
-          <Route path="/" element={<div>Scanning...</div>} />
+          <Route
+            path="/gantts"
+            element={<GanttChartPage projectName={decodedProjectName} />}
+          />
+          <Route
+            path="/settings"
+            element={<SettingsPage projectName={decodedProjectName} />}
+          />
         </Routes>
       </main>
     </div>
+  );
+}
+
+function GlobalLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getCurrentPage = () => {
+    if (location.pathname === "/settings") return "global_settings";
+    return "projects";
+  };
+
+  const handleNavigate = (page: string) => {
+    if (page === "projects") navigate("/projects");
+    if (page === "global_settings") navigate("/settings");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <MenuBar
+        context="global"
+        currentPage={getCurrentPage()}
+        onNavigate={handleNavigate}
+      />
+      <main className="py-10">
+        <Routes>
+          <Route path="/projects" element={<ProjectManagementPage />} />
+          <Route path="/settings" element={<GlobalSettingsPage />} />
+          <Route
+            path="/projects/new"
+            element={
+              <ProjectCreatePage
+                onProjectCreated={async (name) => {
+                  navigate(`/projects/${encodeURIComponent(name)}`);
+                }}
+              />
+            }
+          />
+          <Route path="/" element={<Navigate to="/projects" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/projects/:projectName/*" element={<ProjectLayout />} />
+      <Route path="/*" element={<GlobalLayout />} />
+    </Routes>
   );
 }
 
