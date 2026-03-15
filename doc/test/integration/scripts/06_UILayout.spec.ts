@@ -3,9 +3,9 @@ import { test, expect } from "@playwright/test";
 async function ensureSystemInitialized(request: any) {
   const res = await request.get("/api/v1/projects/");
   const projects = await res.json();
-  if (!projects.includes("Default Project")) {
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -19,8 +19,8 @@ test.describe("Integration: UI Layout and Navigation", () => {
     page,
   }) => {
     // 1. Initial Load - should be able to get to a project
-    await page.goto("/projects/Default Project");
-    await expect(page).toHaveURL(/.*\/projects\/Default%20Project/, {
+    await page.goto("/projects/DefaultProject");
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject/, {
       timeout: 10000,
     });
 
@@ -35,13 +35,15 @@ test.describe("Integration: UI Layout and Navigation", () => {
 
     // 3. Verify Navigation Links
     // Click Settings
-    await page.click('text="Project Settings"');
-    await expect(page).toHaveURL(/.*\/projects\/Default%20Project\/settings/);
-    await expect(page.locator("text=Project Settings")).toBeVisible();
+    await page.getByRole("button", { name: "Project Settings" }).click();
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject\/settings/);
+    await expect(page.locator("h1:has-text('Project Settings')")).toBeVisible();
 
     // Click Tasks
-    await page.click('text="Tasks"');
-    await expect(page).toHaveURL(/.*\/projects\/Default%20Project$/);
-    await expect(page.locator("text=+ New Task")).toBeVisible();
+    await page.getByRole("button", { name: "Tasks", exact: true }).click();
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject$/);
+    await expect(
+      page.getByRole("button", { name: "+ New Task" }),
+    ).toBeVisible();
   });
 });

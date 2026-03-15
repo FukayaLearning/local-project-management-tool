@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import { SettingsPage } from "./presentation/pages/SettingsPage";
 import { TaskListPage } from "./presentation/pages/TaskListPage";
-import { ProjectCreatePage } from "./presentation/pages/ProjectCreatePage";
+
 import { GanttChartPage } from "./presentation/pages/GanttChartPage";
 import { GlobalSettingsPage } from "./presentation/pages/GlobalSettingsPage";
 import { ProjectManagementPage } from "./presentation/pages/ProjectManagementPage";
@@ -34,7 +34,7 @@ function ProjectLayout() {
   const decodedProjectName = decodeURIComponent(projectName);
 
   const getCurrentPage = () => {
-    if (location.pathname.includes("/gantts")) return "gantt";
+    if (location.pathname.includes("/gantt")) return "gantt";
     if (location.pathname.includes("/settings")) return "project_settings";
     return "tasks";
   };
@@ -42,7 +42,7 @@ function ProjectLayout() {
   const handleNavigate = (page: string) => {
     const encoded = encodeURIComponent(decodedProjectName);
     if (page === "tasks") navigate(`/projects/${encoded}`);
-    if (page === "gantt") navigate(`/projects/${encoded}/gantts`);
+    if (page === "gantt") navigate(`/projects/${encoded}/gantt`);
     if (page === "project_settings") navigate(`/projects/${encoded}/settings`);
     if (page === "projects") navigate("/projects");
   };
@@ -91,7 +91,7 @@ function ProjectLayout() {
             element={<TaskListPage projectName={decodedProjectName} />}
           />
           <Route
-            path="/gantts"
+            path="/gantt"
             element={<GanttChartPage projectName={decodedProjectName} />}
           />
           <Route
@@ -129,16 +129,6 @@ function GlobalLayout() {
         <Routes>
           <Route path="/projects" element={<ProjectManagementPage />} />
           <Route path="/settings" element={<GlobalSettingsPage />} />
-          <Route
-            path="/projects/new"
-            element={
-              <ProjectCreatePage
-                onProjectCreated={async (name) => {
-                  navigate(`/projects/${encodeURIComponent(name)}`);
-                }}
-              />
-            }
-          />
           <Route path="/" element={<Navigate to="/projects" replace />} />
         </Routes>
       </main>

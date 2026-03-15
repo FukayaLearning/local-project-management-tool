@@ -68,10 +68,7 @@ test.describe("Integration: Auto Commit Log Format", () => {
     // We assume backend is running locally alongside frontend for these tests
     // or mounted volume is accessible at `backend/data` relative to project root
     // @ts-ignore
-    const projectRoot = process.env.CI
-      ? "/app"
-      : // @ts-ignore
-        path.resolve(__dirname, "../../../..");
+    const projectRoot = process.env.CI ? "/app" : path.resolve(".");
     const repoPath = path.join(
       projectRoot,
       "backend",

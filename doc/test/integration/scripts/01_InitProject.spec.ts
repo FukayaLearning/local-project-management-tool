@@ -13,17 +13,11 @@ test.describe("Integration: Project Initialization", () => {
     // データがない場合でも、/projects にリダイレクトされる
     await expect(page).toHaveURL(/.*\/projects/);
 
-    // 空の場合は New Project ボタンが存在する
-    await page.getByRole("button", { name: "+ New Project" }).click();
-
-    // /projects/new への遷移
-    await expect(page).toHaveURL(/.*\/projects\/new/);
-    await expect(page.locator("text=新規プロジェクト作成")).toBeVisible();
-
-    // 2. プロジェクト作成
+    // 空の場合はどちらかのボタンが存在する
+    // /projects 画面上で入力と作成ボタンを操作する
     const projectName = "MyFirstProject";
-    await page.locator("#project-name").fill(projectName);
-    await page.getByRole("button", { name: "プロジェクト作成開始" }).click();
+    await page.getByPlaceholder("New project name...").fill(projectName);
+    await page.getByRole("button", { name: "Create Project" }).click();
 
     // 作成後、該当プロジェクトのタスク一覧ページへ遷移
     await expect(page).toHaveURL(new RegExp(`/projects/${projectName}`), {

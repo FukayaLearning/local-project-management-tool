@@ -3,9 +3,9 @@ import { test, expect } from "@playwright/test";
 async function ensureSystemInitialized(request: any) {
   const res = await request.get("/api/v1/projects/");
   const projects = await res.json();
-  if (!projects.includes("Default Project")) {
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -19,7 +19,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     page,
   }) => {
     // Navigate to Gantt Chart page
-    await page.goto("/projects/Default Project");
+    await page.goto("/projects/DefaultProject");
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -50,7 +50,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
       .toISOString()
       .split("T")[0];
 
-    await request.post("/api/v1/projects/Default%20Project/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Gantt Test Task",
         status: "New",
@@ -61,7 +61,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     });
 
     // Navigate to Gantt Chart page
-    await page.goto("/projects/Default Project/gantt");
+    await page.goto("/projects/DefaultProject/gantt");
     await expect(page.locator("text=Gantt Chart").first()).toBeVisible({
       timeout: 10000,
     });
@@ -81,7 +81,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
       .toISOString()
       .split("T")[0];
 
-    await request.post("/api/v1/projects/Default%20Project/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Inazuma Task 1",
         status: "New",
@@ -90,7 +90,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
         progress: 20,
       },
     });
-    await request.post("/api/v1/projects/Default%20Project/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Inazuma Task 2",
         status: "Doing",
@@ -101,7 +101,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     });
 
     // Navigate to Gantt Chart page
-    await page.goto("/projects/Default Project/gantt");
+    await page.goto("/projects/DefaultProject/gantt");
     await expect(page.locator("text=Gantt Chart").first()).toBeVisible({
       timeout: 10000,
     });
