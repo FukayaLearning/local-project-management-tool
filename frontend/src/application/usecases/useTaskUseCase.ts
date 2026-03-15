@@ -51,19 +51,43 @@ export const useTaskUseCase = () => {
     }
   }, []);
 
-  const deleteTask = useCallback(async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await repository.delete(id);
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to delete task"));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const deleteTask = useCallback(
+    async (id: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await repository.delete(id);
+        setTasks((prev) => prev.filter((t) => t.id !== id));
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to delete task"),
+        );
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [repository],
+  );
+
+  const reorderTasks = useCallback(
+    async (orders: { id: string; display_order: number }[]) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await repository.updateOrders(orders);
+        fetchTasks();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to reorder tasks"),
+        );
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchTasks, repository],
+  );
 
   return {
     tasks,
@@ -73,5 +97,6 @@ export const useTaskUseCase = () => {
     createTask,
     updateTask,
     deleteTask,
+    reorderTasks,
   };
 };

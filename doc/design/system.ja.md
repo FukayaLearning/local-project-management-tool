@@ -60,6 +60,7 @@ graph TD
   | **SPEC-TASK-002-001** | Task | タスクデータ | データ形式 | タスクは `data/tasks.csv` に保存される。 | REQ-TASK-004 |
   | **SPEC-TASK-002-002** | Task | タスク作成 | ID生成 | 新規作成時にUUID v4を自動生成してIDとする。 | REQ-TASK-002 |
   | **SPEC-TASK-003-001** | Task | 階層構造 | データ構造 | `parent_id` カラムを持ち、親タスクのIDを保持する。 | REQ-TASK-003 |
+  | **SPEC-TASK-004-001** | Task | タスク順序 | API | `PUT /api/v1/tasks/reorder` で複数タスクの `display_order` を一括更新する。 | REQ-TASK-005 |
 
 ### 3.3 可視化・チャート (VIEW)
 

@@ -2,7 +2,7 @@ from typing import List, Optional
 from backend.app.domain.repositories.task_repository import ITaskRepository
 from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.entities.task import Task
-from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO
+from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO
 
 
 class TaskUseCase:
@@ -47,6 +47,13 @@ class TaskUseCase:
         updated_task = self.task_repository.update(task)
         self.git_repository.commit(f"Update task {updated_task.title}")
         return updated_task
+
+    def reorder_tasks(self, orders: List[TaskOrderUpdateDTO]) -> bool:
+        task_orders = [{"id": order.id, "display_order": order.display_order} for order in orders]
+        success = self.task_repository.update_orders(task_orders)
+        if success:
+            self.git_repository.commit("Reorder tasks")
+        return success
 
     def delete_task(self, task_id: str) -> bool:
         result = self.task_repository.delete(task_id)

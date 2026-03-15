@@ -39,10 +39,10 @@ test.describe("Integration: Manual Synchronization", () => {
     // 2. tasks.csv を直接編集 (新しいタスクを1行追加)
     // ヘッダーが未作成（タスクが空）の場合はヘッダーも書き込む
     const header =
-      "id,title,status,assignee_id,start_date,due_date,parent_id,description,task_type,planned_hours,actual_hours,progress\n";
+      "id,title,status,assignee_id,start_date,due_date,parent_id,description,task_type,planned_hours,actual_hours,progress,display_order\n";
     const newTaskId = `manual-${Date.now()}`;
     const newTaskTitle = `Manual Task ${Date.now()}`;
-    const csvLine = `${newTaskId},${newTaskTitle},New,,,,,,,,,0\n`;
+    const csvLine = `${newTaskId},${newTaskTitle},New,,,,,,,,,0,0\n`;
 
     console.log(`Manually adding task to ${TASKS_CSV}`);
     if (!fs.existsSync(TASKS_CSV)) {

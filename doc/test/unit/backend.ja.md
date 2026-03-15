@@ -41,6 +41,7 @@
 | **UNIT-BE-TASK-007** | Redo                         | なし                                          | Git.redo() -> "Redo successful"                                          | Git.redoが1回呼ばれ、結果文字列が返ること。                                       |
 | **UNIT-BE-TASK-008** | タスク一覧取得(手動変更検知) | なし                                          | Git.has_uncommitted_changes() -> True                                    | 自動コミットが実行されること                                                      |
 | **UNIT-BE-TASK-009** | タスク作成(親タスク指定)     | `TaskCreateDTO(title="Sub", parent_id="P1")`  | Repo.save() -> Task, Git.commit() -> Success                             | 親タスクID(parent_id)が設定された状態でタスクが生成・保存されること。             |
+| **UNIT-BE-TASK-010** | タスク順序変更               | `List[TaskOrderUpdateDTO]`                    | Repo.update_orders() -> True, Git.commit() -> Success                    | Repo.update_ordersとGit.commitが呼ばれ、Trueが返ること。                          |
 
 ### 2.3 SystemUseCase
 

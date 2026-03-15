@@ -43,6 +43,7 @@
 | **REQ-TASK-002** | Task     | Task Create/Edit | Ability to create new tasks and edit existing ones. IDs should be automatically generated (uuid4).          | High     |         |
 | **REQ-TASK-003** | Task     | Hierarchy View   | Ability to display a hierarchical tree view based on parent-child relationships of tasks.                   | Medium   |         |
 | **REQ-TASK-004** | Task     | CSV I/O          | Ability to save and load task data in CSV format.                                                           | High     |         |
+| **REQ-TASK-005** | Task     | Task Reordering  | Ability to reorder tasks using drag and drop in the task list and Gantt chart.                              | High     |         |
 
 ### 2.3 Visualization & Charts (VIEW)
 

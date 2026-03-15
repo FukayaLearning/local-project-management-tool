@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime, date
 from backend.app.domain.entities.task import Task
 from backend.app.domain.repositories.task_repository import ITaskRepository
@@ -34,12 +34,19 @@ class TaskFileRepository(ITaskRepository):
         
         # Convert date strings back to date objects if needed, but Pydantic handles str -> date
         # Convert numeric fields
-        if data.get("planned_hours"):
+        if data.get("planned_hours") is not None:
             data["planned_hours"] = float(data["planned_hours"])
-        if data.get("actual_hours"):
+        if data.get("actual_hours") is not None:
             data["actual_hours"] = float(data["actual_hours"])
-        if data.get("progress"):
+        if data.get("progress") is not None:
             data["progress"] = int(float(data["progress"])) # handle potential float string "0.0"
+        if data.get("display_order") is not None:
+            data["display_order"] = int(float(data["display_order"]))
+            
+        # Remove None values for non-optional fields so Pydantic uses default
+        for f in ["progress", "display_order"]:
+            if f in data and data[f] is None:
+                del data[f]
 
         return Task(**data)
 
@@ -100,6 +107,27 @@ class TaskFileRepository(ITaskRepository):
         initial_len = len(df)
         df = df[df["id"] != task_id]
         if len(df) < initial_len:
+            self._save_df(df)
+            return True
+        return False
+
+    def update_orders(self, task_orders: List[Dict]) -> bool:
+        df = self._read_df()
+        if df.empty:
+            return False
+            
+        if "display_order" not in df.columns:
+            df["display_order"] = "0"
+            
+        updated_any = False
+        for order in task_orders:
+            task_id = order.get("id")
+            display_order = order.get("display_order")
+            if task_id in df["id"].values:
+                df.loc[df["id"] == task_id, "display_order"] = str(display_order)
+                updated_any = True
+                
+        if updated_any:
             self._save_df(df)
             return True
         return False

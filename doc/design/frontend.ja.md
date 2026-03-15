@@ -44,6 +44,7 @@ frontend/src/
 - **スタイリング**: TailwindCSS (プロジェクト標準に準拠) または CSS Modules
 - **状態管理**: React Context + Custom Hooks (局所的な状態はuseState)
 - **ルーティング**: React Router (必要に応じて。今回は単一ページまたはタブ切り替え等の簡易な構成も視野だが、拡張性を考慮しRouter導入を推奨)
+- **その他ライブラリ**: ドラッグ＆ドロップによる順序変更のため `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` を使用
 
 ## 3. コンポーネント設計
 
@@ -69,9 +70,9 @@ frontend/src/
 
 - `TaskListPage`: ルートコンポーネント。
   - `TaskToolbar`: 新規作成ボタン、フィルタリング、表示切り替え (List/Gantt)。
-  - `TaskListView`: テーブル形式でのタスク一覧表示。
+  - `TaskListView`: テーブル形式でのタスク一覧表示。SortableContextを用いてドラッグ＆ドロップの並び替えをサポート。
     - `TaskRow`: 各タスクの行。編集・削除アクションを含む。
-  - `GanttChartView`: ガントチャート形式での表示。
+  - `GanttChartView`: ガントチャート形式での表示。ドラッグ＆ドロップの並び替えをサポート。
     - `GanttBar`: タスクの期間を示すバー。
   - `TaskDetailModal`: タスクの新規作成・編集用モーダル。
     - `TaskForm`: タイトル、担当者、期間などの入力フォーム。

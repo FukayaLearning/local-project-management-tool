@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Task } from "../../../../domain/entities/task";
 import {
   InazumaPoint,
@@ -8,10 +8,28 @@ import {
   flattenTasksWithHierarchy,
   calculateTimelineRange,
   calculateParentDateRange,
+  HierarchicalTask,
 } from "../../../../domain/services/ganttChartService";
 import { TimelineHeader } from "./TimelineHeader";
 import { GanttBar } from "./GanttBar";
 import { InazumaLine } from "./InazumaLine";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface GanttChartProps {
   tasks: Task[];
@@ -19,7 +37,56 @@ interface GanttChartProps {
   rowHeight: number;
   showInazumaLine: boolean;
   referenceDate: string;
+  onReorder?: (orders: { id: string; display_order: number }[]) => void;
 }
+
+const SortableTaskLabel = ({
+  task,
+  rowHeight,
+}: {
+  task: HierarchicalTask;
+  rowHeight: number;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    boxShadow: isDragging ? "0 5px 15px rgba(0,0,0,0.15)" : "none",
+    height: rowHeight,
+    paddingLeft: 12 + task.depth * 16,
+    cursor: "grab",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`border-b border-gray-100 flex items-center px-3 text-sm truncate hover:bg-gray-100 ${
+        isDragging ? "bg-white" : ""
+      }`}
+      {...attributes}
+      {...listeners}
+      title={task.title}
+    >
+      <span
+        className={
+          task.hasChildren ? "font-semibold text-gray-800" : "text-gray-600"
+        }
+      >
+        {task.title}
+      </span>
+    </div>
+  );
+};
 
 export const GanttChart: React.FC<GanttChartProps> = ({
   tasks,
@@ -27,10 +94,16 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   rowHeight,
   showInazumaLine,
   referenceDate,
+  onReorder,
 }) => {
   const chartBodyRef = useRef<HTMLDivElement>(null);
+  const [localTasks, setLocalTasks] = useState(tasks);
 
-  const timelineRange = calculateTimelineRange(tasks);
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
+
+  const timelineRange = calculateTimelineRange(localTasks);
   if (!timelineRange) {
     return (
       <div className="text-center text-gray-500 py-10">
@@ -43,12 +116,12 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     timelineRange.startDate,
     timelineRange.endDate,
   );
-  const hierarchicalTasks = flattenTasksWithHierarchy(tasks);
+  const hierarchicalTasks = flattenTasksWithHierarchy(localTasks);
 
   // Calculate parent date ranges
   const taskWithResolvedDates = hierarchicalTasks.map((task) => {
     if (task.hasChildren) {
-      const children = tasks.filter((t) => t.parent_id === task.id);
+      const children = localTasks.filter((t) => t.parent_id === task.id);
       const range = calculateParentDateRange(children);
       if (range) {
         return {
@@ -84,37 +157,82 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   );
   const refLineX = refDiffDays * dayWidth;
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      setLocalTasks((items) => {
+        // Find indices in the flattened representation to get visual order
+        const flatItems = flattenTasksWithHierarchy(items);
+        const oldIndex = flatItems.findIndex((item) => item.id === active.id);
+        const newIndex = flatItems.findIndex((item) => item.id === over?.id);
+
+        const newFlatItems = arrayMove(flatItems, oldIndex, newIndex);
+
+        if (onReorder) {
+          const orders = newFlatItems.map((item, index) => ({
+            id: item.id,
+            display_order: index,
+          }));
+          onReorder(orders);
+        }
+
+        // Apply display orders back to local tasks for optimistic update
+        const idToOrder = new Map();
+        newFlatItems.forEach((item, idx) => idToOrder.set(item.id, idx));
+        return items.map((t) => ({
+          ...t,
+          display_order: idToOrder.has(t.id)
+            ? idToOrder.get(t.id)
+            : t.display_order,
+        }));
+      });
+    }
+  };
+
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
       <div className="flex">
         {/* Task Label Column */}
         <div
-          className="flex-shrink-0 border-r border-gray-300 bg-gray-50"
-          style={{ width: 200 }}
+          className="flex-shrink-0 border-r border-gray-300 bg-gray-50 flex flex-col"
+          style={{ width: 220 }}
         >
           {/* Header for label column */}
           <div className="h-8 border-b border-gray-300 flex items-center px-3 font-semibold text-sm text-gray-700">
             Task
           </div>
           {/* Task rows */}
-          {taskWithResolvedDates.map((task) => (
-            <div
-              key={task.id}
-              className="border-b border-gray-100 flex items-center px-3 text-sm truncate"
-              style={{ height: rowHeight, paddingLeft: 12 + task.depth * 16 }}
-              title={task.title}
+          <div className="relative">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              <span
-                className={
-                  task.hasChildren
-                    ? "font-semibold text-gray-800"
-                    : "text-gray-600"
-                }
+              <SortableContext
+                items={taskWithResolvedDates.map((t) => t.id)}
+                strategy={verticalListSortingStrategy}
               >
-                {task.title}
-              </span>
-            </div>
-          ))}
+                {taskWithResolvedDates.map((task) => (
+                  <SortableTaskLabel
+                    key={task.id}
+                    task={task}
+                    rowHeight={rowHeight}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
 
         {/* Chart Area */}

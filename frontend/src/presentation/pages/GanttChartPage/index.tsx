@@ -9,7 +9,8 @@ const ROW_HEIGHT = 36;
 const ZOOM_STEP = 10;
 
 export const GanttChartPage: React.FC = () => {
-  const { tasks, isLoading, error, fetchTasks } = useTaskUseCase();
+  const { tasks, isLoading, error, fetchTasks, reorderTasks } =
+    useTaskUseCase();
   const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
   const [showInazumaLine, setShowInazumaLine] = useState(false);
   const [referenceDate, setReferenceDate] = useState(
@@ -88,6 +89,7 @@ export const GanttChartPage: React.FC = () => {
         rowHeight={ROW_HEIGHT}
         showInazumaLine={showInazumaLine}
         referenceDate={referenceDate}
+        onReorder={reorderTasks}
       />
     </div>
   );

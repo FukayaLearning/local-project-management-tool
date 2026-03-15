@@ -60,6 +60,7 @@ graph TD
   | **SPEC-TASK-002-001** | Task | Task Data | Data Format | Tasks are saved in `data/tasks.csv`. | REQ-TASK-004 |
   | **SPEC-TASK-002-002** | Task | Task Create | ID Gen | Automatically generate UUID v4 for ID on creation. | REQ-TASK-002 |
   | **SPEC-TASK-003-001** | Task | Hierarchy | Data Structure | Has `parent_id` column to hold parent task ID. | REQ-TASK-003 |
+  | **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/tasks/reorder` updates the `display_order` of multiple tasks at once. | REQ-TASK-005 |
 
 ### 3.3 Visualization & Charts (VIEW)
 

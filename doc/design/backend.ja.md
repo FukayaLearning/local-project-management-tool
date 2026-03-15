@@ -44,7 +44,7 @@ backend/app/
 
 ### 3.1 エンティティ/値オブジェクト (Domain)
 
-- `Task`: ID, Title, Status, Dates, ParentID などを保持。
+- `Task`: ID, Title, Status, Dates, ParentID, display_order などを保持。
 - `ProjectSettings`: プロジェクト名、期間などを保持。
 - `BasicSettings`: ステータス定義、担当者定義などを保持。
 
@@ -100,6 +100,14 @@ backend/app/
   1.  `TaskUseCase.update_task(id, dto)` を呼び出す。
   2.  `TaskRepository` で該当IDのレコードを更新する。
   3.  **Git Commit**: `GitService.commit(f"Update task {title}")` を実行する。
+
+#### `PUT /tasks/reorder`
+
+- **関連Spec-ID**: `SPEC-TASK-004-001`, `SPEC-HIST-001-001`
+- **処理フロー**:
+  1.  `TaskUseCase.reorder_tasks(orders)` を呼び出す。
+  2.  `TaskRepository.update_orders(orders)` で複数タスクの順序を一括で更新・保存する。
+  3.  **Git Commit**: `GitService.commit("Reorder tasks")` を実行する。
 
 #### `DELETE /tasks/{id}`
 

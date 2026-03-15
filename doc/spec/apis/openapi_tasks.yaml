@@ -86,6 +86,39 @@ paths:
         "204":
           description: Deleted
 
+  /tasks/reorder:
+    put:
+      summary: Reorder Tasks
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  display_order:
+                    type: integer
+                required:
+                  - id
+                  - display_order
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
   /tasks/undo:
     post:
       summary: Undo Last Change
@@ -140,6 +173,9 @@ components:
         parent_id:
           type: string
           nullable: true
+        display_order:
+          type: integer
+          default: 0
 
     TaskInput:
       allOf:

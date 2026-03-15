@@ -158,10 +158,13 @@ export function generateTimelineDates(
  * Parent tasks appear before their children, with depth for indentation.
  */
 export function flattenTasksWithHierarchy(tasks: Task[]): HierarchicalTask[] {
+  const sortedTasks = [...tasks].sort(
+    (a, b) => (a.display_order || 0) - (b.display_order || 0),
+  );
   const taskMap = new Map<string, Task>();
   const childrenMap = new Map<string, Task[]>();
 
-  tasks.forEach((task) => {
+  sortedTasks.forEach((task) => {
     taskMap.set(task.id, task);
     if (task.parent_id) {
       const children = childrenMap.get(task.parent_id) || [];
@@ -188,13 +191,13 @@ export function flattenTasksWithHierarchy(tasks: Task[]): HierarchicalTask[] {
   }
 
   // Start with root tasks (no parent_id)
-  const rootTasks = tasks.filter(
+  const rootTasks = sortedTasks.filter(
     (task) => !task.parent_id || !taskMap.has(task.parent_id),
   );
   rootTasks.forEach((task) => addTaskAndChildren(task, 0));
 
   // Add any remaining tasks not reachable from roots
-  tasks.forEach((task) => {
+  sortedTasks.forEach((task) => {
     if (!visited.has(task.id)) {
       addTaskAndChildren(task, 0);
     }

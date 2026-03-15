@@ -17,6 +17,7 @@ function createTask(
   return {
     status: "New",
     progress: 0,
+    display_order: 0,
     ...overrides,
   };
 }
@@ -310,6 +311,26 @@ describe("GanttChartService", () => {
         expect(task.depth).toBe(0);
         expect(task.hasChildren).toBe(false);
       });
+    });
+
+    it("should sort tasks by display_order before flattening", () => {
+      const tasks: Task[] = [
+        createTask({ id: "1", title: "Task 1", display_order: 2 }),
+        createTask({ id: "2", title: "Task 2", display_order: 1 }),
+        createTask({
+          id: "3",
+          title: "Task 3",
+          parent_id: "2",
+          display_order: 0,
+        }),
+      ];
+
+      const result = flattenTasksWithHierarchy(tasks);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe("2");
+      expect(result[1].id).toBe("3");
+      expect(result[2].id).toBe("1");
     });
   });
 
