@@ -78,3 +78,13 @@
 | :--- | :---------------------------------------- | :---------------------------------------------------------------------------------- | :---------------- |
 | 1    | Access the application                    | Header and Sidebar (navigation) are displayed properly, with logo and menus present | **IT-SCN-UI-001** |
 | 2    | Click on each link in the navigation menu | Transitions to corresponding pages (Tasks, Gantt Chart, Settings, etc.) properly    | **IT-SCN-UI-001** |
+
+### Scenario 8: Gantt Chart Display Flow (Gantt Chart)
+
+- **Related Requirements**: REQ-VIEW-001, REQ-VIEW-002
+
+| Step | Operation/Procedure                       | Expected Result                                          | Test-ID              |
+| :--- | :---------------------------------------- | :------------------------------------------------------- | :------------------- |
+| 1    | Access Gantt Chart page                   | Gantt Chart page is displayed with \"Gantt Chart\" title | **IT-SCN-GANTT-001** |
+| 2    | Create a task with dates and save         | A bar is displayed on the Gantt Chart                    | **IT-SCN-GANTT-002** |
+| 3    | Toggle \"Show Progress Line\" checkbox ON | Inazuma line (red dashed line) is displayed              | **IT-SCN-GANTT-003** |

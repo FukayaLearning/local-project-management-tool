@@ -92,6 +92,25 @@ Displayed when not initialized or when user selects "Create New Project".
   - `ProjectNameInput`: Input for project name.
   - `CreateButton`: Executes creation. Redirects to Task List on success.
 
+### 3.6 Gantt Chart Page (`presentation/pages/GanttChartPage`)
+
+Fetches task data via `TaskUseCase` and converts it to rendering data using `GanttChartService`.
+
+- `GanttChartPage`: Root component. Manages task fetching, zoom control (dayWidth), Inazuma line toggle, and reference date selection.
+  - `GanttChart`: Chart area. Renders task label column and timeline column side by side.
+    - `TimelineHeader`: Date column header. Displays date labels according to zoom level.
+    - `GanttBar`: Task bar for each task. Renders bar based on start_date to due_date. Parent tasks use a summary style (different color) encompassing child ranges. Includes progress rate visualization.
+    - `InazumaLine`: Draws a polyline using SVG `<path>` based on progress rates. Red dashed line style. Visualizes progress status of each task at the reference date.
+
+### 3.7 Domain Services (`domain/services`)
+
+- `GanttChartService`: Provides calculation logic for Gantt chart rendering as pure functions.
+  - `calculateParentDateRange(parentTask, childTasks)`: Aggregates parent task range to the min start_date and max due_date of its children.
+  - `calculateBarPosition(startDate, dueDate, timelineStart, dayWidth)`: Calculates bar left/width in pixels.
+  - `calculateInazumaLinePoints(tasks, referenceDate, timelineStart, dayWidth, rowHeight)`: Calculates Inazuma line polyline coordinates from each task's progress rate and the reference date.
+  - `generateTimelineDates(start, end)`: Generates an array of dates for timeline display.
+  - `flattenTasksWithHierarchy(tasks)`: Sorts tasks in display order considering parent-child relationships.
+
 ## 4. Data & State Management
 
 ### 4.1 Application State

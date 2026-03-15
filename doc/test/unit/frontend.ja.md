@@ -48,3 +48,13 @@
 |                         | UNIT-FE-MNU-002    | プロジェクト切替   | 選択変更時にswitch APIが呼ばれ、リロードされること        |
 |                         | UNIT-FE-MNU-003    | Undo実行           | Undoボタン押下時にUndo APIが呼ばれること                  |
 |                         | UNIT-FE-MNU-004    | Redo実行           | Redoボタン押下時にRedo APIが呼ばれること                  |
+
+### 2.4 ドメインサービス (Domain Layer)
+
+| サービス              | Test-ID               | テスト概要           | 期待値/振る舞い                                             |
+| :-------------------- | :-------------------- | :------------------- | :---------------------------------------------------------- |
+| **GanttChartService** | UNIT-FE-SVC-GANTT-001 | 親タスク期間集約     | 子タスクの最小start_date〜最大due_dateのDateRangeが返ること |
+|                       | UNIT-FE-SVC-GANTT-002 | バー位置計算         | 日付差×dayWidthに基づく正しいleftとwidthが返ること          |
+|                       | UNIT-FE-SVC-GANTT-003 | イナズマ線座標計算   | 進捗率に基づく正しい折れ線座標配列が返ること                |
+|                       | UNIT-FE-SVC-GANTT-004 | タイムライン日付生成 | 開始日〜終了日の連続する日付文字列配列が返ること            |
+|                       | UNIT-FE-SVC-GANTT-005 | タスク階層並替え     | 親タスク→子タスクの順で並び、depthが正しく設定されること    |

@@ -101,6 +101,7 @@ graph TD
   | **SPEC-INIT-001-002** | Init | Manual Sync | Startup Sync | Upon startup, read config files and task data. Switch branches if current Git branch mismatch with project settings. Commit any uncommitted changes. | REQ-INIT-002 |
   | **SPEC-INIT-002-001** | Init | Project Create | API | `POST /api/v1/projects` creates a new project (branch) and updates the configuration file. | REQ-INIT-005 |
   | **SPEC-INIT-003-001** | Init | Project Switch | API | `POST /api/v1/projects/{project_id}/switch` (or `checkout`) switches the branch. | REQ-UI-002 |
+  | **SPEC-INIT-004-001** | Init | Screen Transition | Routing | Based on the system status API result at startup, navigate to `/create_project` if no default project is set, or to `/tasks` if set. | REQ-INIT-004 |
 
 ### 3.6 Common UI (UI)
 

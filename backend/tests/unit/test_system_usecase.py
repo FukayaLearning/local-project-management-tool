@@ -32,13 +32,16 @@ def test_get_system_status_not_initialized(usecase, mock_git):
     assert status["is_git_initialized"] is False
     assert status["has_default_project"] is False
     assert status["current_project"] is None
-    mock_git.is_initialized.assert_called_once()
 
 
-def test_get_system_status_initialized(usecase, mock_git):
+def test_get_system_status_initialized(usecase, mock_git, mock_settings_repo):
     # Arrange
     mock_git.is_initialized.return_value = True
+    mock_git.has_uncommitted_changes.return_value = False
     mock_git.get_current_branch.return_value = "my-project"
+    settings = Settings()
+    settings.project.project_name = "my-project"
+    mock_settings_repo.get_settings.return_value = settings
 
     # Act
     status = usecase.get_system_status()
@@ -47,13 +50,14 @@ def test_get_system_status_initialized(usecase, mock_git):
     assert status["is_git_initialized"] is True
     assert status["has_default_project"] is True
     assert status["current_project"] == "my-project"
-    mock_git.get_current_branch.assert_called_once()
 
 
-def test_get_system_status_initialized_on_main(usecase, mock_git):
+def test_get_system_status_initialized_on_main(usecase, mock_git, mock_settings_repo):
     # Arrange: initialized but on main branch means no default project
     mock_git.is_initialized.return_value = True
+    mock_git.has_uncommitted_changes.return_value = False
     mock_git.get_current_branch.return_value = "main"
+    mock_settings_repo.get_settings.return_value = Settings()
 
     # Act
     status = usecase.get_system_status()

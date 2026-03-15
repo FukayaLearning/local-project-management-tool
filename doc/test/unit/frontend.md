@@ -48,3 +48,13 @@
 |                         | UNIT-FE-MNU-002    | Switch Project       | Switch API is called on selection change, triggers reload |
 |                         | UNIT-FE-MNU-003    | Execute Undo         | Undo API is called when Undo button is clicked            |
 |                         | UNIT-FE-MNU-004    | Execute Redo         | Redo API is called when Redo button is clicked            |
+
+### 2.4 Domain Services (Domain Layer)
+
+| Service               | Test-ID               | Test Summary              | Expected Behavior                                                  |
+| :-------------------- | :-------------------- | :------------------------ | :----------------------------------------------------------------- |
+| **GanttChartService** | UNIT-FE-SVC-GANTT-001 | Parent Date Aggregation   | Returns DateRange with min start_date and max due_date of children |
+|                       | UNIT-FE-SVC-GANTT-002 | Bar Position Calculation  | Returns correct left and width based on date difference × dayWidth |
+|                       | UNIT-FE-SVC-GANTT-003 | Inazuma Line Calculation  | Returns correct polyline coordinate array based on progress rate   |
+|                       | UNIT-FE-SVC-GANTT-004 | Timeline Date Generation  | Returns array of consecutive date strings from start to end        |
+|                       | UNIT-FE-SVC-GANTT-005 | Task Hierarchy Flattening | Tasks sorted parent-first with correct depth values                |

@@ -11,8 +11,9 @@ export class ApiClient {
       "Content-Type": "application/json",
     };
 
-    const config = {
+    const config: RequestInit = {
       ...options,
+      cache: "no-store",
       headers: {
         ...defaultHeaders,
         ...options?.headers,

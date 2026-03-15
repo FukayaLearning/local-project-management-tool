@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { SettingsPage } from "./presentation/pages/SettingsPage";
 import { TaskListPage } from "./presentation/pages/TaskListPage";
 import { ProjectCreatePage } from "./presentation/pages/ProjectCreatePage";
+import { GanttChartPage } from "./presentation/pages/GanttChartPage";
 import { MenuBar } from "./presentation/components/Layout/MenuBar";
 import { useSystemUseCase } from "./application/usecases/useSystemUseCase";
 import "./index.css";
@@ -116,12 +117,7 @@ function App() {
           />
           <Route path="/tasks" element={<TaskListPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route
-            path="/gantt"
-            element={
-              <div className="text-center">Gantt Chart (Not Implemented)</div>
-            }
-          />
+          <Route path="/gantt" element={<GanttChartPage />} />
           <Route path="/" element={<div>Scanning...</div>} />
         </Routes>
       </main>
