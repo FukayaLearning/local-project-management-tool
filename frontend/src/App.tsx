@@ -149,6 +149,7 @@ function GlobalLayout() {
 function App() {
   return (
     <Routes>
+      <Route path="/projects/new" element={<GlobalLayout />} />
       <Route path="/projects/:projectName/*" element={<ProjectLayout />} />
       <Route path="/*" element={<GlobalLayout />} />
     </Routes>

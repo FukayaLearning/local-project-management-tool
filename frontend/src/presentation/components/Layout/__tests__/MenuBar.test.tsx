@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { MenuBar } from "../MenuBar";
 import { ApiClient } from "../../../../infrastructure/api/client";
 
@@ -10,12 +11,8 @@ vi.mock("../../../../infrastructure/api/client", () => ({
   },
 }));
 
-// Mock window.location.reload
-const reloadMock = vi.fn();
-Object.defineProperty(window, "location", {
-  value: { reload: reloadMock },
-  writable: true,
-});
+// No longer overriding window.location.reload directly
+// We will test if onUndo / onRedo are called instead.
 
 // Mock window.alert
 window.alert = vi.fn();
@@ -23,12 +20,18 @@ window.alert = vi.fn();
 describe("MenuBar", () => {
   const mockOnNavigate = vi.fn();
   const mockOnSwitchProject = vi.fn();
+  const mockOnUndo = vi.fn();
+  const mockOnRedo = vi.fn();
+
   const defaultProps = {
+    context: "project" as const,
     currentPage: "tasks",
     onNavigate: mockOnNavigate,
     currentProject: "Project A",
     projects: ["Project A", "Project B"],
     onSwitchProject: mockOnSwitchProject,
+    onUndo: mockOnUndo,
+    onRedo: mockOnRedo,
   };
 
   beforeEach(() => {
@@ -42,7 +45,7 @@ describe("MenuBar", () => {
     expect(screen.getByText("Local PM")).toBeInTheDocument();
     expect(screen.getByText("Tasks")).toBeInTheDocument();
     expect(screen.getByText("Gantt Chart")).toBeInTheDocument();
-    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(screen.getByText("Project Settings")).toBeInTheDocument();
 
     // Check Project Selector
     expect(screen.getByRole("combobox")).toHaveValue("Project A");
@@ -58,15 +61,17 @@ describe("MenuBar", () => {
     const tasksButton = screen.getByRole("button", { name: "Tasks" });
     expect(tasksButton.className).toContain("border-blue-500");
 
-    const settingsButton = screen.getByRole("button", { name: "Settings" });
+    const settingsButton = screen.getByRole("button", {
+      name: "Project Settings",
+    });
     expect(settingsButton.className).toContain("border-transparent");
   });
 
   it("UNIT-FE-MNU-002: Should call onNavigate when buttons clicked", () => {
     render(<MenuBar {...defaultProps} />);
 
-    fireEvent.click(screen.getByText("Settings"));
-    expect(mockOnNavigate).toHaveBeenCalledWith("settings");
+    fireEvent.click(screen.getByText("Project Settings"));
+    expect(mockOnNavigate).toHaveBeenCalledWith("project_settings");
 
     fireEvent.click(screen.getByText("Gantt Chart"));
     expect(mockOnNavigate).toHaveBeenCalledWith("gantt");
@@ -82,26 +87,20 @@ describe("MenuBar", () => {
   });
 
   it("UNIT-FE-MNU-003: Should call Undo API and reload on success", async () => {
-    (ApiClient.post as any).mockResolvedValue({});
-
     render(<MenuBar {...defaultProps} />);
     fireEvent.click(screen.getByText("Undo"));
 
     await waitFor(() => {
-      expect(ApiClient.post).toHaveBeenCalledWith("/tasks/undo", {});
-      expect(reloadMock).toHaveBeenCalled();
+      expect(mockOnUndo).toHaveBeenCalled();
     });
   });
 
   it("UNIT-FE-MNU-004: Should call Redo API and reload on success", async () => {
-    (ApiClient.post as any).mockResolvedValue({});
-
     render(<MenuBar {...defaultProps} />);
     fireEvent.click(screen.getByText("Redo"));
 
     await waitFor(() => {
-      expect(ApiClient.post).toHaveBeenCalledWith("/tasks/redo", {});
-      expect(reloadMock).toHaveBeenCalled();
+      expect(mockOnRedo).toHaveBeenCalled();
     });
   });
 });

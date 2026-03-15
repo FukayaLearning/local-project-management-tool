@@ -3,9 +3,9 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
-import { useSystemUseCase } from "../application/usecases/useSystemUseCase";
+import { useProjectUseCase } from "../application/usecases/useProjectUseCase";
 
-// Mock pages so we don't need contexts
+// Mock pages
 vi.mock("../presentation/pages/SettingsPage", () => ({
   SettingsPage: () => <div>Settings Page Content</div>,
 }));
@@ -18,143 +18,80 @@ vi.mock("../presentation/pages/ProjectCreatePage", () => ({
 vi.mock("../presentation/pages/GanttChartPage", () => ({
   GanttChartPage: () => <div>Gantt Chart Page Content</div>,
 }));
+vi.mock("../presentation/pages/GlobalSettingsPage", () => ({
+  GlobalSettingsPage: () => <div>Global Settings Page Content</div>,
+}));
+vi.mock("../presentation/pages/ProjectManagementPage", () => ({
+  ProjectManagementPage: () => <div>Project Management Page Content</div>,
+}));
 
-// Mock useSystemUseCase
-vi.mock("../application/usecases/useSystemUseCase", () => ({
-  useSystemUseCase: vi.fn(),
+// Mock useProjectUseCase
+vi.mock("../application/usecases/useProjectUseCase", () => ({
+  useProjectUseCase: vi.fn(),
 }));
 
 describe("App Routing and Layout", () => {
-  const mockFetchSystemStatus = vi.fn();
   const mockFetchProjects = vi.fn();
-  const mockSwitchProject = vi.fn();
-  const mockCreateProject = vi.fn();
+  const mockUndo = vi.fn();
+  const mockRedo = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  const setupMock = (systemStatus: any, projects: any, isLoading: boolean) => {
-    (useSystemUseCase as any).mockReturnValue({
-      systemStatus,
-      projects,
-      isLoading,
-      fetchSystemStatus: mockFetchSystemStatus.mockResolvedValue(systemStatus),
-      fetchProjects: mockFetchProjects.mockResolvedValue(projects),
-      switchProject: mockSwitchProject,
-      createProject: mockCreateProject,
-    });
-  };
-
-  it("UNIT-FE-APP-001: Should show loading screen initially", () => {
-    // Return a promise that never resolves to simulate loading state indefinitely for the test
-    const unresolvedPromise = new Promise(() => {});
-    (useSystemUseCase as any).mockReturnValue({
-      systemStatus: null,
-      projects: [],
-      isLoading: true,
-      fetchSystemStatus: vi.fn().mockReturnValue(unresolvedPromise),
+    (useProjectUseCase as any).mockReturnValue({
+      projects: ["Project A", "Project B"],
       fetchProjects: mockFetchProjects,
-      switchProject: mockSwitchProject,
-      createProject: mockCreateProject,
+      undo: mockUndo,
+      redo: mockRedo,
     });
-    render(
-      <MemoryRouter initialEntries={["/"]}>
-        <App />
-      </MemoryRouter>,
-    );
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
-  it("UNIT-FE-APP-002: Should navigate to /create_project if system not initialized", async () => {
-    setupMock(
-      { is_git_initialized: false, has_default_project: false },
-      [],
-      false,
-    );
-
+  it("UNIT-FE-APP-001: Should render ProjectManagementPage on /projects", () => {
     render(
-      <MemoryRouter initialEntries={["/"]}>
+      <MemoryRouter initialEntries={["/projects"]}>
         <App />
       </MemoryRouter>,
     );
-
-    // In our mock, ProjectCreatePage will just render its content.
-    // We need to wait for the async navigation to complete.
     expect(
-      await screen.findByText("Create Project Page Content"),
+      screen.getByText("Project Management Page Content"),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Local PM")).not.toBeInTheDocument();
   });
 
-  it("UNIT-FE-APP-003: Should render MenuBar and TaskListPage on /tasks", async () => {
-    setupMock(
-      {
-        is_git_initialized: true,
-        has_default_project: true,
-        current_project: "ProjA",
-      },
-      ["ProjA"],
-      false,
-    );
-
-    render(
-      <MemoryRouter initialEntries={["/tasks"]}>
-        <App />
-      </MemoryRouter>,
-    );
-
-    // Layout should show MenuBar
-    expect(screen.getByText("Local PM")).toBeInTheDocument();
-    expect(screen.getByText("Tasks")).toBeInTheDocument();
-
-    // MenuBar layout wrap
-    const mainArea = screen.getByRole("main");
-    expect(mainArea).toBeInTheDocument();
-  });
-
-  it("UNIT-FE-APP-004: Should render GanttChartPage on /gantt", async () => {
-    setupMock(
-      {
-        is_git_initialized: true,
-        has_default_project: true,
-        current_project: "ProjA",
-      },
-      ["ProjA"],
-      false,
-    );
-
-    render(
-      <MemoryRouter initialEntries={["/gantt"]}>
-        <App />
-      </MemoryRouter>,
-    );
-
-    // MenuBar should be present
-    expect(screen.getByText("Local PM")).toBeInTheDocument();
-
-    // Gantt Chart should be rendered
-    expect(screen.getByText("Gantt Chart Page Content")).toBeInTheDocument();
-  });
-
-  it("UNIT-FE-APP-005: Should render SettingsPage on /settings", async () => {
-    setupMock(
-      {
-        is_git_initialized: true,
-        has_default_project: true,
-        current_project: "ProjA",
-      },
-      ["ProjA"],
-      false,
-    );
-
+  it("UNIT-FE-APP-002: Should render GlobalSettingsPage on /settings", () => {
     render(
       <MemoryRouter initialEntries={["/settings"]}>
         <App />
       </MemoryRouter>,
     );
+    expect(
+      screen.getByText("Global Settings Page Content"),
+    ).toBeInTheDocument();
+  });
 
-    expect(screen.getByText("Local PM")).toBeInTheDocument();
+  it("UNIT-FE-APP-003: Should render TaskListPage on /projects/:projectName", () => {
+    render(
+      <MemoryRouter initialEntries={["/projects/ProjA"]}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Tasks Page Content")).toBeInTheDocument();
+    expect(mockFetchProjects).toHaveBeenCalled();
+  });
+
+  it("UNIT-FE-APP-004: Should render GanttChartPage on /projects/:projectName/gantts", () => {
+    render(
+      <MemoryRouter initialEntries={["/projects/ProjA/gantts"]}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Gantt Chart Page Content")).toBeInTheDocument();
+  });
+
+  it("UNIT-FE-APP-005: Should render SettingsPage on /projects/:projectName/settings", () => {
+    render(
+      <MemoryRouter initialEntries={["/projects/ProjA/settings"]}>
+        <App />
+      </MemoryRouter>,
+    );
     expect(screen.getByText("Settings Page Content")).toBeInTheDocument();
   });
 });

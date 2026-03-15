@@ -16,7 +16,9 @@ vi.mock(
   "../../../infrastructure/api/repositories/settingsApiRepository",
   () => {
     const SettingsApiRepository = vi.fn();
-    SettingsApiRepository.prototype.getSettings = vi.fn();
+    SettingsApiRepository.prototype.getGlobalSettings = vi.fn();
+    SettingsApiRepository.prototype.updateGlobalSettings = vi.fn();
+    SettingsApiRepository.prototype.getProjectSettings = vi.fn();
     SettingsApiRepository.prototype.updateProjectSettings = vi.fn();
     return { SettingsApiRepository };
   },
@@ -35,16 +37,18 @@ describe("useSettingsUseCase", () => {
   it("fetches settings successfully", async () => {
     // Setup mock
     // @ts-ignore
-    SettingsApiRepository.prototype.getSettings.mockResolvedValue(mockSettings);
+    SettingsApiRepository.prototype.getGlobalSettings.mockResolvedValue(
+      mockSettings.basic,
+    );
 
     const { result } = renderHook(() => useSettingsUseCase());
 
     await act(async () => {
-      await result.current.fetchSettings();
+      await result.current.fetchGlobalSettings();
     });
 
     await waitFor(() => {
-      expect(result.current.settings).toEqual(mockSettings);
+      expect(result.current.globalSettings).toEqual(mockSettings.basic);
     });
   });
 
@@ -53,7 +57,9 @@ describe("useSettingsUseCase", () => {
 
     // Setup mocks
     // @ts-ignore
-    SettingsApiRepository.prototype.getSettings.mockResolvedValue(mockSettings);
+    SettingsApiRepository.prototype.getProjectSettings.mockResolvedValue(
+      mockSettings.project,
+    );
     // @ts-ignore
     SettingsApiRepository.prototype.updateProjectSettings.mockResolvedValue(
       updatedProject,
@@ -63,19 +69,22 @@ describe("useSettingsUseCase", () => {
 
     // Initial fetch
     await act(async () => {
-      await result.current.fetchSettings();
+      await result.current.fetchProjectSettings("Test Project");
     });
 
     // Update
     let res;
     await act(async () => {
-      res = await result.current.updateProjectSettings(updatedProject);
+      res = await result.current.updateProjectSettings(
+        "Test Project",
+        updatedProject,
+      );
     });
 
     expect(res).toEqual(updatedProject);
 
     await waitFor(() => {
-      expect(result.current.settings?.project).toEqual(updatedProject);
+      expect(result.current.projectSettings).toEqual(updatedProject);
     });
   });
 });
