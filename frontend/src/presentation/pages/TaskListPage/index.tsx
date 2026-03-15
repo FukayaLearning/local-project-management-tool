@@ -5,7 +5,11 @@ import { TaskDetailModal } from "./components/TaskDetailModal";
 import { Button } from "../../components/Button";
 import { Task, TaskCreate, TaskUpdate } from "../../../domain/entities/task";
 
-export const TaskListPage: React.FC = () => {
+interface TaskListPageProps {
+  projectName: string;
+}
+
+export const TaskListPage: React.FC<TaskListPageProps> = ({ projectName }) => {
   const {
     tasks,
     isLoading,
@@ -21,8 +25,8 @@ export const TaskListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchTasks(projectName);
+  }, [fetchTasks, projectName]);
 
   const handleCreateClick = () => {
     setEditingTask(null);
@@ -36,16 +40,20 @@ export const TaskListPage: React.FC = () => {
 
   const handleSave = async (data: TaskCreate | TaskUpdate) => {
     if (editingTask) {
-      await updateTask(editingTask.id, data as TaskUpdate);
+      await updateTask(projectName, editingTask.id, data as TaskUpdate);
     } else {
-      await createTask(data as TaskCreate);
+      await createTask(projectName, data as TaskCreate);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
-      await deleteTask(id);
+      await deleteTask(projectName, id);
     }
+  };
+
+  const handleReorder = (orders: { id: string; display_order: number }[]) => {
+    reorderTasks(projectName, orders);
   };
 
   if (isLoading && tasks.length === 0) {
@@ -82,7 +90,7 @@ export const TaskListPage: React.FC = () => {
         )}
         onEdit={handleEditClick}
         onDelete={handleDelete}
-        onReorder={reorderTasks}
+        onReorder={handleReorder}
         isReorderable={searchTerm === ""}
       />
 

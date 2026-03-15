@@ -8,89 +8,71 @@ from backend.app.container import Container
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Task])
+@router.get("/{project_name}/tasks", response_model=List[Task])
 @inject
 def list_tasks(
+    project_name: str,
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    return usecase.list_tasks()
+    return usecase.list_tasks(project_name)
 
 
-@router.get("/{task_id}", response_model=Task)
+@router.get("/{project_name}/tasks/{task_id}", response_model=Task)
 @inject
 def get_task(
+    project_name: str,
     task_id: str,
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    task = usecase.get_task(task_id)
+    task = usecase.get_task(project_name, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
 
-@router.post("/", response_model=Task, status_code=201)
+@router.post("/{project_name}/tasks", response_model=Task, status_code=201)
 @inject
 def create_task(
+    project_name: str,
     dto: TaskCreateDTO,
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    return usecase.create_task(dto)
+    return usecase.create_task(project_name, dto)
 
 
-@router.put("/reorder")
+@router.put("/{project_name}/tasks/reorder")
 @inject
 def reorder_tasks(
+    project_name: str,
     orders: List[TaskOrderUpdateDTO],
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    success = usecase.reorder_tasks(orders)
+    success = usecase.reorder_tasks(project_name, orders)
     if not success:
         raise HTTPException(status_code=400, detail="Failed to reorder tasks")
     return {"message": "Tasks reordered successfully"}
 
 
-@router.put("/{task_id}", response_model=Task)
+@router.put("/{project_name}/tasks/{task_id}", response_model=Task)
 @inject
 def update_task(
+    project_name: str,
     task_id: str,
     dto: TaskUpdateDTO,
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    task = usecase.update_task(task_id, dto)
+    task = usecase.update_task(project_name, task_id, dto)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
 
-@router.delete("/{task_id}", status_code=204)
+@router.delete("/{project_name}/tasks/{task_id}", status_code=204)
 @inject
 def delete_task(
+    project_name: str,
     task_id: str,
     usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
 ):
-    if not usecase.delete_task(task_id):
+    if not usecase.delete_task(project_name, task_id):
         raise HTTPException(status_code=404, detail="Task not found")
-
-
-@router.post("/undo")
-@inject
-def undo_task_change(
-    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
-):
-    try:
-        result = usecase.undo()
-        return {"message": result}
-    except RuntimeError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post("/redo")
-@inject
-def redo_task_change(
-    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
-):
-    try:
-        result = usecase.redo()
-        return {"message": result}
-    except RuntimeError as e:
-        raise HTTPException(status_code=400, detail=str(e))

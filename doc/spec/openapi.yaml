@@ -1,23 +1,23 @@
 openapi: 3.0.0
 info:
   title: Local Project Management Tool API
-  version: 1.0.0
-  description: API Specification for Offline Project Management Tool
+  version: 2.0.0
+  description: API specification for the offline project management tool
 
 paths:
+  /settings:
+    $ref: "./apis/openapi_settings.yaml#/paths/~1settings"
   /projects:
     $ref: "./apis/openapi_projects.yaml#/paths/~1projects"
-  /projects/{project_id}/switch:
-    $ref: "./apis/openapi_projects.yaml#/paths/~1projects~1{project_id}~1switch"
-  /projects/settings:
-    $ref: "./apis/openapi_projects.yaml#/paths/~1projects~1settings"
-  /tasks:
-    $ref: "./apis/openapi_tasks.yaml#/paths/~1tasks"
-  /tasks/{id}:
-    $ref: "./apis/openapi_tasks.yaml#/paths/~1tasks~1{id}"
-  /tasks/undo:
-    $ref: "./apis/openapi_tasks.yaml#/paths/~1tasks~1undo"
-  /tasks/redo:
-    $ref: "./apis/openapi_tasks.yaml#/paths/~1tasks~1redo"
-  /system/status:
-    $ref: "./apis/openapi_system.yaml#/paths/~1system~1status"
+  /projects/{project_name}/settings:
+    $ref: "./apis/openapi_projects.yaml#/paths/~1projects~1{project_name}~1settings"
+  /projects/{project_name}/undo:
+    $ref: "./apis/openapi_projects.yaml#/paths/~1projects~1{project_name}~1undo"
+  /projects/{project_name}/redo:
+    $ref: "./apis/openapi_projects.yaml#/paths/~1projects~1{project_name}~1redo"
+  /projects/{project_name}/tasks:
+    $ref: "./apis/openapi_tasks.yaml#/paths/~1projects~1{project_name}~1tasks"
+  /projects/{project_name}/tasks/{task_id}:
+    $ref: "./apis/openapi_tasks.yaml#/paths/~1projects~1{project_name}~1tasks~1{task_id}"
+  /projects/{project_name}/tasks/reorder:
+    $ref: "./apis/openapi_tasks.yaml#/paths/~1projects~1{project_name}~1tasks~1reorder"

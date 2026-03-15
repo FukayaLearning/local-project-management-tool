@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -18,9 +18,11 @@ test.describe("Integration: UI Layout and Navigation", () => {
   test("IT-SCN-UI-001: Should display common layout elements and navigate correctly", async ({
     page,
   }) => {
-    // 1. Initial Load - should redirect to /tasks
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    // 1. Initial Load - should be able to get to a project
+    await page.goto("/projects/DefaultProject");
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject/, {
+      timeout: 10000,
+    });
 
     // 2. Verify Header and Sidebar existence
     // Assuming Mantine AppShell is used, there should be header and navbar regions
@@ -33,13 +35,15 @@ test.describe("Integration: UI Layout and Navigation", () => {
 
     // 3. Verify Navigation Links
     // Click Settings
-    await page.click('text="Settings"');
-    await expect(page).toHaveURL(/\/settings/);
-    await expect(page.locator("text=Project Settings")).toBeVisible();
+    await page.getByRole("button", { name: "Project Settings" }).click();
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject\/settings/);
+    await expect(page.locator("h1:has-text('Project Settings')")).toBeVisible();
 
     // Click Tasks
-    await page.click('text="Tasks"');
-    await expect(page).toHaveURL(/\/tasks/);
-    await expect(page.locator("text=+ New Task")).toBeVisible();
+    await page.getByRole("button", { name: "Tasks", exact: true }).click();
+    await expect(page).toHaveURL(/.*\/projects\/DefaultProject$/);
+    await expect(
+      page.getByRole("button", { name: "+ New Task" }),
+    ).toBeVisible();
   });
 });

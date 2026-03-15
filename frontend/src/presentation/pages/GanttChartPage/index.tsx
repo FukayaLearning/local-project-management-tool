@@ -8,7 +8,13 @@ const MAX_DAY_WIDTH = 80;
 const ROW_HEIGHT = 36;
 const ZOOM_STEP = 10;
 
-export const GanttChartPage: React.FC = () => {
+interface GanttChartPageProps {
+  projectName: string;
+}
+
+export const GanttChartPage: React.FC<GanttChartPageProps> = ({
+  projectName,
+}) => {
   const { tasks, isLoading, error, fetchTasks, reorderTasks } =
     useTaskUseCase();
   const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
@@ -18,8 +24,8 @@ export const GanttChartPage: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchTasks(projectName);
+  }, [fetchTasks, projectName]);
 
   const handleZoomIn = () => {
     setDayWidth((prev) => Math.min(prev + ZOOM_STEP, MAX_DAY_WIDTH));
@@ -27,6 +33,10 @@ export const GanttChartPage: React.FC = () => {
 
   const handleZoomOut = () => {
     setDayWidth((prev) => Math.max(prev - ZOOM_STEP, MIN_DAY_WIDTH));
+  };
+
+  const handleReorder = (orders: { id: string; display_order: number }[]) => {
+    reorderTasks(projectName, orders);
   };
 
   if (isLoading && tasks.length === 0) {
@@ -89,7 +99,7 @@ export const GanttChartPage: React.FC = () => {
         rowHeight={ROW_HEIGHT}
         showInazumaLine={showInazumaLine}
         referenceDate={referenceDate}
-        onReorder={reorderTasks}
+        onReorder={handleReorder}
       />
     </div>
   );

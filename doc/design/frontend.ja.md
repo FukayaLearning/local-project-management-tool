@@ -4,6 +4,7 @@
 
 本書は「Local Project Management Tool」のフロントエンド設計書です。
 React + TypeScriptを用いたSPA (Single Page Application) として実装し、DDD (Domain-Driven Design) ライクなレイヤードアーキテクチャを採用します。
+本バージョンより、プロジェクトごとの独立したGitリポジトリ管理とマルチプロジェクト対応のアーキテクチャに刷新されています。
 
 ## 2. 全体方針
 
@@ -15,24 +16,29 @@ React + TypeScriptを用いたSPA (Single Page Application) として実装し�
 frontend/src/
 ├── domain/                  # [ドメイン層] ビジネスロジックと型定義
 │   ├── entities/            # 【Entity】Task, Settings, ProjectSettingsなど
-│   ├── repositories/        # 【Repository Interface】ITaskRepository, ISettingsRepository
-│   └── services/            # 【Domain Service】（必要に応じて）
+│   ├── repositories/        # 【Repository Interface】ITaskRepository, ISettingsRepository, IProjectRepository
+│   └── services/            # 【Domain Service】GanttChartServiceなど
 │
 ├── infrastructure/          # [インフラ層] 外部通信の実装
 │   ├── api/                 # APIクライアント
 │   │   ├── client.ts        # fetchラッパー
-│   │   └── repositories/    # Repositoryの実装 (TaskApiRepository, SettingsApiRepository)
+│   │   └── repositories/    # Repositoryの実装 (TaskApiRepository, SettingsApiRepository, ProjectApiRepository)
 │   └── dtos/                # APIレスポンス等の型定義 (Domain Entityへの変換前)
 │
 ├── application/             # [アプリケーション層] ユースケース (Custom Hooks)
-│   └── usecases/            # useTaskUseCase, useSettingsUseCase
+│   ├── providers/           # DependencyProvider (DIコンテナ)
+│   └── usecases/            # useTaskUseCase, useSettingsUseCase, useProjectUseCase
 │
 ├── presentation/            # [プレゼンテーション層] UIコンポーネント
 │   ├── components/          # 共通UI部品 (Button, Input, Modal, etc.)
 │   ├── styles/              # グローバルスタイル (index.css)
 │   └── pages/               # ページコンポーネント (Page/View)
-│       ├── SettingsPage/
-│       └── TaskListPage/
+│       ├── GlobalSettingsPage/ # 全体設定画面
+│       ├── ProjectManagementPage/ # プロジェクト管理画面
+│       ├── ProjectCreatePage/     # プロジェクト新規作成画面
+│       ├── SettingsPage/          # プロジェクト固有設定画面
+│       ├── TaskListPage/          # タスク一覧画面
+│       └── GanttChartPage/        # ガントチャート画面
 │
 └── main.tsx                 # エントリーポイント
 ```
@@ -41,95 +47,73 @@ frontend/src/
 
 - **言語**: TypeScript
 - **フレームワーク**: React (Vite)
-- **スタイリング**: TailwindCSS (プロジェクト標準に準拠) または CSS Modules
+- **UIライブラリ**: Mantine (テーマベースのUI構築)
+- **スタイリング**: TailwindCSS (Utility First CSS)
 - **状態管理**: React Context + Custom Hooks (局所的な状態はuseState)
-- **ルーティング**: React Router (必要に応じて。今回は単一ページまたはタブ切り替え等の簡易な構成も視野だが、拡張性を考慮しRouter導入を推奨)
+- **ルーティング**: React Router (react-router-dom) を用いたURLベースのコンテキスト管理
 - **その他ライブラリ**: ドラッグ＆ドロップによる順序変更のため `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` を使用
 
 ## 3. コンポーネント設計
 
-### 3.1 共通コンポーネント (`presentation/components`)
+### 3.1 共通レイアウト (`presentation/components/Layout`)
 
-- `Button`: ボタン (Primary, Secondary, Danger)
-- `Input`: テキスト入力
-- `Select`: ドロップダウン
-- `Modal`: 汎用モーダルダイアログ
-- `Card`: 枠付きコンテナ
+2種類のコンテキスト（Global / Project）に応じたレイアウトを提供します。
 
-### 3.2 設定画面 (`presentation/pages/SettingsPage`)
+- `App.tsx`: アプリのルート。`BrowserRouter` の配下でコンテキストに応じた `GlobalLayout` と `ProjectLayout` をルーティング。
+- `MenuBar`: ヘッダ部分。Contextパラメーターを受け取り表示を切り替える。
+  - **Global Context**: ロゴ、プロジェクト管理リンク、全体設定リンク。
+  - **Project Context**: ロゴ、プロジェクト管理へ戻るリンク、タスク・ガントチャート・プロジェクト設定リンク、プロジェクト切り替えプルダウン、Undo/Redoボタン。
 
-`SettingsUseCase` を使用してデータを取得・更新します。
+### 3.2 ページコンポーネント (`presentation/pages`)
 
-- `SettingsPage`: ルートコンポーネント。データのロードと保存処理を統括。
-  - `ProjectSettingsForm`: プロジェクト名、期間の設定フォーム。
-  - `BasicSettingsForm`: タスクステータス、休日の設定フォーム（今回は表示のみまたは簡易編集）。
+#### 3.2.1 グローバルコンテキスト
 
-### 3.3 タスク一覧画面 (`presentation/pages/TaskListPage`)
+- `ProjectManagementPage`: 既存プロジェクトの一覧表示と新規プロジェクト作成画面へのナビゲーションを提供。`useProjectUseCase`を利用。
+- `GlobalSettingsPage`: 全体で使用される基本設定（BasicSettings: 1日の標準労働時間、タスクステータス・タイプ、休日定義）を表示。`useSettingsUseCase`を利用。
+- `ProjectCreatePage`: 新規プロジェクトを作成するための画面。プロジェクト名を入力して作成ボタンを押下。作成完了後、該当プロジェクト画面へ自動遷移。
 
-`TaskUseCase` を使用してタスク操作を行います。
+#### 3.2.2 プロジェクトコンテキスト (`/projects/:projectName/*`)
 
-- `TaskListPage`: ルートコンポーネント。
-  - `TaskToolbar`: 新規作成ボタン、フィルタリング、表示切り替え (List/Gantt)。
-  - `TaskListView`: テーブル形式でのタスク一覧表示。SortableContextを用いてドラッグ＆ドロップの並び替えをサポート。
-    - `TaskRow`: 各タスクの行。編集・削除アクションを含む。
-  - `GanttChartView`: ガントチャート形式での表示。ドラッグ＆ドロップの並び替えをサポート。
-    - `GanttBar`: タスクの期間を示すバー。
-  - `TaskDetailModal`: タスクの新規作成・編集用モーダル。
-    - `TaskForm`: タイトル、担当者、期間などの入力フォーム。
+URLパスパラメーター `projectName` を取得し、各ユースケースへ渡してデータ取得と更新を行います。
 
-### 3.4 共通レイアウト (`presentation/components/Layout`)
-
-- `AppLayout`: 全画面共通のラッパーコンポーネント。
-- `MenuBar`: ヘッダー部分。ロゴ、画面遷移リンク、プロジェクト選択ドロップダウンを含む。
-  - 画面遷移: 「タスク一覧」「ガントチャート」
-  - プロジェクト選択: APIから取得したプロジェクト一覧を表示し、変更時に `useProject` フックを通じてアクティブなプロジェクトを切り替える。
-  - Undo/Redo: 「Undo」「Redo」ボタンを配置し、APIをコールして変更を取り消し・やり直しする。
-
-### 3.5 新規プロジェクト作成画面 (`presentation/pages/ProjectCreatePage`)
-
-初期化未済の場合、またはユーザーが新規作成を選択した場合に表示されます。
-
-- `ProjectCreatePage`: プロジェクト名入力フォームを提供。
-  - `ProjectNameInput`: プロジェクト名を入力。
-  - `CreateButton`: 作成を実行。成功時はタスク一覧へ遷移。
-
-### 3.6 ガントチャートページ (`presentation/pages/GanttChartPage`)
-
-`TaskUseCase` でタスクデータを取得し、`GanttChartService` で描画用データに変換して表示します。
-
-- `GanttChartPage`: ルートコンポーネント。タスク取得、ズーム制御（dayWidth）、イナズマ線表示ON/OFF、基準日選択の状態管理。
-  - `GanttChart`: チャート領域全体。タスクラベル列＋タイムライン列を横並びで描画。
-    - `TimelineHeader`: 日付列ヘッダー。ズームレベルに応じて日付ラベルを表示。
-    - `GanttBar`: 各タスクの計画バー。開始日〜終了日に基づくバー描画。親タスクはサマリースタイル（別色）で子の期間を包含。進捗率の視覚表現を含む。
-    - `InazumaLine`: SVG `<path>` で進捗率に基づく折れ線を描画。赤い破線スタイル。基準日時点での各タスクの進捗状況を視覚化。
-
-### 3.7 ドメインサービス (`domain/services`)
-
-- `GanttChartService`: ガントチャート描画に必要な計算ロジックを純粋関数として提供。
-  - `calculateParentDateRange(parentTask, childTasks)`: 親タスクの期間を子タスクの最小start_date〜最大due_dateに集約。
-  - `calculateBarPosition(startDate, dueDate, timelineStart, dayWidth)`: バーのleft/widthをピクセル単位で計算。
-  - `calculateInazumaLinePoints(tasks, referenceDate, timelineStart, dayWidth, rowHeight)`: 各タスクの進捗率と基準日からイナズマ線の折れ線座標を算出。
-  - `generateTimelineDates(start, end)`: タイムライン表示用の日付配列を生成。
-  - `flattenTasksWithHierarchy(tasks)`: 親子関係を考慮した表示順序にタスクを並び替え。
+- `TaskListPage`: タスク一覧。`useTaskUseCase`を使用。
+  - 新規作成、インライン編集、ドラッグ＆ドロップによる順序変更機能を包含。
+  - `TaskDetailModal`: タスクの詳細編集モーダル。
+- `GanttChartPage`: ガントチャート表示。
+  - 依存する `GanttChartService` を用いて、親子関係や進捗を示すイナズマ線の計算と描画を実行。
+  - ズームIn/Out制御、ドラッグ＆ドロップのタスク入れ替え対応。
+- `SettingsPage`: プロジェクト単位の設定画面。
+  - `ProjectSettingsForm`: プロジェクト特有設定（名称の変更や設定のオーバーライド）を編集。
+  - 全体設定（Global Settings）も参照用ボードとして表示。
 
 ## 4. データ・状態管理
 
 ### 4.1 アプリケーション状態 (Application State)
 
-Redux等の大規模なStoreは使用せず、Custom Hooks (`useTaskUseCase` 等) が返す状態 (`data`, `isLoading`, `error`) を各ページのルートコンポーネントで受け取り、子コンポーネントにPropsとして渡す方針とします。
+Redux等のグローバルストアは使用せず、依存注入(DI)コンテナ `DependencyProvider` を通じてRepository層を注入された `Custom Hooks` (`useTaskUseCase`, `useProjectUseCase` 等) が状態 (`data`, `isLoading`, `error`) を管理します。ページルートコンポーネントがこれを購読し、子コンポーネントへPropsとして渡す設計（Prop Drillingの最小化）です。
 
 ### 4.2 API連携 (Infrastructure)
 
-- **Repository Pattern**: `infrastructure/api/repositories` 内で `fetch` または `axios` を用いてバックエンドAPIをコールします。
-- **DTO -> Entity変換**: APIからのレスポンス(JSON)を、ドメイン層で定義されたEntityクラス/インターフェースに変換してアプリケーション層に返します。
+- **Repository Pattern**: `infrastructure/api/repositories` 内の `ProjectApiRepository`, `TaskApiRepository`, `SettingsApiRepository` 等が `ApiClient`クラスを用いてバックエンドAPIをコール。
+- 全てのプロジェクト内データを操作するAPIは、URLパスとして `projectName` を必要とします。(例: `GET /api/v1/projects/:projectName/tasks`)
+- 変換: APIからのJSONレスポンスはInfrastructure層・UseCase層を経てDomain Entityへ変換・適用されます。
 
-### 4.3 初期化フローとルーティング
+### 4.3 初期化とルーティング定義
 
-1. アプリケーション起動時 (`App.tsx`) に `GET /system/status` をコールし、初期化状態を確認します。
-2. 未初期化またはデフォルトプロジェクト未設定の場合、`/create-project` (ProjectCreatePage) へリダイレクトします。
-3. 初期化済みの場合、`/tasks` (TaskListPage) へ遷移します。
+React Routerによるルーティング定義:
+
+1. `/*`: `GlobalLayout`
+   - `/projects` -> `ProjectManagementPage`
+   - `/projects/new` -> `ProjectCreatePage`
+   - `/settings` -> `GlobalSettingsPage`
+   - `/` -> `/projects` へのリダイレクト
+2. `/projects/:projectName/*`: `ProjectLayout`
+   - `/` -> `TaskListPage`
+   - `/gantts` -> `GanttChartPage`
+   - `/settings` -> `SettingsPage`
 
 ## 5. エラーハンドリング
 
-- API呼び出しのエラーは `usecases` でキャッチし、エラー状態 (`error: Error | null`) としてコンポーネントに通知します。
-- 画面上では `Toast` またはエラーメッセージ表示エリアを用いてユーザーに通知します。
+- API呼び出しにおけるエラーは `usecases` でキャッチし、ステート (`error: Error | null`) として保持され、コンポーネントへ渡ります。
+- UI上では、エラーメッセージ表示エリアを通してユーザーにフィードバックを提供します。
+- 操作エラー時（例: プロジェクト作成失敗時）は各フォーム内の即時エラー表示で対応します。

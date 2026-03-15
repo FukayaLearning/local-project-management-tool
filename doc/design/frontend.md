@@ -3,7 +3,8 @@
 ## 1. Overview
 
 This document is the Frontend Design for the "Local Project Management Tool".
-It is implemented as a SPA (Single Page Application) using React + TypeScript, adopting a DDD (Domain-Driven Design)-like Layered Architecture.
+It is implemented as an SPA (Single Page Application) using React + TypeScript, adopting a DDD (Domain-Driven Design)-like Layered Architecture.
+As of the current version, the architecture has been entirely renewed to support multi-project environments and independent per-project Git repositories.
 
 ## 2. General Strategy
 
@@ -15,24 +16,29 @@ Following the rules in `coding.md`, the directory structure and responsibility s
 frontend/src/
 ├── domain/                  # [Domain Layer] Business logic and type definitions
 │   ├── entities/            # [Entity] Task, Settings, ProjectSettings, etc.
-│   ├── repositories/        # [Repository Interface] ITaskRepository, ISettingsRepository
-│   └── services/            # [Domain Service] (If necessary)
+│   ├── repositories/        # [Repository Interface] ITaskRepository, ISettingsRepository, IProjectRepository
+│   └── services/            # [Domain Service] e.g. GanttChartService
 │
 ├── infrastructure/          # [Infrastructure Layer] External communication implementation
 │   ├── api/                 # API Client
 │   │   ├── client.ts        # fetch wrapper
-│   │   └── repositories/    # Repository Implementation (TaskApiRepository, SettingsApiRepository)
+│   │   └── repositories/    # Repository implementations (TaskApiRepository, SettingsApiRepository, ProjectApiRepository)
 │   └── dtos/                # API Response type definitions (Before conversion to Domain Entity)
 │
 ├── application/             # [Application Layer] Use Cases (Custom Hooks)
-│   └── usecases/            # useTaskUseCase, useSettingsUseCase
+│   ├── providers/           # DependencyProvider (DI Container)
+│   └── usecases/            # useTaskUseCase, useSettingsUseCase, useProjectUseCase
 │
 ├── presentation/            # [Presentation Layer] UI Components
 │   ├── components/          # Common UI Parts (Button, Input, Modal, etc.)
 │   ├── styles/              # Global Styles (index.css)
 │   └── pages/               # Page Components (Page/View)
-│       ├── SettingsPage/
-│       └── TaskListPage/
+│       ├── GlobalSettingsPage/ # Global configuration page
+│       ├── ProjectManagementPage/ # Project listing page
+│       ├── ProjectCreatePage/     # New project creation page
+│       ├── SettingsPage/          # Per-project settings page
+│       ├── TaskListPage/          # Task list page
+│       └── GanttChartPage/        # Gantt chart page
 │
 └── main.tsx                 # Entry Point
 ```
@@ -41,95 +47,73 @@ frontend/src/
 
 - **Language**: TypeScript
 - **Framework**: React (Vite)
-- **Styling**: TailwindCSS (Standard compliance) or CSS Modules
-- **State Management**: React Context + Custom Hooks (Local state uses useState)
-- **Routing**: React Router (Recommended for scalability)
-- **Other Libraries**: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` for drag and drop task reordering.
+- **UI Library**: Mantine (Theme-based UI creation)
+- **Styling**: TailwindCSS (Utility First CSS)
+- **State Management**: React Context + Custom Hooks (Local state uses `useState`)
+- **Routing**: React Router (`react-router-dom`) for context-based URL manipulation
+- **Other Libraries**: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` for drag-and-drop task reordering.
 
 ## 3. Component Design
 
-### 3.1 Common Components (`presentation/components`)
+### 3.1 Common Layout (`presentation/components/Layout`)
 
-- `Button`: Buttons (Primary, Secondary, Danger)
-- `Input`: Text Input
-- `Select`: Dropdown
-- `Modal`: Generic Modal Dialog
-- `Card`: Container with border
+Provides a layout corresponding to two distinct contexts (Global / Project).
 
-### 3.2 Settings Page (`presentation/pages/SettingsPage`)
+- `App.tsx`: App Root. Routes betweeen `GlobalLayout` and `ProjectLayout` based on URL.
+- `MenuBar`: Header portion. Receives a Context parameter to toggle available actions.
+  - **Global Context**: Logo, 'Project Management' link, 'Basic Settings' link.
+  - **Project Context**: Logo, 'Back to Projects' link, Task/Gantt/Project Settings links, Project switcher dropdown, Undo/Redo buttons.
 
-Uses `SettingsUseCase` to fetch and update data.
+### 3.2 Page Components (`presentation/pages`)
 
-- `SettingsPage`: Root component. Manages data loading and saving.
-  - `ProjectSettingsForm`: Form for Project Name, Duration.
-  - `BasicSettingsForm`: Form for Status definitions, Holidays (Read-only or simple edit).
+#### 3.2.1 Global Context
 
-### 3.3 Task List Page (`presentation/pages/TaskListPage`)
+- `ProjectManagementPage`: Lists existing projects and provides navigation to the new project creation page. Uses `useProjectUseCase`.
+- `GlobalSettingsPage`: Displays basic settings utilized across the entire application (e.g., standard work hours, core task statuses/types, holiday definitions). Uses `useSettingsUseCase`.
+- `ProjectCreatePage`: Page for creating a new project. Submit project name to initialize a repository. Upon success, auto-navigates to the project screen.
 
-Uses `TaskUseCase` for task operations.
+#### 3.2.2 Project Context (`/projects/:projectName/*`)
 
-- `TaskListPage`: Root component.
-  - `TaskToolbar`: New Task button, Filtering, View Switcher (List/Gantt).
-  - `TaskListView`: Task list in table format. Supports drag and drop reordering using SortableContext.
-    - `TaskRow`: Row for each task. Includes Edit/Delete actions.
-  - `GanttChartView`: Display in Gantt Chart format. Supports drag and drop reordering.
-    - `GanttBar`: Bar representing task duration.
-  - `TaskDetailModal`: Modal for creating/editing tasks.
-    - `TaskForm`: Input form for Title, Assignee, Duration, etc.
+Extracts the `projectName` URL path parameter to pass to use-cases for targeted data retrieval/updates.
 
-### 3.4 Common Layout (`presentation/components/Layout`)
-
-- `AppLayout`: Wrapper component common to all screens.
-- `MenuBar`: Header part. Includes logo, screen navigation links, project selection dropdown.
-  - Navigation: "Task List", "Gantt Chart".
-  - Project Selection: Displays project list fetched from API. Switches active project via `useProject` hook upon change.
-  - Undo/Redo: Places "Undo" and "Redo" buttons to call API for reverting/redoing changes.
-
-### 3.5 New Project Creation Page (`presentation/pages/ProjectCreatePage`)
-
-Displayed when not initialized or when user selects "Create New Project".
-
-- `ProjectCreatePage`: Provides project name input form.
-  - `ProjectNameInput`: Input for project name.
-  - `CreateButton`: Executes creation. Redirects to Task List on success.
-
-### 3.6 Gantt Chart Page (`presentation/pages/GanttChartPage`)
-
-Fetches task data via `TaskUseCase` and converts it to rendering data using `GanttChartService`.
-
-- `GanttChartPage`: Root component. Manages task fetching, zoom control (dayWidth), Inazuma line toggle, and reference date selection.
-  - `GanttChart`: Chart area. Renders task label column and timeline column side by side.
-    - `TimelineHeader`: Date column header. Displays date labels according to zoom level.
-    - `GanttBar`: Task bar for each task. Renders bar based on start_date to due_date. Parent tasks use a summary style (different color) encompassing child ranges. Includes progress rate visualization.
-    - `InazumaLine`: Draws a polyline using SVG `<path>` based on progress rates. Red dashed line style. Visualizes progress status of each task at the reference date.
-
-### 3.7 Domain Services (`domain/services`)
-
-- `GanttChartService`: Provides calculation logic for Gantt chart rendering as pure functions.
-  - `calculateParentDateRange(parentTask, childTasks)`: Aggregates parent task range to the min start_date and max due_date of its children.
-  - `calculateBarPosition(startDate, dueDate, timelineStart, dayWidth)`: Calculates bar left/width in pixels.
-  - `calculateInazumaLinePoints(tasks, referenceDate, timelineStart, dayWidth, rowHeight)`: Calculates Inazuma line polyline coordinates from each task's progress rate and the reference date.
-  - `generateTimelineDates(start, end)`: Generates an array of dates for timeline display.
-  - `flattenTasksWithHierarchy(tasks)`: Sorts tasks in display order considering parent-child relationships.
+- `TaskListPage`: Lists tasks. Uses `useTaskUseCase`.
+  - Includes creation, inline-editing, and drag-and-drop item re-ordering.
+  - `TaskDetailModal`: Modal form for comprehensive task edits.
+- `GanttChartPage`: Renders a Gantt chart.
+  - Depends on `GanttChartService` to calculate geometries for dependencies and the progress 'Inazuma' polyline.
+  - Toggles zoom levels and allows drag-and-drop vertical repositioning.
+- `SettingsPage`: Settings scoped down to a single project.
+  - `ProjectSettingsForm`: For modifications strictly isolated to the project itself (name or setting overrides).
+  - Also displays global basic settings in a read-only informational context.
 
 ## 4. Data & State Management
 
 ### 4.1 Application State
 
-Large-scale stores like Redux are not used. State returned by Custom Hooks (`useTaskUseCase`, etc.) such as `data`, `isLoading`, `error` is received by the page's root component and passed down to child components as Props.
+Does not utilize monolithic global stores (e.g., Redux). Uses a Dependency Injection (DI) container pattern (`DependencyProvider`). Repositories are injected into Custom Hooks (`useTaskUseCase`, `useProjectUseCase`, etc.). These hooks manage states like `data`, `isLoading`, and `error`. Top-level page components subscribe to these updates and push data down as React Props (minimizing unnecessary prop-drilling).
 
 ### 4.2 API Integration (Infrastructure)
 
-- **Repository Pattern**: Calls backend APIs using `fetch` or `axios` within `infrastructure/api/repositories`.
-- **DTO -> Entity Conversion**: Converts API responses (JSON) into Domain Layer Entity classes/interfaces before returning to the Application Layer.
+- **Repository Pattern**: Repositories defined in `infrastructure/api/repositories` (`ProjectApiRepository`, `TaskApiRepository`, `SettingsApiRepository`) use `ApiClient` under the hood.
+- All mutating or fetching operations inside a project require the `projectName` in the URL (e.g., `GET /api/v1/projects/:projectName/tasks`).
+- Data passes from API JSON representations into DTOs, then resolves as strongly typed Domain Entities within the Application Layer.
 
 ### 4.3 Initialization Flow & Routing
 
-1.  Call `GET /system/status` at application startup (`App.tsx`) to check initialization status.
-2.  If not initialized or default project is not set, redirect to `/create-project` (ProjectCreatePage).
-3.  If initialized, transition to `/tasks` (TaskListPage).
+React Router is defined as follows:
+
+1. `/*`: Handled by `GlobalLayout`
+   - `/projects` -> `ProjectManagementPage`
+   - `/projects/new` -> `ProjectCreatePage`
+   - `/settings` -> `GlobalSettingsPage`
+   - `/` -> Redirects to `/projects`
+2. `/projects/:projectName/*`: Handled by `ProjectLayout`
+   - `/` -> `TaskListPage`
+   - `/gantts` -> `GanttChartPage`
+   - `/settings` -> `SettingsPage`
 
 ## 5. Error Handling
 
-- API errors are caught in `usecases` and notified to components as error state (`error: Error | null`).
-- Notified to the user via `Toast` or error message display areas on the screen.
+- API invocation failures are immediately caught inside `usecases`. The failure is preserved in the local `error: Error | null` state object.
+- At the UI level, the corresponding views present these errors within designated notification wrappers or form-error highlights.
+- For interactive tasks like project creation, errors bubble up to immediately display inline alongside the submit action.

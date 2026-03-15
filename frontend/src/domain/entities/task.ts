@@ -12,11 +12,12 @@ export interface Task {
   actual_hours?: number | null;
   progress: number;
   display_order: number;
+  actual_start_date?: string | null;
+  actual_end_date?: string | null;
 }
 
-// Helper types for UI or creation
 export type TaskCreate = Omit<Task, "id" | "actual_hours" | "progress"> & {
-  id?: string; // Optional if created locally before sync, but usually defined by backend
+  id?: string;
 };
 
 export type TaskUpdate = Partial<Task>;

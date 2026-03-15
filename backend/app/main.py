@@ -1,9 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dependency_injector.wiring import inject, Provide
-from .presentation.api.v1.endpoints import projects, tasks, system
-from .application.usecases.system_usecase import SystemUseCase
+from .presentation.api.v1.endpoints import projects, tasks, settings
 from .container import Container
 
 
@@ -12,8 +10,6 @@ container = Container()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    system_usecase = container.system_usecase()
-    system_usecase.initialize_system()
     yield
 
 
@@ -34,9 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(settings.router, prefix="/api/v1/settings", tags=["settings"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
-app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
+app.include_router(tasks.router, prefix="/api/v1/projects", tags=["tasks"])
 
 
 @app.get("/")

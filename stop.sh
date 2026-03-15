@@ -11,6 +11,6 @@ echo "Stopping Application (PRODUCTION mode)..."
 cd "${REPO_ROOT}"
 
 # Stop services
-docker compose -f docker-compose.prod.yaml down "$@"
+docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down --remove-orphans "$@"
 
 echo "Application stopped."

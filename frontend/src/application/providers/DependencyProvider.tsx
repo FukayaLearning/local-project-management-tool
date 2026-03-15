@@ -1,12 +1,12 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { ISettingsRepository } from "../../domain/repositories/settingsRepository";
 import { ITaskRepository } from "../../domain/repositories/taskRepository";
-import { ISystemRepository } from "../../domain/repositories/systemRepository";
+import { IProjectRepository } from "../../domain/repositories/projectRepository";
 
 export interface DependencyContextType {
   settingsRepository: ISettingsRepository;
   taskRepository: ITaskRepository;
-  systemRepository: ISystemRepository;
+  projectRepository: IProjectRepository;
 }
 
 const DependencyContext = createContext<DependencyContextType | null>(null);

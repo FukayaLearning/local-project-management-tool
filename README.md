@@ -9,7 +9,7 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 - **Offline First**: No internet connection required. Runs entirely on your local machine.
 - **File-Based**: Data is stored in human-readable JSON and CSV formats, managed by Git.
 - **Powerful History**: Robust Undo/Redo functionality powered by Git integration.
-- **Project Management**: Create and switch between multiple projects. Each project is managed as a separate Git branch.
+- **Project Management**: Create and switch between multiple projects. Each project is managed as a separate Git repository within its own directory.
 - **Gantt Chart**: Visualize task schedules with a Gantt chart. Parent tasks automatically aggregate child task date ranges. Includes an Inazuma (progress) line to compare actual progress against the plan.
 - **Smart Initialization**: Automatically guides you to project creation on first launch.
 
@@ -19,7 +19,13 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 .
 ├── backend/            # Python (FastAPI) Application
 │   ├── app/            # Application Logic
-│   └── data/           # User Data (JSON/CSV) - .gitignored
+│   └── data/           # Global Settings and All Projects Data
+│       ├── setting.json # Global settings (not tracked by Git)
+│       ├── ProjectA/   # Project-specific directory
+│       │   ├── .git/   # Independent Git repository for the project
+│       │   ├── setting.json # Project settings (tracked by Git)
+│       │   └── tasks.csv    # Task data (tracked by Git)
+│       └── ProjectB/   # Another project
 ├── frontend/           # React Application
 ├── doc/                # Documentation
 └── docker-compose.yml  # Docker Composition

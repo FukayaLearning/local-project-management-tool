@@ -57,33 +57,4 @@ export class ApiClient {
   static async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
-
-  static async getSystemStatus(): Promise<any> {
-    return this.get<any>("/system/status");
-  }
-
-  static async createProject(name: string): Promise<any> {
-    return this.post<any>("/projects/", { project_name: name });
-  }
-
-  static async ensureSystemInitialized(): Promise<void> {
-    try {
-      const status = await this.getSystemStatus();
-      if (!status.is_git_initialized || !status.has_default_project) {
-        console.log(
-          "System not initialized or no default project. Creating Default Project...",
-        );
-        // The backend handles initialization if needed when creating a project
-        try {
-          await this.createProject("Default Project");
-        } catch (e: any) {
-          // Ignore if project already exists (e.g. from previous run)
-          console.log("Project creation info:", e.message);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to ensure system initialization:", error);
-      // Don't throw, let the test fail naturally if setup failed, to see logs
-    }
-  }
 }

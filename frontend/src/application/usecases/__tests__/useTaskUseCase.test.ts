@@ -40,7 +40,7 @@ describe("useTaskUseCase", () => {
 
     // Trigger fetch
     await act(async () => {
-      await result.current.fetchTasks();
+      await result.current.fetchTasks("ProjectA");
     });
 
     expect(result.current.isLoading).toBe(false);
@@ -59,7 +59,7 @@ describe("useTaskUseCase", () => {
     const { result } = renderHook(() => useTaskUseCase());
 
     await act(async () => {
-      await result.current.fetchTasks();
+      await result.current.fetchTasks("ProjectA");
     });
 
     expect(result.current.isLoading).toBe(false);
@@ -78,13 +78,16 @@ describe("useTaskUseCase", () => {
     const { result } = renderHook(() => useTaskUseCase());
 
     await act(async () => {
-      await result.current.createTask(newTask as any);
+      await result.current.createTask("ProjectA", newTask as any);
     });
 
     await waitFor(() => {
       expect(result.current.tasks).toContainEqual(createdTask);
     });
-    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(
+      "ProjectA",
+      newTask,
+    );
   });
 
   it("creates task with parent successfully", async () => {
@@ -96,13 +99,16 @@ describe("useTaskUseCase", () => {
     const { result } = renderHook(() => useTaskUseCase());
 
     await act(async () => {
-      await result.current.createTask(newTask as any);
+      await result.current.createTask("ProjectA", newTask as any);
     });
 
     await waitFor(() => {
       expect(result.current.tasks).toContainEqual(createdTask);
     });
-    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(
+      "ProjectA",
+      newTask,
+    );
   });
 
   it("reorders tasks successfully", async () => {
@@ -114,12 +120,15 @@ describe("useTaskUseCase", () => {
     const { result } = renderHook(() => useTaskUseCase());
 
     await act(async () => {
-      await result.current.reorderTasks([{ id: "1", display_order: 1 }]);
+      await result.current.reorderTasks("ProjectA", [
+        { id: "1", display_order: 1 },
+      ]);
     });
 
-    expect(TaskApiRepository.prototype.updateOrders).toHaveBeenCalledWith([
-      { id: "1", display_order: 1 },
-    ]);
-    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalled();
+    expect(TaskApiRepository.prototype.updateOrders).toHaveBeenCalledWith(
+      "ProjectA",
+      [{ id: "1", display_order: 1 }],
+    );
+    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalledWith("ProjectA");
   });
 });

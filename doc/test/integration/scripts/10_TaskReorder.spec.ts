@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -40,8 +40,16 @@ async function dragAndDrop(page: any, src: any, dst: any) {
 }
 
 test.describe("Integration: Task Reorder", () => {
+  const testProjectName = `ReorderProject_${Date.now()}`;
+
   test.beforeEach(async ({ request }) => {
-    await ensureSystemInitialized(request);
+    const res = await request.get("/api/v1/projects/");
+    const projects = await res.json();
+    if (!projects.includes(testProjectName)) {
+      await request.post("/api/v1/projects/", {
+        data: { project_name: testProjectName },
+      });
+    }
   });
 
   test("IT-SCN-REORDER-001: Should drag and drop task rows in Task List", async ({
@@ -52,14 +60,14 @@ test.describe("Integration: Task Reorder", () => {
     const taskTitle2 = `T2 ${Date.now()}`;
 
     // Create tasks via API since form usage is verified in other tests
-    await request.post("/api/v1/tasks/", {
+    await request.post(`/api/v1/projects/${testProjectName}/tasks`, {
       data: { title: taskTitle1, status: "New" },
     });
-    await request.post("/api/v1/tasks/", {
+    await request.post(`/api/v1/projects/${testProjectName}/tasks`, {
       data: { title: taskTitle2, status: "New" },
     });
 
-    await page.goto("/tasks");
+    await page.goto(`/projects/${testProjectName}`);
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });
@@ -116,7 +124,7 @@ test.describe("Integration: Task Reorder", () => {
       .split("T")[0];
 
     // Create Tasks via API to set dates properly
-    await request.post("/api/v1/tasks/", {
+    await request.post(`/api/v1/projects/${testProjectName}/tasks`, {
       data: {
         title: taskTitle1,
         status: "New",
@@ -124,7 +132,7 @@ test.describe("Integration: Task Reorder", () => {
         due_date: dueDate,
       },
     });
-    await request.post("/api/v1/tasks/", {
+    await request.post(`/api/v1/projects/${testProjectName}/tasks`, {
       data: {
         title: taskTitle2,
         status: "New",
@@ -133,7 +141,7 @@ test.describe("Integration: Task Reorder", () => {
       },
     });
 
-    await page.goto("/gantt");
+    await page.goto(`/projects/${testProjectName}/gantt`);
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });

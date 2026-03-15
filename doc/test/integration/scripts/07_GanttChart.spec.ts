@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -19,12 +19,14 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     page,
   }) => {
     // Navigate to Gantt Chart page
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await page.goto("/projects/DefaultProject");
+    await expect(page.locator("text=Loading")).not.toBeVisible({
+      timeout: 10000,
+    });
 
     // Click Gantt Chart in navigation
     await page.click('text="Gantt Chart"');
-    await expect(page).toHaveURL(/\/gantt/);
+    await expect(page).toHaveURL(/.*\/gantt/);
 
     // Verify Gantt Chart title is displayed
     await expect(page.locator("text=Gantt Chart").first()).toBeVisible();
@@ -48,7 +50,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
       .toISOString()
       .split("T")[0];
 
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Gantt Test Task",
         status: "New",
@@ -59,7 +61,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     });
 
     // Navigate to Gantt Chart page
-    await page.goto("/gantt");
+    await page.goto("/projects/DefaultProject/gantt");
     await expect(page.locator("text=Gantt Chart").first()).toBeVisible({
       timeout: 10000,
     });
@@ -79,7 +81,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
       .toISOString()
       .split("T")[0];
 
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Inazuma Task 1",
         status: "New",
@@ -88,7 +90,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
         progress: 20,
       },
     });
-    await request.post("/api/v1/tasks/", {
+    await request.post("/api/v1/projects/DefaultProject/tasks", {
       data: {
         title: "Inazuma Task 2",
         status: "Doing",
@@ -99,7 +101,7 @@ test.describe("Integration: Gantt Chart Display Flow", () => {
     });
 
     // Navigate to Gantt Chart page
-    await page.goto("/gantt");
+    await page.goto("/projects/DefaultProject/gantt");
     await expect(page.locator("text=Gantt Chart").first()).toBeVisible({
       timeout: 10000,
     });

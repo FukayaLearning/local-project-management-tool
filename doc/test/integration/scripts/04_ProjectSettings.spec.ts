@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 async function ensureSystemInitialized(request: any) {
-  const statusRes = await request.get("/api/v1/system/status");
-  const status = await statusRes.json();
-  if (!status.is_git_initialized || !status.has_default_project) {
+  const res = await request.get("/api/v1/projects/");
+  const projects = await res.json();
+  if (!projects.includes("DefaultProject")) {
     await request.post("/api/v1/projects/", {
-      data: { project_name: "Default Project" },
+      data: { project_name: "DefaultProject" },
     });
   }
 }
@@ -18,7 +18,7 @@ test.describe("Integration: Project Settings", () => {
   test("IT-SCN-SET-001/002: Should display and update project name", async ({
     page,
   }) => {
-    await page.goto("/settings");
+    await page.goto("/projects/DefaultProject/settings");
 
     // Loading 待機
     await expect(page.locator("text=Loading")).not.toBeVisible({

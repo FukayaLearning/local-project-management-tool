@@ -1,9 +1,18 @@
 paths:
-  /tasks:
+  /projects/{project_name}/tasks:
     get:
-      summary: Get Task List
+      summary: List Tasks
+      description: Reads from CSV and returns all task data for the specified project.
+      operationId: listTasks
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
       responses:
         "200":
           description: Success
@@ -13,10 +22,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Task"
+        "404":
+          description: Project not found
     post:
       summary: Create Task
+      description: Creates a new task in the specified project and Git commits.
+      operationId: createTask
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
       requestBody:
         required: true
         content:
@@ -25,19 +45,24 @@ paths:
               $ref: "#/components/schemas/TaskInput"
       responses:
         "201":
-          description: Created
+          description: Created successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
 
-  /tasks/{id}:
+  /projects/{project_name}/tasks/{task_id}:
     get:
-      summary: Get Task Details
+      summary: Get Task Detail
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
@@ -49,12 +74,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
+        "404":
+          description: Task not found
     put:
       summary: Update Task
+      description: Updates a task in the specified project and Git commits.
+      operationId: updateTask
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
@@ -67,30 +101,45 @@ paths:
               $ref: "#/components/schemas/TaskInput"
       responses:
         "200":
-          description: Updated
+          description: Update successful
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
     delete:
       summary: Delete Task
+      description: Deletes a task from the specified project and Git commits.
+      operationId: deleteTask
       tags:
         - tasks
       parameters:
-        - name: id
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
           in: path
           required: true
           schema:
             type: string
       responses:
         "204":
-          description: Deleted
+          description: Deleted successfully
 
-  /tasks/reorder:
+  /projects/{project_name}/tasks/reorder:
     put:
-      summary: Reorder Tasks
+      summary: Batch Update Task Order
+      description: Batch updates display_order of multiple tasks in the specified project and Git commits.
+      operationId: reorderTasks
       tags:
         - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -110,38 +159,7 @@ paths:
                   - display_order
       responses:
         "200":
-          description: Updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-
-  /tasks/undo:
-    post:
-      summary: Undo Last Change
-      tags:
-        - tasks
-      responses:
-        "200":
-          description: Undone
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /tasks/redo:
-    post:
-      summary: Redo Last Change
-      tags:
-        - tasks
-      responses:
-        "200":
-          description: Redone
+          description: Update successful
           content:
             application/json:
               schema:
@@ -176,6 +194,30 @@ components:
         display_order:
           type: integer
           default: 0
+        planned_hours:
+          type: number
+          nullable: true
+        actual_hours:
+          type: number
+          nullable: true
+        progress:
+          type: integer
+          default: 0
+          description: Progress rate (0-100)
+        description:
+          type: string
+          nullable: true
+        task_type:
+          type: string
+          nullable: true
+        actual_start_date:
+          type: string
+          format: date
+          nullable: true
+        actual_end_date:
+          type: string
+          format: date
+          nullable: true
 
     TaskInput:
       allOf:
