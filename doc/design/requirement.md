@@ -1,22 +1,24 @@
-# Requirement Definition
+# Requirements Definition
 
 ## 1. System Overview
 
-### 1.1 Background & Purpose
+### 1.1 Background and Purpose
 
-- **Background**: There is a need for a project management tool that operates in an offline environment and does not require complex infrastructure like database servers. There is also a need for reliable change history management using a version control system (Git).
-- **Purpose**: To provide a project management tool that is completely offline, manages data in versatile formats like JSON/CSV, and offers powerful history management via Git. This allows users to manage projects securely from anywhere.
+- **Background**: There is a need for a project management tool that operates in offline environments without requiring complex infrastructure such as database servers. Additionally, there is a need to reliably manage change history using a version control system (Git).
+- **Purpose**: To provide a project management tool that operates fully offline, manages data in universal formats such as JSON/CSV, and features powerful history management through Git. This enables users to perform project management with confidence regardless of location.
 
 ### 1.2 Scope
 
 - **In Scope**:
-  - Management of project settings and basic settings (JSON)
+  - Multiple project creation, listing, and selection functionality
+  - Per-project settings management (JSON), global basic settings management (JSON)
   - CRUD operations for task data (CSV)
-  - Visual display of task data (List, Gantt Chart)
-  - Data history management via Git (Undo/Redo)
+  - Visual display of task data (list, Gantt chart)
+  - History management through independent Git repositories per project (Undo/Redo)
 - **Out of Scope**:
-  - Simultaneous editing by multiple users and real-time synchronization (asynchronous sharing via Git is possible, but real-time sync is out of scope)
+  - Multi-user simultaneous editing/real-time synchronization (asynchronous sharing via Git is possible but outside the scope of this system)
   - Direct integration with cloud storage
+  - Migration functionality from existing data structures
 
 ### 1.3 User Definition
 
@@ -28,68 +30,84 @@
 
 ## 2. Functional Requirements
 
-### 2.1 Configuration Management (CNFG)
+### 2.1 Settings Management (CNFG)
 
-| Req-ID           | Category | Feature Name     | Detail & Behavior                                                                                                             | Priority | Remarks |
-| :--------------- | :------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-CNFG-001** | Config   | Basic Settings   | Ability to manage Task Status, Task Type, Assignee, Daily Work Hours, and Holiday Definitions in a configuration file (JSON). | High     |         |
-| **REQ-CNFG-002** | Config   | Project Settings | Ability to manage Project Name, duration, and overrides for Basic Settings in a project-specific configuration file (JSON).   | High     |         |
+| Req-ID           | Category      | Feature Name          | Details / Behavior                                                                                                                                                                                                          | Priority | Notes |
+| :--------------- | :------------ | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-CNFG-001** | Settings Mgmt | Global Basic Settings | Task statuses, task types, assignees, daily work hours, and holiday definitions shall be managed in a global settings file (`data/setting.json`). This file shall not be under Git management.                              | High     |       |
+| **REQ-CNFG-002** | Settings Mgmt | Project Settings      | Project-specific settings (override values for basic settings and metadata) shall be managed in a settings file within the project directory (`data/<project-name>/setting.json`). This file shall be under Git management. | High     |       |
 
 ### 2.2 Task Management (TASK)
 
-| Req-ID           | Category | Feature Name     | Detail & Behavior                                                                                           | Priority | Remarks |
-| :--------------- | :------- | :--------------- | :---------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-TASK-001** | Task     | Task List View   | Ability to display registered tasks in a list format. Supports deletion, searching, filtering, and sorting. | High     |         |
-| **REQ-TASK-002** | Task     | Task Create/Edit | Ability to create new tasks and edit existing ones. IDs should be automatically generated (uuid4).          | High     |         |
-| **REQ-TASK-003** | Task     | Hierarchy View   | Ability to display a hierarchical tree view based on parent-child relationships of tasks.                   | Medium   |         |
-| **REQ-TASK-004** | Task     | CSV I/O          | Ability to save and load task data in CSV format.                                                           | High     |         |
-| **REQ-TASK-005** | Task     | Task Reordering  | Ability to reorder tasks using drag and drop in the task list and Gantt chart.                              | High     |         |
+| Req-ID           | Category        | Feature Name      | Details / Behavior                                                                                             | Priority | Notes |
+| :--------------- | :-------------- | :---------------- | :------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-TASK-001** | Task Management | Task List Display | Registered tasks shall be displayed in a list format. Deletion, search, filter, and sort shall be available.   | High     |       |
+| **REQ-TASK-002** | Task Management | Task Create/Edit  | New task creation and editing of existing tasks shall be possible. IDs shall be auto-generated (uuid4).        | High     |       |
+| **REQ-TASK-003** | Task Management | Hierarchy Display | Hierarchical tree display based on parent-child relationships of tasks shall be possible.                      | Medium   |       |
+| **REQ-TASK-004** | Task Management | CSV I/O           | Task data shall be saved and loaded in CSV format. The save location shall be `data/<project-name>/tasks.csv`. | High     |       |
+| **REQ-TASK-005** | Task Management | Task Reordering   | Tasks shall be reorderable via drag-and-drop in the task list and Gantt chart.                                 | High     |       |
 
-### 2.3 Visualization & Charts (VIEW)
+### 2.3 Visualization / Charts (VIEW)
 
-| Req-ID           | Category      | Feature Name  | Detail & Behavior                                                                                                                       | Priority | Remarks |
-| :--------------- | :------------ | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-VIEW-001** | Visualization | Gantt Chart   | Ability to display task schedules (planned start/end) in a Gantt chart format. Parent task duration should be aggregated from children. | High     |         |
-| **REQ-VIEW-002** | Visualization | Progress Line | Ability to display a progress line (Inazuma line) based on actual dates and progress rate.                                              | Medium   |         |
+| Req-ID           | Category      | Feature Name        | Details / Behavior                                                                                                              | Priority | Notes |
+| :--------------- | :------------ | :------------------ | :------------------------------------------------------------------------------------------------------------------------------ | :------- | :---- |
+| **REQ-VIEW-001** | Visualization | Gantt Chart Display | Task schedules (planned start/end) shall be displayed in Gantt chart format. Parent task period aggregation shall be performed. | High     |       |
+| **REQ-VIEW-002** | Visualization | Inazuma Line        | Progress status shall be displayed as an Inazuma line based on actual dates and progress rates.                                 | Medium   |       |
 
 ### 2.4 History Management (HIST)
 
-| Req-ID           | Category | Feature Name              | Detail & Behavior                                                                                                                             | Priority | Remarks |
-| :--------------- | :------- | :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-HIST-001** | History  | Auto Commit               | Automatically create a Git commit upon data modification operations through the tool such as task creation, editing, or deletion.             | High     |         |
-| **REQ-HIST-002** | History  | Manual Change Auto Commit | Detect if task data has been directly modified externally while the tool is running, and automatically create a Git commit when loading data. | High     |         |
-| **REQ-HIST-003** | History  | Undo/Redo                 | Ability to revert task data to a previous state (Undo) or cancel the revert (Redo) using Git history.                                         | High     |         |
+| Req-ID           | Category     | Feature Name         | Details / Behavior                                                                                                                                                                 | Priority | Notes |
+| :--------------- | :----------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-HIST-001** | History Mgmt | Auto Commit          | When data is changed through tool operations (task create/edit/delete), a commit shall be automatically created in the project's Git repository.                                   | High     |       |
+| **REQ-HIST-002** | History Mgmt | Manual Change Commit | When task data is directly modified externally while the tool is running, changes shall be detected at data load time and automatically committed to the project's Git repository. | High     |       |
+| **REQ-HIST-003** | History Mgmt | Undo/Redo            | Using the project's Git history, it shall be possible to revert task data to a previous state (Undo) or cancel a revert (Redo).                                                    | High     |       |
 
-### 2.5 Initialization & Project Creation (INIT)
+### 2.5 Project Management (PROJ)
 
-| Req-ID           | Category         | Feature Name         | Detail & Behavior                                                                                                                                                                                                                   | Priority | Remarks |
-| :--------------- | :--------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-INIT-001** | Initialization   | Git Repo Init        | When the tool starts, if there is no Git configuration in the task data directory, initialize as a local Git repo with main branch.                                                                                                 | High     |         |
-| **REQ-INIT-002** | Initialization   | Manual Sync Startup  | When the tool starts, ensure it loads and works correctly even if configuration files or task data were directly modified externally. Switch Git branches appropriately if the project has changed (create a new one if necessary). | High     |         |
-| **REQ-INIT-003** | Initialization   | Check Project Config | When the tool starts, check if a default project configuration exists.                                                                                                                                                              | High     |         |
-| **REQ-INIT-004** | Initialization   | Screen Transition    | When the tool starts, if default project config exists, show task list. If not, show new project creation screen.                                                                                                                   | High     |         |
-| **REQ-INIT-005** | Project Creation | Create New Project   | Ability to enter project name and save in the new project creation screen. On save, create a branch with the project name from main and start data storage.                                                                         | High     |         |
+| Req-ID           | Category           | Feature Name              | Details / Behavior                                                                                                                                                                                                                  | Priority | Notes |
+| :--------------- | :----------------- | :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-PROJ-001** | Project Management | Project List Display      | Existing projects shall be displayed in a list. Selecting a project shall navigate to its task list page.                                                                                                                           | High     |       |
+| **REQ-PROJ-002** | Project Management | New Project Creation      | A new project shall be created by entering a project name. Upon creation, the project directory, Git initialization, settings/task file initialization, and initial commit shall be performed, then navigate to the task list page. | High     |       |
+| **REQ-PROJ-003** | Project Management | Project Name Validation   | Project names shall be validated as follows: (1) not empty after trimming, (2) no OS-prohibited directory name characters (Windows/Linux), (3) no duplicate with existing project names. Errors shall be displayed on violation.    | High     |       |
+| **REQ-PROJ-004** | Project Management | Auto Git Repository Init  | When a project's task is changed and No Git repository exists, `git init` shall be performed on the pre-change state, an initial commit created, then the change committed.                                                         | High     |       |
+| **REQ-PROJ-005** | Project Management | External Change Detection | At tool startup or data load, if project settings or task data have been directly modified externally, they shall be loaded and the tool shall operate correctly.                                                                   | High     |       |
 
-### 2.6 Common UI (UI)
+### 2.6 UI Common (UI)
 
-| Req-ID         | Category | Feature Name      | Detail & Behavior                                                          | Priority | Remarks |
-| :------------- | :------- | :---------------- | :------------------------------------------------------------------------- | :------- | :------ |
-| **REQ-UI-001** | UI       | Menu Bar          | Always display the menu bar on all screens.                                | High     |         |
-| **REQ-UI-002** | UI       | Project Switch    | Display project selection dropdown in menu bar to switch projects.         | High     |         |
-| **REQ-UI-003** | UI       | Screen Navigation | Display screen transition menu (Task List, Gantt Chart, etc.) in menu bar. | High     |         |
-| **REQ-UI-004** | UI       | Undo/Redo         | Display Undo/Redo buttons in menu bar to revert/redo task changes.         | High     |         |
+| Req-ID         | Category | Feature Name            | Details / Behavior                                                                                                                                                           | Priority | Notes |
+| :------------- | :------- | :---------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-UI-001** | UI       | Global Menu Display     | On global context screens (project management, basic settings), links to "Project Management" and "Basic Settings" shall be displayed.                                       | High     |       |
+| **REQ-UI-002** | UI       | Project Menu Display    | On project context screens (task list, Gantt chart, project settings), links to "Project Management", "Task List", "Gantt Chart", and "Project Settings" shall be displayed. | High     |       |
+| **REQ-UI-003** | UI       | Project Switch Dropdown | On project context screens, a project list dropdown shall be displayed to enable switching between projects.                                                                 | High     |       |
+| **REQ-UI-004** | UI       | Undo/Redo Buttons       | On project context screens, "Undo" and "Redo" buttons shall be displayed to allow canceling or redoing task change operations.                                               | High     |       |
+
+### 2.7 Routing (ROUTE)
+
+| Req-ID            | Category | Feature Name            | Details / Behavior                                                                                            | Priority | Notes |
+| :---------------- | :------- | :---------------------- | :------------------------------------------------------------------------------------------------------------ | :------- | :---- |
+| **REQ-ROUTE-001** | Routing  | Project Management Page | The project management page (project list + new creation) shall be displayed at `/projects` or `/`.           | High     |       |
+| **REQ-ROUTE-002** | Routing  | Basic Settings Page     | The basic settings page shall be displayed at `/settings`.                                                    | High     |       |
+| **REQ-ROUTE-003** | Routing  | Task List Page          | The task list page for the selected project shall be displayed at `/projects/<encoded-name>`.                 | High     |       |
+| **REQ-ROUTE-004** | Routing  | Gantt Chart Page        | The Gantt chart page for the selected project shall be displayed at `/projects/<encoded-name>/gantts`.        | High     |       |
+| **REQ-ROUTE-005** | Routing  | Project Settings Page   | The project settings page for the selected project shall be displayed at `/projects/<encoded-name>/settings`. | High     |       |
 
 ---
 
 ## 3. Non-Functional Requirements
 
-### 3.1 Environment & Constraints (ENV)
+### 3.1 Operating Environment / Constraints (ENV)
 
-- **REQ-ENV-001**: All functions must operate in an offline environment without internet connection.
-- **REQ-ENV-002**: Data storage destination must be the local file system (JSON/CSV).
-- **REQ-ENV-003**: Must not require external database servers (MySQL, PostgreSQL, etc.).
-- **REQ-ENV-004**: Data and change history must be preserved across tool restarts and version upgrades (Docker rebuilds).
+- **REQ-ENV-001**: All features shall function in offline environments without internet connectivity.
+- **REQ-ENV-002**: Data storage shall use the local file system (JSON/CSV).
+- **REQ-ENV-003**: No external database servers (MySQL, PostgreSQL, etc.) shall be required.
+- **REQ-ENV-004**: Change history shall be preserved and carried over during version upgrades (Docker build replacement) or tool restarts.
 
 ### 3.2 Performance (PERF)
 
-- **REQ-PERF-001**: Must be able to manipulate and display thousands of task records without delay on standard PC specs.
+- **REQ-PERF-001**: On typical PC specifications, several thousand task records shall be operated and displayed without delay.
+
+### 3.3 Data Management (DATA)
+
+- **REQ-DATA-001**: Each project shall have an independent Git repository with completely separated history.
+- **REQ-DATA-002**: `setting.json` and `tasks.csv` within each project directory shall be under Git management.
+- **REQ-DATA-003**: The global basic settings (`data/setting.json`) shall not be under Git management.
