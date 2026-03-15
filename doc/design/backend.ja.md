@@ -14,13 +14,12 @@ Layered Architecture (UI/Application/Domain/Infrastructure) を採用し、関�
 ```
 backend/app/
 ├── domain/                  # [ドメイン層] ビジネスロジックの中核（外部依存なし）
-│   ├── entities/            # 【Entity】Task, Settingsなど
-│   ├── repositories/        # 【Repository Interface】ITaskRepository, ISettingsRepository
+│   ├── entities/            # 【Entity】Task, Settings, ProjectSettings など
+│   ├── repositories/        # 【Repository Interface】ITaskRepository, ISettingsRepository, IGitRepository
 │   └── services/            # 【Domain Service】複数エンティティにまたがるロジック
 │
 ├── application/             # [アプリケーション層] ユースケース
-│   ├── usecases/            # 【UseCase】TaskUseCase, SettingsUseCase (Gitコミット制御も含む)
-│   └── dtos/                # 【DTO】データ転送用オブジェクト (Pydanticから変換)
+│   └── usecases/            # 【UseCase】TaskUseCase, SettingsUseCase, ProjectUseCase
 │
 ├── infrastructure/          # [インフラ層] 技術的な詳細実装
 │   ├── file_system/         # JSON/CSV読み書き実装 (TaskFileRepository, SettingsFileRepository)
@@ -29,144 +28,185 @@ backend/app/
 ├── presentation/            # [プレゼンテーション層] APIエンドポイント
 │   └── api/
 │       └── v1/
-│           ├── endpoints/   # ルータ定義
+│           ├── endpoints/   # ルータ定義 (projects.py, tasks.py, settings.py)
 │           └── schemas/     # 【Schema】Pydanticモデル（リクエスト/レスポンス）
 │
-└── main.py                  # DI設定・アプリ起動
+├── container.py             # DI設定
+└── main.py                  # アプリ起動
 ```
 
 ### 2.2 共通処理
 
 - **エラーハンドリング**: グローバル例外ハンドラにより、ドメイン例外を適切なHTTPステータスコードとJSONレスポンスに変換します。
-- **DI (Dependency Injection)**: `main.py` または `dependencies.py` にて、Repositoryの実装クラスをUseCaseに注入します。
+- **DI (Dependency Injection)**: `container.py` にて、Repositoryの実装クラスをUseCaseに注入します。Gitリポジトリの操作はプロジェクトごとにデータディレクトリが異なるため、各UseCase呼び出し時にプロジェクト名を受け取り、対象ディレクトリを動的に決定します。
+- **スレッドセーフティ**: Git操作は `threading.Lock` で排他制御し、同時アクセス時のデータ不整合を防ぎます。
 
 ## 3. データモデル設計
 
 ### 3.1 エンティティ/値オブジェクト (Domain)
 
-- `Task`: ID, Title, Status, Dates, ParentID, display_order などを保持。
-- `ProjectSettings`: プロジェクト名、期間などを保持。
-- `BasicSettings`: ステータス定義、担当者定義などを保持。
+- `Task`: ID, Title, Status, Dates, ParentID, display_order, planned_hours, actual_hours, progress 等を保持。
+- `BasicSettings`: タスク状態定義、タスク種別定義、担当者定義、1日投入時間、休日定義を保持。グローバル設定。
+- `ProjectSettings`: プロジェクト名、基本設定のオーバーライド値を保持。
 
 ### 3.2 データストア (Infrastructure)
 
-- `data/settings.json`: System Setting, Project Setting をマージして保存・読み込み。
-- `data/tasks.csv`: Pandas DataFrameを用いて読み書き。CSVヘッダはSystem Settingの定義に従う。
+- `data/setting.json`: グローバル基本設定。Git管理対象外。
+- `data/<プロジェクト名>/setting.json`: プロジェクト固有設定。Git管理対象。
+- `data/<プロジェクト名>/tasks.csv`: プロジェクト固有タスクデータ。Pandas DataFrameを用いて読み書き。Git管理対象。
+
+### 3.3 ディレクトリ管理
+
+- `data/` をルートとし、各プロジェクトはサブディレクトリとして管理される。
+- プロジェクト一覧は `data/` 配下のディレクトリ一覧（`.`で始まるものを除く）から取得する。
+- 各プロジェクトディレクトリは独立したGitリポジトリ（`.git/`）を持つ。
 
 ## 4. APIロジック詳細
 
-### 4.1 プロジェクト設定 (Projects)
+### 4.1 グローバル基本設定 (Settings)
 
-#### `GET /projects/settings`
+#### `GET /api/v1/settings`
 
-- **関連Spec-ID**: `SPEC-CNFG-001-001`, `SPEC-CNFG-002-001`
+- **関連Spec-ID**: `SPEC-CNFG-001-001`, `SPEC-CNFG-001-003`
 - **処理フロー**:
-  1.  `SettingsUseCase.get_settings()` を呼び出す。
-  2.  `SettingsFileRepository` 経由で JSON ファイルを読み込む。
-  3.  `ProjectSettings` エンティティを返却する。
+  1. `SettingsUseCase.get_global_settings()` を呼び出す。
+  2. `SettingsFileRepository` 経由で `data/setting.json` を読み込む。
+  3. `BasicSettings` エンティティを返却する。
 
-#### `PUT /projects/settings`
+#### `PUT /api/v1/settings`
 
-- **関連Spec-ID**: `SPEC-CNFG-002-002`, `SPEC-HIST-001-001`
+- **関連Spec-ID**: `SPEC-CNFG-001-001`, `SPEC-CNFG-001-003`
 - **処理フロー**:
-  1.  `SettingsUseCase.update_settings(dto)` を呼び出す。
-  2.  `SettingsFileRepository` 経由で JSON ファイルを更新する。
-  3.  **Git Commit**: `GitService.commit("Update project settings")` を実行する。
+  1. `SettingsUseCase.update_global_settings(dto)` を呼び出す。
+  2. `SettingsFileRepository` 経由で `data/setting.json` を更新する。
+  3. ※Git管理対象外のため、コミットは行わない。
 
-### 4.2 タスク管理 (Tasks)
+### 4.2 プロジェクト管理 (Projects)
 
-#### `GET /tasks`
+#### `GET /api/v1/projects`
 
-- **関連Spec-ID**: `SPEC-TASK-001-001`
+- **関連Spec-ID**: `SPEC-PROJ-001-001`
 - **処理フロー**:
-  1.  `TaskUseCase.list_tasks(filter)` を呼び出す。
-  2.  **実行時同期**: `TaskUseCase` は、タスクCSVファイルのハッシュ値をチェックし、前回読み込み時から変更があれば `GitService.commit("Manual change detected during runtime")` を実行する。
-  3.  `TaskRepository` (Pandas) がCSVを読み込み、`List[Task]` を返却する。
-  4.  階層構造の構築はフロントエンドに委譲するため、フラットなリストとして返す。
+  1. `ProjectUseCase.list_projects()` を呼び出す。
+  2. `data/` ディレクトリの子ディレクトリ一覧を取得する（`.`始まりを除外）。
+  3. プロジェクト名のリスト `List[str]` を返却する。
 
-#### `POST /tasks`
+#### `POST /api/v1/projects`
 
-- **関連Spec-ID**: `SPEC-TASK-002-002`, `SPEC-HIST-001-001`
+- **関連Spec-ID**: `SPEC-PROJ-002-001`, `SPEC-PROJ-002-002`, `SPEC-PROJ-003-001`
 - **処理フロー**:
-  1.  `TaskUseCase.create_task(dto)` を呼び出す。
-  2.  **ID採番**: UUID v4 を生成。
-  3.  `Task` エンティティを生成し、`TaskRepository` で保存(追記)する。
-  4.  **Git Commit**: `GitService.commit(f"Add task {title}")` を実行する。
+  1. `ProjectUseCase.create_project(project_name)` を呼び出す。
+  2. **バリデーション**:
+     - プロジェクト名が空（トリム後）→ HTTP 400
+     - OS禁止文字を含む → HTTP 400
+     - 既存プロジェクトと重複 → HTTP 400
+  3. `data/<project_name>/` ディレクトリを作成。
+  4. `data/<project_name>/setting.json` に初期プロジェクト設定を書き込む。
+  5. `data/<project_name>/tasks.csv` に空のCSVヘッダを書き込む。
+  6. `GitService.initialize(data/<project_name>/)` でGitリポジトリを初期化。
+  7. **Git Commit**: `GitService.commit("Initial commit")` を実行。
 
-#### `PUT /tasks/{id}`
+#### `GET /api/v1/projects/{project_name}/settings`
 
-- **関連Spec-ID**: `SPEC-TASK-002-001`, `SPEC-HIST-001-001`
+- **関連Spec-ID**: `SPEC-CNFG-002-001`, `SPEC-CNFG-002-003`
 - **処理フロー**:
-  1.  `TaskUseCase.update_task(id, dto)` を呼び出す。
-  2.  `TaskRepository` で該当IDのレコードを更新する。
-  3.  **Git Commit**: `GitService.commit(f"Update task {title}")` を実行する。
+  1. `SettingsUseCase.get_project_settings(project_name)` を呼び出す。
+  2. `data/<project_name>/setting.json` を読み込む。
+  3. `ProjectSettings` エンティティを返却する。
 
-#### `PUT /tasks/reorder`
+#### `PUT /api/v1/projects/{project_name}/settings`
+
+- **関連Spec-ID**: `SPEC-CNFG-002-002`, `SPEC-CNFG-002-003`, `SPEC-HIST-001-001`
+- **処理フロー**:
+  1. `SettingsUseCase.update_project_settings(project_name, dto)` を呼び出す。
+  2. `data/<project_name>/setting.json` を更新する。
+  3. **Git Commit**: `GitService.commit("Update project settings", data/<project_name>/)` を実行。
+
+#### `POST /api/v1/projects/{project_name}/undo`
+
+- **関連Spec-ID**: `SPEC-HIST-003-001`, `SPEC-HIST-003-002`
+- **処理フロー**:
+  1. `ProjectUseCase.undo(project_name)` を呼び出す。
+  2. `GitService.undo(data/<project_name>/)` で `git reset --hard HEAD^` を実行。
+  3. 初期コミットしかない場合はHTTP 400エラーを返す。
+
+#### `POST /api/v1/projects/{project_name}/redo`
+
+- **関連Spec-ID**: `SPEC-HIST-003-001`, `SPEC-HIST-003-003`
+- **処理フロー**:
+  1. `ProjectUseCase.redo(project_name)` を呼び出す。
+  2. `GitService.redo(data/<project_name>/)` でReflogを使用してRedo操作を実行。
+  3. Redo可能なコミットがない場合はHTTP 400エラーを返す。
+
+### 4.3 タスク管理 (Tasks)
+
+#### `GET /api/v1/projects/{project_name}/tasks`
+
+- **関連Spec-ID**: `SPEC-TASK-001-001`, `SPEC-PROJ-005-001`, `SPEC-HIST-002-001`
+- **処理フロー**:
+  1. `TaskUseCase.list_tasks(project_name)` を呼び出す。
+  2. **外部変更検知**: プロジェクトのGitリポジトリに未コミット変更があれば `GitService.commit("Manual change detected during runtime")` を実行。
+  3. **Git自動初期化**: Gitリポジトリが存在しない場合、初期化と初期コミットを行う。
+  4. `TaskRepository` がCSV `data/<project_name>/tasks.csv` を読み込み、`List[Task]` を返却する。
+  5. 階層構造の構築はフロントエンドに委譲するため、フラットなリストとして返す。
+
+#### `POST /api/v1/projects/{project_name}/tasks`
+
+- **関連Spec-ID**: `SPEC-TASK-002-002`, `SPEC-TASK-002-003`, `SPEC-HIST-001-001`
+- **処理フロー**:
+  1. `TaskUseCase.create_task(project_name, dto)` を呼び出す。
+  2. **ID採番**: UUID v4 を生成。
+  3. `Task` エンティティを生成し、`TaskRepository` で `data/<project_name>/tasks.csv` に保存(追記)する。
+  4. **Git自動初期化**: リポジトリ未存在ならば初期化。
+  5. **Git Commit**: `GitService.commit(f"Add task {title}")` を実行。
+
+#### `PUT /api/v1/projects/{project_name}/tasks/{task_id}`
+
+- **関連Spec-ID**: `SPEC-TASK-002-004`, `SPEC-HIST-001-001`
+- **処理フロー**:
+  1. `TaskUseCase.update_task(project_name, task_id, dto)` を呼び出す。
+  2. `TaskRepository` で該当IDのレコードを更新する。
+  3. **Git Commit**: `GitService.commit(f"Update task {title}")` を実行。
+
+#### `PUT /api/v1/projects/{project_name}/tasks/reorder`
 
 - **関連Spec-ID**: `SPEC-TASK-004-001`, `SPEC-HIST-001-001`
 - **処理フロー**:
-  1.  `TaskUseCase.reorder_tasks(orders)` を呼び出す。
-  2.  `TaskRepository.update_orders(orders)` で複数タスクの順序を一括で更新・保存する。
-  3.  **Git Commit**: `GitService.commit("Reorder tasks")` を実行する。
+  1. `TaskUseCase.reorder_tasks(project_name, orders)` を呼び出す。
+  2. `TaskRepository.update_orders(orders)` で複数タスクの順序を一括で更新・保存する。
+  3. **Git Commit**: `GitService.commit("Reorder tasks")` を実行。
 
-#### `DELETE /tasks/{id}`
+#### `DELETE /api/v1/projects/{project_name}/tasks/{task_id}`
 
+- **関連Spec-ID**: `SPEC-TASK-002-005`, `SPEC-HIST-001-001`
 - **処理フロー**:
-  1.  `TaskUseCase.delete_task(id)` を呼び出す。
-  2.  `TaskRepository` で該当IDのレコードを物理削除（または論理削除フラグ更新）する。
-  3.  **Git Commit**: `GitService.commit(f"Delete task {id}")` を実行する。
-  4.  **Git Commit**: `GitService.commit(f"Delete task {id}")` を実行する。
+  1. `TaskUseCase.delete_task(project_name, task_id)` を呼び出す。
+  2. `TaskRepository` で該当IDのレコードを物理削除する。
+  3. **Git Commit**: `GitService.commit(f"Delete task {id}")` を実行。
 
-### 4.3 システム管理 (System)
+## 5. 外部連携 (Git管理)
 
-#### `GET /system/status`
-
-- **関連Spec-ID**: `SPEC-INIT-001-001`
-- **処理フロー**:
-  1.  **起動時同期**: `SystemUseCase.sync_manual_changes()` を呼び出す。
-      - 現在のプロジェクト設定を読み込み、期待されるGitブランチと現在のブランチを比較。不一致なら `GitService.checkout_branch()`。
-      - 設定ファイルまたはタスクデータに未コミットの変更があれば `GitService.commit("Manual change detected at startup")`。
-  2.  `GitService.is_initialized()` を呼び出し、`.git` ディレクトリの存在を確認。
-  3.  `SettingsUseCase.has_default_project()` を呼び出し、設定ファイルの存在を確認。
-  4.  `GitService.get_current_branch()` を呼び出し、現在のプロジェクト名(ブランチ名)を取得。
-
-### 4.4 プロジェクト管理 (Projects)
-
-#### `POST /projects`
-
-- **関連Spec-ID**: `SPEC-INIT-002-001`
-- **処理フロー**:
-  1.  `GitService.create_branch(name)` を呼び出し、`main` から新ブランチを作成してチェックアウトする。
-  2.  `SettingsUseCase.create_project_settings(name)` を呼び出し、初期設定ファイルを作成保存。
-  3.  **Git Commit**: `GitService.commit(f"Initialize project {name}")`.
-
-#### `POST /projects/{project_id}/switch`
-
-- **関連Spec-ID**: `SPEC-INIT-003-001`
-- **処理フロー**:
-  1.  `GitService.checkout_branch(project_id)` を呼び出す。
-  2.  作業ディレクトリのファイルが切り替わるため、キャッシュ等をクリアする必要がある（FastAPIはステートレスだが、オンメモリデータがあれば注意）。
-
-## 5. 外部連携 (History Management)
-
-### Git連携
+### 5.1 Git連携
 
 - **コンポーネント**: `infrastructure/git/GitService`
-- **機能**: Pythonの `subprocess` または `GitPython` ライブラリを使用。
+- **特徴**: プロジェクトごとに独立したGitリポジトリを操作する。`data_dir` パラメータでプロジェクトディレクトリを受け取り、そのディレクトリ内での操作を行う。
+- **スレッドセーフティ**: `threading.Lock` により、同時アクセス時の排他制御を行う。
 - **メソッド**:
-  - `commit(message: str)`: `git add .` && `git commit -m message`
-  - `restore(commit_hash: str)`: `git restore --source commit_hash .`
-  - `create_branch(name: str)`: `git checkout -b name`
-  - `checkout_branch(name: str)`: `git checkout name`
-  - `get_current_branch() -> str`: `git branch --show-current`
-  - `has_uncommitted_changes() -> bool`: `git status --porcelain` が空でないか確認。
+  - `initialize(project_dir: str)`: `git init -b main` でGitリポジトリを初期化
+  - `is_initialized(project_dir: str) -> bool`: `.git` ディレクトリの存在確認
+  - `commit(message: str, project_dir: str)`: `git add .` && `git commit -m message`
+  - `has_uncommitted_changes(project_dir: str) -> bool`: `git status --porcelain` が空でないか確認
+  - `undo(project_dir: str)`: `git reset --hard HEAD^`
+  - `redo(project_dir: str)`: `git reflog` を参照してredo操作
 
-### 5.2 手動変更同期ロジック
+### 5.2 外部変更同期ロジック
 
-- **ハッシュ管理**: `infrastructure/file_system/FileHashManager` 等を用いて、最後にコミットまたは読み込んだ時点のファイルのハッシュ値（SHA-256）を保持する。
-- **検知タイミング**:
-  - バックエンド起動時（`main.py` の `startup` イベント）。
-  - `GET /tasks` 等のデータ読み込みAPI実行時。
-- **ブランチ切り替え**:
-  - `projects.json` に記載された `current_project` と Git の `current_branch` が異なる場合、ツールが関与しないところでのプロジェクト変更とみなし、ブランチを切り替える。
-  * `restore(commit_hash: str)`: `git restore --source commit_hash .` (※要詳細検討: 現在のワークスペースを上書きする挙動)
+- **検知タイミング**: `GET /api/v1/projects/{project_name}/tasks` 等のデータ読み込みAPI実行時。
+- **処理内容**: プロジェクトのGitリポジトリに未コミット変更があれば自動でコミットする。
+- **Git自動初期化**: タスクデータ変更時にリポジトリが存在しない場合、変更前の状態でGit初期化と初期コミットを行った後に変更をコミットする。
+
+## 6. セキュリティ・非機能要件
+
+- **CORS設定**: フロントエンドからのリクエストを許可するため、CORS設定を行う。
+- **パフォーマンス**: CSVファイルの読み書きはPandasを利用し、ファイルサイズが大きくなった場合のパフォーマンス劣化に注意する。
+- **エラーリカバリ**: Git操作失敗時は適切なエラーメッセージをログに出力し、APIレスポンスで通知する。
