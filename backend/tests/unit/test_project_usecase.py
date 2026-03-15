@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import MagicMock
 from backend.app.application.usecases.project_usecase import ProjectUseCase
-from backend.app.infrastructure.git.git_service import GitService
+from backend.app.domain.repositories.git_repository import IGitRepository
 
 
 @pytest.fixture
 def mock_git():
-    return MagicMock(spec=GitService)
+    return MagicMock(spec=IGitRepository)
 
 
 @pytest.fixture
@@ -37,6 +37,18 @@ def test_create_project(usecase, mock_git):
     assert result == {"project_name": "new-proj"}
     mock_git.create_branch.assert_called_once_with("new-proj")
     mock_git.commit.assert_called_once_with("Initialize project new-proj")
+
+def test_create_project_with_spaces(usecase, mock_git):
+    # Arrange
+    mock_git.is_initialized.return_value = True
+
+    # Act
+    result = usecase.create_project("My New Project")
+
+    # Assert
+    assert result == {"project_name": "My New Project"}
+    mock_git.create_branch.assert_called_once_with("My_New_Project")
+    mock_git.commit.assert_called_once_with("Initialize project My New Project")
 
 
 def test_create_project_auto_initialize(usecase, mock_git):

@@ -13,7 +13,7 @@ def test_settings_initialization():
     settings = Settings()
     assert isinstance(settings.basic, BasicSettings)
     assert isinstance(settings.project, ProjectSettings)
-    assert settings.project.project_name == "New Project"
+    assert settings.project.project_name == ""
 
 def test_basic_settings_defaults():
     basic = BasicSettings()

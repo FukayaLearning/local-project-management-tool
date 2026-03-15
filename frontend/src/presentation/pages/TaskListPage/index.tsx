@@ -17,6 +17,7 @@ export const TaskListPage: React.FC = () => {
   } = useTaskUseCase();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchTasks();
@@ -62,11 +63,22 @@ export const TaskListPage: React.FC = () => {
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Task List</h1>
-        <Button onClick={handleCreateClick}>+ New Task</Button>
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Button onClick={handleCreateClick}>+ New Task</Button>
+        </div>
       </div>
 
       <TaskListView
-        tasks={tasks}
+        tasks={tasks.filter((task) =>
+          task.title.toLowerCase().includes(searchTerm.toLowerCase()),
+        )}
         onEdit={handleEditClick}
         onDelete={handleDelete}
       />

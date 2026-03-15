@@ -1,12 +1,13 @@
 import subprocess
 import os
 from typing import List
+from backend.app.domain.repositories.git_repository import IGitRepository
 
 # Default data directory name, same as used by TaskFileRepository and SettingsFileRepository
 DEFAULT_DATA_DIR = "data"
 
 
-class GitService:
+class GitService(IGitRepository):
     """タスクデータ専用のGitリポジトリを管理する。
     
     プロジェクトのソースコードリポジトリとは完全に分離し、
@@ -94,3 +95,7 @@ class GitService:
 
     def restore(self, commit_hash: str) -> None:
         self._run_git(["restore", "--source", commit_hash, "."])
+
+    def has_uncommitted_changes(self) -> bool:
+        output = self._run_git(["status", "--porcelain"])
+        return len(output.strip()) > 0

@@ -14,7 +14,7 @@ services:
     ports:
       - "8000:8000" # Internal only via proxy
     volumes:
-      - ./backend:/workspace/backend
+      - ./backend/data:/workspace/backend/data
     tty: true
 
   frontend:
@@ -23,11 +23,6 @@ services:
       target: dev
     ports:
       - "3000:5173" # Internal only via proxy
-    volumes:
-      - ./frontend:/app
-      - ./doc/test/integration/scripts:/app/integration_tests
-      - ./doc/test/integration/result:/app/integration_results
-      - /app/node_modules
     environment:
       - VITE_API_BASE_URL=/api/v1
     tty: true

@@ -1,71 +1,106 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useTaskUseCase } from '../useTaskUseCase';
-import { TaskApiRepository } from '../../../infrastructure/api/repositories/taskApiRepository';
+import { DependencyProvider } from "../../providers/DependencyProvider";
+import { TaskApiRepository } from "../../../infrastructure/api/repositories/taskApiRepository";
+import { useTaskUseCase } from "../useTaskUseCase";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+// Mock the dependencies provider
+vi.mock("../../providers/DependencyProvider", () => ({
+  useDependencies: () => ({
+    taskRepository: new TaskApiRepository(),
+  }),
+  DependencyProvider: ({ children }: any) => children,
+}));
 
-vi.mock('../../../infrastructure/api/repositories/taskApiRepository', () => {
-    const TaskApiRepository = vi.fn();
-    TaskApiRepository.prototype.getAll = vi.fn();
-    TaskApiRepository.prototype.create = vi.fn();
-    TaskApiRepository.prototype.update = vi.fn();
-    TaskApiRepository.prototype.delete = vi.fn();
-    return { TaskApiRepository };
+// Mock the module
+vi.mock("../../../infrastructure/api/repositories/taskApiRepository", () => {
+  const TaskApiRepository = vi.fn();
+  TaskApiRepository.prototype.getAll = vi.fn();
+  TaskApiRepository.prototype.create = vi.fn();
+  TaskApiRepository.prototype.update = vi.fn();
+  TaskApiRepository.prototype.delete = vi.fn();
+  return { TaskApiRepository };
 });
 
-describe('useTaskUseCase', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+describe("useTaskUseCase", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("fetches tasks successfully", async () => {
+    const mockTasks = [{ id: "1", title: "Task 1", status: "New" }];
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue(mockTasks);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    // Initial state
+    expect(result.current.tasks).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
+
+    // Trigger fetch
+    await act(async () => {
+      await result.current.fetchTasks();
     });
 
-    it('fetches tasks successfully', async () => {
-        const mockTasks = [{ id: '1', title: 'Task 1', status: 'New' }];
-        // @ts-ignore
-        TaskApiRepository.prototype.getAll.mockResolvedValue(mockTasks);
+    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.tasks).toEqual(mockTasks);
+    });
+    expect(result.current.error).toBeNull();
+  });
 
-        const { result } = renderHook(() => useTaskUseCase());
+  it("handles fetch error", async () => {
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockRejectedValue(
+      new Error("Fetch failed"),
+    );
 
-        // Initial state
-        expect(result.current.tasks).toEqual([]);
-        expect(result.current.isLoading).toBe(false);
+    const { result } = renderHook(() => useTaskUseCase());
 
-        // Trigger fetch
-        await result.current.fetchTasks();
-
-        expect(result.current.isLoading).toBe(false);
-        await waitFor(() => {
-            expect(result.current.tasks).toEqual(mockTasks);
-        });
-        expect(result.current.error).toBeNull();
+    await act(async () => {
+      await result.current.fetchTasks();
     });
 
-    it('handles fetch error', async () => {
-        // @ts-ignore
-        TaskApiRepository.prototype.getAll.mockRejectedValue(new Error('Fetch failed'));
+    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.tasks).toEqual([]);
+      expect(result.current.error).toEqual(new Error("Fetch failed"));
+    });
+  });
 
-        const { result } = renderHook(() => useTaskUseCase());
+  it("creates task successfully", async () => {
+    const newTask = { title: "New Task", status: "New" };
+    const createdTask = { id: "2", ...newTask };
+    // @ts-ignore
+    TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
 
-        await result.current.fetchTasks();
+    const { result } = renderHook(() => useTaskUseCase());
 
-        expect(result.current.isLoading).toBe(false);
-        await waitFor(() => {
-            expect(result.current.tasks).toEqual([]);
-            expect(result.current.error).toEqual(new Error('Fetch failed'));
-        });
+    await act(async () => {
+      await result.current.createTask(newTask as any);
     });
 
-    it('creates task successfully', async () => {
-        const newTask = { title: 'New Task', status: 'New' };
-        const createdTask = { id: '2', ...newTask };
-        // @ts-ignore
-        TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
-
-        const { result } = renderHook(() => useTaskUseCase());
-
-        await result.current.createTask(newTask as any);
-
-        await waitFor(() => {
-            expect(result.current.tasks).toContainEqual(createdTask);
-        });
-        expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+    await waitFor(() => {
+      expect(result.current.tasks).toContainEqual(createdTask);
     });
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+  });
+
+  it("creates task with parent successfully", async () => {
+    const newTask = { title: "Sub Task", status: "New", parent_id: "parent-1" };
+    const createdTask = { id: "3", ...newTask };
+    // @ts-ignore
+    TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.createTask(newTask as any);
+    });
+
+    await waitFor(() => {
+      expect(result.current.tasks).toContainEqual(createdTask);
+    });
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(newTask);
+  });
 });

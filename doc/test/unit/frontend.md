@@ -28,6 +28,7 @@
 | **useTaskUseCase**     | UNIT-FE-UC-TASK-001 | Fetch Tasks Success     | Tasks fetched from API are reflected in state |
 |                        | UNIT-FE-UC-TASK-002 | Fetch Tasks Failure     | Error state is updated                        |
 |                        | UNIT-FE-UC-TASK-003 | Create Task Success     | Newly created task is added to the list       |
+|                        | UNIT-FE-UC-TASK-004 | Create Subtask Success  | Task created with parent_id reflects properly |
 | **useSettingsUseCase** | UNIT-FE-UC-SET-001  | Fetch Settings Success  | Project settings are reflected in state       |
 |                        | UNIT-FE-UC-SET-002  | Update Settings Success | Updated settings are reflected in state       |
 

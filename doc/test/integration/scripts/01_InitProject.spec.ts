@@ -11,7 +11,7 @@ test.describe("Integration: Project Initialization", () => {
     await page.goto("/");
 
     // データがない場合、/create_project にリダイレクトされるはず
-    await expect(page).toHaveURL(/\/create_project/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*\/create_project/, { timeout: 10000 });
     await expect(page.locator("text=新規プロジェクト作成")).toBeVisible();
 
     // 2. プロジェクト作成
@@ -20,7 +20,7 @@ test.describe("Integration: Project Initialization", () => {
     await page.getByRole("button", { name: "プロジェクト作成開始" }).click();
 
     // 作成後、/tasks へ遷移
-    await expect(page).toHaveURL(/\/tasks/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*\/tasks/, { timeout: 10000 });
     await expect(page.locator("text=Loading")).not.toBeVisible({
       timeout: 10000,
     });

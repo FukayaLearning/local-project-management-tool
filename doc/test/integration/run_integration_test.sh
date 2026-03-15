@@ -42,6 +42,7 @@ echo "Setting up environment..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Root is 3 levels up
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+export REPO_ROOT
 FRONTEND_DIR="${REPO_ROOT}/frontend"
 TEST_DIR="${SCRIPT_DIR}"
 export E2E_DIR="${SCRIPT_DIR}"
@@ -64,8 +65,8 @@ cleanup() {
     else
         docker compose -f docker-compose.prod.yaml logs backend > "${RESULT_DIR}/backend.log" 2>&1 || true
         docker compose -f docker-compose.prod.yaml logs frontend > "${RESULT_DIR}/frontend.log" 2>&1 || true
-        # Prod mode cleanup
-        docker compose -f docker-compose.prod.yaml down -v
+        # Prod mode cleanup using root script
+        "${REPO_ROOT}/stop.sh" -v
     fi
 }
 trap cleanup EXIT
@@ -78,7 +79,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     # Ensure clean state
     docker compose -f docker-compose.yaml down -v --remove-orphans
     echo "Cleaning up backend data..."
-    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
+    docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
     docker compose -f docker-compose.yaml up -d --build
     
     echo "Waiting for App services to start..."
@@ -91,7 +92,7 @@ if [ "$DEMO_MODE" == "true" ]; then
     cd "${TEST_DIR}"
     if [ ! -d "node_modules" ]; then
         echo "Installing integration test dependencies on Host..."
-        npm install
+        npm install --quiet --no-progress 2>&1 | tee -a "${LOG_FILE}"
     fi
     npx playwright install chromium
 
@@ -125,21 +126,21 @@ if [ "$DEMO_MODE" == "true" ]; then
     # 3. Run Tests in Container, Connected to Host
     echo "Running Tests in Container (Connected to Host)..."
     cd "${REPO_ROOT}"
-    # Use -f to combine compose files. 
-    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run --rm --build \
-        -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" \
-        -e BASE_URL=http://localhost:8080 \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee -a "${LOG_FILE}"
-        
+    docker compose -f docker-compose.yaml -f doc/test/integration/docker-compose.e2e.yaml -f doc/test/integration/docker-compose.e2e.demo.yaml run -T --rm --build -e PLAYWRIGHT_WS_ENDPOINT="$WS_ENDPOINT" -e BASE_URL=http://localhost:8080 e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
 else
     echo "Running in PRODUCTION Mode (Headless Container)..."
     cd "${REPO_ROOT}"
     
     # 1. Clean & Start App (Prod mode)
-    docker compose -f docker-compose.prod.yaml down -v
+    "${REPO_ROOT}/stop.sh" -v
     echo "Cleaning up backend data..."
-    rm -rf "${REPO_ROOT}/backend/data/"* "${REPO_ROOT}/backend/data/".git* || true
-    docker compose -f docker-compose.prod.yaml up -d --build
+    docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
+    
+    # Use the root build script for consistency
+    "${REPO_ROOT}/build.sh"
+    
+    # Use the root run script for consistency
+    "${REPO_ROOT}/run.sh"
     
     echo "Waiting for App services to start..."
     sleep 10
@@ -147,7 +148,5 @@ else
     # 2. Run Tests in Container (Headless)
     echo "Running Tests in Container (Self-contained)..."
     # Compose prod and e2e files. 
-    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run --rm --build \
-        -e BASE_URL=http://frontend \
-        e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES | tee "${LOG_FILE}"
+    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run -T --rm --build -e BASE_URL=http://frontend e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee "${LOG_FILE}"
 fi

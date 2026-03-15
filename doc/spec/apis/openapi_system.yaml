@@ -2,6 +2,7 @@ paths:
   /system/status:
     get:
       summary: Get System Status
+      description: Retrieves system initialization status and project info. Detects manual file changes during startup or upon call, and automatically commits them to Git.
       operationId: getSystemStatus
       tags:
         - system
