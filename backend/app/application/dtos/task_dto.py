@@ -14,6 +14,8 @@ class TaskCreateDTO(BaseModel):
     task_type: Optional[str] = None
     planned_hours: Optional[float] = None
     display_order: int = 0
+    actual_start_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
     
 class TaskUpdateDTO(BaseModel):
     title: Optional[str] = None
@@ -28,6 +30,8 @@ class TaskUpdateDTO(BaseModel):
     actual_hours: Optional[float] = None
     progress: Optional[int] = None
     display_order: Optional[int] = None
+    actual_start_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
 
 class TaskOrderUpdateDTO(BaseModel):
     id: str

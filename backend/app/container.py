@@ -3,7 +3,6 @@ from backend.app.infrastructure.git.git_service import GitService
 from backend.app.infrastructure.file_system.task_repository import TaskFileRepository
 from backend.app.infrastructure.file_system.settings_repository import SettingsFileRepository
 from backend.app.application.usecases.project_usecase import ProjectUseCase
-from backend.app.application.usecases.system_usecase import SystemUseCase
 from backend.app.application.usecases.settings_usecase import SettingsUseCase
 from backend.app.application.usecases.task_usecase import TaskUseCase
 
@@ -15,7 +14,7 @@ class Container(containers.DeclarativeContainer):
         modules=[
             "backend.app.presentation.api.v1.endpoints.projects",
             "backend.app.presentation.api.v1.endpoints.tasks",
-            "backend.app.presentation.api.v1.endpoints.system",
+            "backend.app.presentation.api.v1.endpoints.settings",
             "backend.app.main",
         ]
     )
@@ -29,12 +28,8 @@ class Container(containers.DeclarativeContainer):
     project_usecase = providers.Factory(
         ProjectUseCase,
         git_repository=git_repository,
-    )
-
-    system_usecase = providers.Factory(
-        SystemUseCase,
-        git_repository=git_repository,
         settings_repository=settings_repository,
+        task_repository=task_repository,
     )
 
     settings_usecase = providers.Factory(
@@ -47,4 +42,5 @@ class Container(containers.DeclarativeContainer):
         TaskUseCase,
         task_repository=task_repository,
         git_repository=git_repository,
+        settings_repository=settings_repository,
     )

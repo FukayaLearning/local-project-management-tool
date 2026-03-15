@@ -17,3 +17,5 @@ class Task(BaseModel):
     actual_hours: Optional[float] = None
     progress: int = 0  # 0-100
     display_order: int = 0
+    actual_start_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
