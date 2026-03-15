@@ -22,3 +22,7 @@ class ISettingsRepository(ABC):
     @abstractmethod
     def initialize_project_settings(self, project_dir: str, project_name: str) -> None:
         pass
+
+    @abstractmethod
+    def get_data_dir(self) -> str:
+        pass

@@ -17,5 +17,5 @@ bash doc/test/unit/run_frontend_unit_test.sh
 
 - 実行には Docker が必要です。
 - スクリプトはプロジェクトルートから実行することを想定しています。
-- 試験結果とログは `doc/test/unit/result/frontend/` に保存されます。
+- 試験結果とログは `doc/test/unit/result/frontend/` にresult_YYYYMMDD_HHMMSS.logのファイル名で保存されます。
 - カバレッジレポートは `doc/test/unit/result/frontend/coverage/index.html` で確認できます。
