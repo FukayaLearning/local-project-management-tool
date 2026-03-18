@@ -11,108 +11,95 @@
   - タスク管理 (CSV, UUID v4)
   - Git連携: 変更時の自動コミット、起動時・実行時の手動変更検知同期。
   - 履歴管理: Git restoreを利用した Undo/Redo。
-  - 可視化: ガントチャート、イナズマ線（計画中）。
+  - 可視化: ガントチャート、イナズマ線。
 
 ## 技術スタック
 
-- **フロントエンド**: React, TypeScript, Vite, TailwindCSS (DDDレイヤードアーキテクチャ)
+- **フロントエンド**: React, TypeScript, Vite, Vanilla CSS (DDDレイヤードアーキテクチャ)
 - **バックエンド**: Python 3.12+, FastAPI, Pandas (DDDレイヤードアーキテクチャ)
 - **インフラ**: Docker (Frontend, Backend, Nginx)
 - **データベース**: なし（`data/` ディレクトリ内のJSON/CSVファイル）
 - **バージョン管理**: Git（ソースコードおよびタスクデータの永続化用）
 
-## 設計・ルール
+## プロジェクトルールとアーキテクチャ
 
-`.gemini/antigravity/memory/` 内のルールを厳守してください：
+`.gemini/antigravity/memory/` 内のルールおよび `SKILL.md`（使用する場合）を厳守してください：
 
-- `coding.md`: DDDのレイヤー分け（Presentation, Application, Domain, Infrastructure）。
-- `documents.md`: ドキュメント構造および日英併記の原則。
-- `processes.md`: 開発プロセスの順序（要求->設計->実装->テスト）。
-- `test.md`: 試験ルール（Vitest for FE, Pytest for BE）。実行にはスクリプトを使用。
-- `htmlpage.md`: Markdown内の画面イメージはHTMLフラグメントとして埋め込む。
+- **コーディング (coding.md)**:
+  - DDDレイヤードアーキテクチャ: Presentation, Application, Domain, Infrastructure。
+  - PresentationはDomainエンティティに変換し、Application/InfrastructureはDomainに依存。
+  - 最上位での依存性注入 (DI) が必須。
+- **ドキュメント (documents.md)**:
+  - 常に英語 (`.md`) と日本語 (`.ja.md`) のペアを維持。
+  - `doc/` 配下の特定のファイルツリー構成（要求、システム設計、トレーサビリティマトリックス等）。
+- **開発プロセス (processes.md)**:
+  - 要求定義からREADME更新まで、定められた21段階のフローを遵守。
+- **テスト (test.md)**:
+  - すべての手順にはスクリプト（`build.sh`, `run.sh`, `stop.sh`）を使用。
+  - 単体試験: 分岐網羅80%以上、インフラはMock化。
+  - 結合試験: PlaywrightによるシナリオベースのE2E。
+  - エビデンス（ログ/標準出力）は `result/` ディレクトリに保存。
+- **UIデザイン (htmlpage.md)**:
+  - Markdown内の画面イメージはHTMLフラグメントとして埋め込む。
 
-## 現在のステータス (2026-02-21 時点)
+## 利用可能なスキル (Skills)
+
+以下のスキルを使用して複雑なタスクを実行できます：
+
+- `backend-unit-test`: バックエンドの単体試験を実行し、デバッグを支援。
+- `demo`: 結合試験スクリプトをデモモード（ブラウザ表示あり）で実行。
+- `frontend-unit-test`: フロントエンドの単体試験を実行し、デバッグを支援。
+- `integration-test`: フルスタックの結合試験およびシナリオを実行。
+- `run`: 適切な環境でプロジェクトを起動。
+- `stop`: 起動中のプロジェクトコンテナを停止。
+
+## ワークフロー (スラッシュコマンド)
+
+- `/check-traceability`: 要求、設計、実装、試験の整合性をチェック。
+- `/debug`: バグや試験失敗の根本原因を特定。
+- `/do-remain-process`: プロセスフローに従い、現在のフェーズから開発を継続。
+- `/reverse-engineering`: ソースコードや試験コードからドキュメントを掘り起こす。
+- `/review`: ルールへの準拠をドキュメントとコードの両面でレビュー。
+- `/sync-documents`: 英語版と日本語版のドキュメントを同期。
+
+## 現在のステータス (2026-03-19 時点)
 
 - [x] 基本設定とプロジェクト管理
 - [x] タスクのCRUD (CSV保存)
 - [x] Git連携コア機能 (自動コミット、ブランチ切り替え)
 - [x] Undo/Redo 機能
-- [/] 初期化フロー (システムステータス確認)
-- [ ] ガントチャートロジック (計画中)
+- [x] 初期化フロー (システムステータス確認)
+- [x] ガントチャート機能
 - [ ] イナズマ線ロジック (計画中)
 
 ## 重要なファイル
 
-- `backend/app/main.py`: エントリーポイントおよびDI設定。
+- `backend/src/main.py`: エントリーポイントおよびDI設定。
 - `frontend/src/main.tsx`: フロントエンドエントリーポイント。
 - `doc/design/requirement.ja.md`: 機能要求の真実のソース。
-- `doc/design/traceability_matrix.md`: 実装状況の追跡。
+- `doc/design/traceability_matrix.md`: 実装状況の追跡（トレーサビリティマトリックス）。
 
 ## 共通ワークフロー
 
-- `/check-traceability`: ドキュメントの整合性チェック。
-- `/do-remain-process`: 開発プロセスの途中から再開する場合に使用。
-- `doc/test/integration/scripts/`: 結合試験シナリオの実行。
+- `doc/test/integration/scripts/` 配下でE2Eシナリオを実行または定義。
+- 各 `result/` ディレクトリで試験のエビデンスとログを管理。
 
 ## 開発手順
 
-ビルド、試験、デモのすべての手順は、整合性を保つためにプロジェクト規定のスクリプトを使用して実行してください。
+ビルド、試験、デモのすべての手順は、整合性を保つためにプロジェクト規定のスクリプトを使用してください。
 
-### ビルド確認 (本番環境同等)
-
-プロジェクト直下のスクリプトを使用し、本番環境と同じ構成でビルドができることを確認します。
-
-- **実行**: `./build.sh`
-
-### 本番環境実行
-
-プロジェクト直下のスクリプトを使用し、本番環境と同じ構成でアプリケーションを起動します。
-
-- **実行**: `./run.sh`
-- **オートスタート設定**: `./run.sh --autostart` を実行すると、Docker の `restart: always` ポリシーが設定され、PC起動時やDockerデスクトップ起動時に自動開始されます。
-- **アクセス**: `http://localhost:8080` (Nginx経由)
-
-### 本番環境停止
-
-プロジェクト直下のスクリプトを使用して、本番環境を停止します。
-
-- **実行**: `./stop.sh`
-
-### 単体試験
-
-以下のスクリプトは、単体試験環境のビルド確認と試験を同時に実行します。
-
+- **ビルド**: `./build.sh`
+- **本番環境起動**: `./run.sh`（または `./run.sh --autostart`）
+- **本番環境停止**: `./stop.sh`
 - **バックエンド単体試験**: `./doc/test/unit/run_backend_unit_test.sh`
 - **フロントエンド単体試験**: `./doc/test/unit/run_frontend_unit_test.sh`
+- **結合試験**: `./doc/test/integration/run_integration_test.sh`
+- **デモモード**: `./doc/test/integration/run_integration_test.sh --demo`
 
-### 結合試験
+## 試験結果（エビデンス）とデバッグ
 
-全スタックを本番モードで起動し、E2Eシナリオを実行します。
-
-- **実行**: `./doc/test/integration/run_integration_test.sh`
-
-### アプリケーションデモ (デモ/デバッグモード)
-
-アプリケーションを開発モードで起動し、データを初期化した上で結合試験（デモ用）を実行します。
-
-- **実行**: `./doc/test/integration/run_integration_test.sh --demo`
-
-### 試験結果（エビデンス）とデバッグ
-
-実行ログと結果は、`doc/test/` 配下のそれぞれの `result/` ディレクトリに保存されます。不具合発生時の調査に活用してください。
-
-- **結合試験 (`doc/test/integration/result/`)**:
-  - `result_TIMESTAMP.log`: Playwrightのテスト実行ログ。
-  - `backend.log`: バックエンドコンテナのログ（APIエラーの調査に有効）。
-  - `frontend.log`: フロントエンドコンテナのログ。
-  - `test-results/`: 失敗したテストのスクリーンショットやトレース情報。
-- **単体試験 (`doc/test/unit/result/`)**:
-  - `backend/result_TIMESTAMP.log`: Pytestの実行ログとトレース。
-  - `frontend/result_TIMESTAMP.log`: Vitestの実行ログ。
-  - `*/coverage/index.html`: コードカバレッジレポート（ブラウザで確認可能）。
-
-**デバッグの進め方**:
+ログは `doc/test/*/result/` に保存されます。
 
 1. `result_TIMESTAMP.log` を確認し、失敗したアサーションを特定する。
-2. `backend.log` を確認し、バックエンド側で例外やエラーレスポンス(500/400系)が発生していないか調査する。
-3. 画面崩れや操作の失敗は `test-results/` 内のスクリーンショットを確認する。
+2. `backend.log` または `frontend.log` を確認し、コンテナやAPIのエラーを調査。
+3. UIの失敗は `test-results/` 内のスクリーンショットやトレース情報を確認。

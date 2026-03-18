@@ -11,108 +11,95 @@ This document provides essential context for AI agents working on this project. 
   - Task management (CSV, UUID v4)
   - Git integration: Auto-commit on change, Startup/Runtime manual change detection.
   - History management: Undo/Redo via Git restore.
-  - Visualisation: Gantt chart and Inazuma line (Planned).
+  - Visualisation: Gantt chart and Inazuma line.
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite, TailwindCSS (DDD Layered Architecture)
+- **Frontend**: React, TypeScript, Vite, Vanilla CSS (DDD Layered Architecture)
 - **Backend**: Python 3.12+, FastAPI, Pandas (DDD Layered Architecture)
 - **Infrastructure**: Docker (Frontend, Backend, Nginx)
 - **Database**: None (JSON/CSV files in `data/` directory)
 - **Version Control**: Git (both for source code and task data persistence)
 
-## Design & Rules
+## Project Rules & Architecture
 
-Strictly follow the rules defined in `.gemini/antigravity/memory/`:
+Strictly follow the rules defined in `.gemini/antigravity/memory/` and `SKILL.md` (if used):
 
-- `coding.md`: DDD layers (Presentation, Application, Domain, Infrastructure).
-- `documents.md`: Documentation structure and dual-language (EN/JP) requirement.
-- `processes.md`: Sequential development process (Requirement -> Design -> Implementation -> Test).
-- `test.md`: Testing rules (Vitest for FE, Pytest for BE). Use scripts for execution.
-- `htmlpage.md`: UI previews in Markdown must be embedded HTML fragments.
+- **Coding (coding.md)**:
+  - DDD Layered Architecture: Presentation, Application, Domain, Infrastructure.
+  - Presentation converts to Domain entities; Application/Infrastructure depend on Domain.
+  - Dependency Injection (DI) is mandatory at the top level.
+- **Documentation (documents.md)**:
+  - Always maintain English (`.md`) and Japanese (`.ja.md`) pairs.
+  - Specific file tree structure in `doc/` (Requirement, System Design, Traceability Matrix, etc.).
+- **Development Process (processes.md)**:
+  - Mandatory 21-step flow starting from Requirement Definition to README update.
+- **Testing (test.md)**:
+  - All procedures MUST use scripts (`build.sh`, `run.sh`, `stop.sh`).
+  - Unit tests: Branch coverage 80%+, Mock infrastructure.
+  - Integration tests: Scenario-based E2E using Playwright.
+  - Evidence (logs/outputs) MUST be stored in `result/` directories.
+- **UI Design (htmlpage.md)**:
+  - UI previews in Markdown must be embedded HTML fragments (not images).
 
-## Current Status (As of 2026-02-21)
+## Available Skills
+
+Use these skills to perform complex tasks:
+
+- `backend-unit-test`: Run backend unit tests and assist in debugging.
+- `demo`: Run the integration test script in demo mode (interactive browser).
+- `frontend-unit-test`: Run frontend unit tests and assist in debugging.
+- `integration-test`: Execute full-stack integration tests and scenarios.
+- `run`: Start the project in the appropriate environment.
+- `stop`: Stop the running project containers.
+
+## Workflows (Slash Commands)
+
+- `/check-traceability`: Verify consistency between requirements, design, implementation, and tests.
+- `/debug`: Identify the root cause of bugs or failing tests.
+- `/do-remain-process`: Continue development from the current phase following the process flow.
+- `/reverse-engineering`: Excavate documentation from source code and existing tests.
+- `/review`: Review documents and code for compliance with project rules.
+- `/sync-documents`: Synchronize English and Japanese documentation pairs.
+
+## Current Status (As of 2026-03-19)
 
 - [x] Basic Settings & Project Management
 - [x] Task CRUD (CSV storage)
 - [x] Git Core Integration (Auto-commit, Branch switching)
 - [x] Undo/Redo Functionality
-- [/] Initialisation Flow (System Status check)
-- [ ] Gantt Chart Logic (Planned)
+- [x] Initialisation Flow (System Status check)
+- [x] Gantt Chart Feature
 - [ ] Inazuma Line Logic (Planned)
 
 ## Critical Files
 
-- `backend/app/main.py`: Entry point and DI configuration.
-- `frontend/src/main.tsx`: Entry point.
-- `doc/design/requirement.ja.md`: Source of truth for functional requirements.
-- `doc/design/traceability_matrix.md`: Tracking implementation progress.
+- `backend/src/main.py`: Entry point and DI configuration.
+- `frontend/src/main.tsx`: Frontend entry point.
+- `doc/design/requirement.ja.md`: Functional requirements (Japanese).
+- `doc/design/traceability_matrix.md`: Core traceability mapping.
 
 ## Common Workflows
 
-- Use `/check-traceability` to verify document consistency.
-- Use `/do-remain-process` when continuing from a specific development step.
-- Use `doc/test/integration/scripts/` to run E2E scenarios.
+- Use `doc/test/integration/scripts/` to run or define E2E scenarios.
+- Check `result/` directories for test evidence and logs.
 
 ## Development Procedures
 
-All build, test, and demo procedures MUST be executed via the provided scripts to ensure consistency (as per project rules).
+All build, test, and demo procedures MUST be executed via the provided scripts.
 
-### Build Confirmation (Production-equivalent)
-
-Confirmed as the production build using the root script.
-
-- **Run**: `./build.sh`
-
-### Production Execution
-
-Starts the application in production mode using the root script.
-
-- **Run**: `./run.sh`
-- **Autostart configuration**: `./run.sh --autostart` (Enables Docker's `restart: always` policy).
-- **Access**: `http://localhost:8080` (via Nginx proxy)
-
-### Production Stop
-
-Stops the application in production mode using the root script.
-
-- **Run**: `./stop.sh`
-
-### Unit Test
-
-These scripts perform build confirmation (unit test environment) and run unit tests.
-
+- **Build**: `./build.sh`
+- **Run**: `./run.sh` (or `./run.sh --autostart`)
+- **Stop**: `./stop.sh`
 - **Backend Unit Test**: `./doc/test/unit/run_backend_unit_test.sh`
 - **Frontend Unit Test**: `./doc/test/unit/run_frontend_unit_test.sh`
+- **Integration Test**: `./doc/test/integration/run_integration_test.sh`
+- **Demo Mode**: `./doc/test/integration/run_integration_test.sh --demo`
 
-### Integration Test
+## Evidence & Debugging
 
-Runs the full stack in production mode and executes E2E scenarios.
+Logs are saved in `doc/test/*/result/`.
 
-- **Run**: `./doc/test/integration/run_integration_test.sh`
-
-### Application Demo (Demo/Debug Mode)
-
-Starts the application in development mode, cleans data, and runs integration tests with visible feedback.
-
-- **Run**: `./doc/test/integration/run_integration_test.sh --demo`
-
-### Evidence & Debugging
-
-Execution logs and results are saved in the respective `result/` directories under `doc/test/`. Use these for debugging failures:
-
-- **Integration Tests (`doc/test/integration/result/`)**:
-  - `result_TIMESTAMP.log`: Output of the Playwright test runner.
-  - `backend.log`: Logs from the backend container (useful for inspecting API errors).
-  - `frontend.log`: Logs from the frontend container.
-  - `test-results/`: Playwright traces and screenshots of failed tests.
-- **Unit Tests (`doc/test/unit/result/`)**:
-  - `backend/result_TIMESTAMP.log`: Pytest execution details.
-  - `frontend/result_TIMESTAMP.log`: Vitest execution details.
-  - `*/coverage/index.html`: Code coverage reports (visualise using a browser).
-
-**Debugging Checklist**:
-
-1. Check `result_TIMESTAMP.log` for the specific failed assertion.
-2. Review `backend.log` for any tracebacks or 500/400 errors during the test.
-3. If integration test fails visually, check `test-results/` for screenshots.
+1. Check `result_TIMESTAMP.log` for failure details.
+2. Review `backend.log` / `frontend.log` for container or API errors.
+3. Check `test-results/` for screenshots/traces of UI failures.
