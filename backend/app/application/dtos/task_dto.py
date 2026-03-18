@@ -16,6 +16,9 @@ class TaskCreateDTO(BaseModel):
     display_order: int = 0
     actual_start_date: Optional[date] = None
     actual_end_date: Optional[date] = None
+    scheduling_rule: Optional[str] = "priority"
+    dependencies: Optional[List[str]] = None
+    progress_history: Optional[List[dict]] = None
     
 class TaskUpdateDTO(BaseModel):
     title: Optional[str] = None
@@ -32,6 +35,9 @@ class TaskUpdateDTO(BaseModel):
     display_order: Optional[int] = None
     actual_start_date: Optional[date] = None
     actual_end_date: Optional[date] = None
+    scheduling_rule: Optional[str] = None
+    dependencies: Optional[List[str]] = None
+    progress_history: Optional[List[dict]] = None
 
 class TaskOrderUpdateDTO(BaseModel):
     id: str

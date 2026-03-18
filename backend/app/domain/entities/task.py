@@ -19,3 +19,8 @@ class Task(BaseModel):
     display_order: int = 0
     actual_start_date: Optional[date] = None
     actual_end_date: Optional[date] = None
+
+    # New fields
+    scheduling_rule: Optional[str] = "priority"
+    dependencies: Optional[list[str]] = Field(default_factory=list)
+    progress_history: Optional[list[dict]] = Field(default_factory=list)

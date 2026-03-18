@@ -97,3 +97,14 @@
 | :--- | :------------------------------------------- | :------------------------------------------------------------------ | :--------------------- |
 | 1    | Drag and drop a task row on Task List page   | Task moves to dropped position and order is maintained after reload | **IT-SCN-REORDER-001** |
 | 2    | Drag and drop a task row on Gantt Chart page | Task moves to dropped position and order is maintained after reload | **IT-SCN-REORDER-002** |
+
+### Scenario 10: Advanced Auto Scheduling (Advanced Scheduling)
+
+- **Related Requirements**: REQ-VIEW-003
+
+| Step | Operation/Procedure                       | Expected Result                                                                                            | Test-ID                |
+| :--- | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :--------------------- |
+| 1    | Assign multiple tasks to the same person  | Tasks are scheduled sequentially without overlap, within daily work hours limit.                           | **IT-SCN-SCHED-001**   |
+| 2    | Change assignee's productivity and save   | Task duration (days) correctly scales based on productivity (e.g., productivity 2.0 halves the duration).  | **IT-SCN-SCHED-002**   |
+| 3    | Add multiple short tasks                  | Next tasks start using remaining time within the same day (Intra-day continuation).                        | **IT-SCN-SCHED-003-1** |
+| 4    | Fix a high priority task to a future date | Lower priority tasks are automatically scheduled in the available gap before the fixed date (Gap-filling). | **IT-SCN-SCHED-003-2** |

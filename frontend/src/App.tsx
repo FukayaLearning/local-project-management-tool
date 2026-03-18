@@ -104,7 +104,7 @@ function ProjectLayout() {
   );
 }
 
-function GlobalLayout() {
+function GlobalLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -125,23 +125,43 @@ function GlobalLayout() {
         currentPage={getCurrentPage()}
         onNavigate={handleNavigate}
       />
-      <main className="py-10">
-        <Routes>
-          <Route path="/projects" element={<ProjectManagementPage />} />
-          <Route path="/settings" element={<GlobalSettingsPage />} />
-          <Route path="/" element={<Navigate to="/projects" replace />} />
-        </Routes>
-      </main>
+      <main className="py-10">{children}</main>
     </div>
   );
 }
 
 function App() {
+  const location = useLocation();
+  console.log("App current path:", location.pathname);
   return (
     <Routes>
-      <Route path="/projects/new" element={<GlobalLayout />} />
+      <Route
+        path="/projects/new"
+        element={
+          <GlobalLayout>
+            <ProjectManagementPage />
+          </GlobalLayout>
+        }
+      />
       <Route path="/projects/:projectName/*" element={<ProjectLayout />} />
-      <Route path="/*" element={<GlobalLayout />} />
+      <Route
+        path="/projects"
+        element={
+          <GlobalLayout>
+            <ProjectManagementPage />
+          </GlobalLayout>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <GlobalLayout>
+            <GlobalSettingsPage />
+          </GlobalLayout>
+        }
+      />
+      <Route path="/" element={<Navigate to="/projects" replace />} />
+      <Route path="*" element={<Navigate to="/projects" replace />} />
     </Routes>
   );
 }

@@ -77,9 +77,9 @@ describe("App Routing and Layout", () => {
     expect(mockFetchProjects).toHaveBeenCalled();
   });
 
-  it("UNIT-FE-APP-004: Should render GanttChartPage on /projects/:projectName/gantts", () => {
+  it("UNIT-FE-APP-004: Should render GanttChartPage on /projects/:projectName/gantt", () => {
     render(
-      <MemoryRouter initialEntries={["/projects/ProjA/gantts"]}>
+      <MemoryRouter initialEntries={["/projects/ProjA/gantt"]}>
         <App />
       </MemoryRouter>,
     );

@@ -6,9 +6,8 @@ services:
     environment:
       - CI=true
     volumes:
-      - ${E2E_DIR:-.}/scripts:/app/scripts
-      - ${E2E_DIR:-.}/result:/app/result
-      - ${E2E_DIR:-.}/package.json:/app/package.json
+      - ${E2E_DIR}/scripts:/app/scripts
+      - ${E2E_DIR}/result:/app/result
       - ${REPO_ROOT}/backend/data:/app/backend/data
       - /var/run/docker.sock:/var/run/docker.sock
       - /app/node_modules

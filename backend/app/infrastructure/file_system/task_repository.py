@@ -38,9 +38,21 @@ class TaskFileRepository(ITaskRepository):
         if data.get("display_order") is not None:
             data["display_order"] = int(float(data["display_order"]))
 
-        for f in ["progress", "display_order"]:
-            if f in data and data[f] is None:
-                del data[f]
+        import json
+        if data.get("dependencies"):
+            try:
+                if isinstance(data["dependencies"], str):
+                    data["dependencies"] = json.loads(data["dependencies"].replace("'", '"'))
+            except Exception:
+                data["dependencies"] = []
+        
+        if data.get("progress_history"):
+            try:
+                if isinstance(data["progress_history"], str):
+                    # Handle both single/double quotes if necessary, though model_dump(mode='json') uses double
+                    data["progress_history"] = json.loads(data["progress_history"].replace("'", '"'))
+            except Exception:
+                data["progress_history"] = []
 
         return Task(**data)
 

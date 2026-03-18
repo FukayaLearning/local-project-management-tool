@@ -20,7 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 interface TaskListViewProps {
-  tasks: Task[];
+  tasks: (Task & { depth?: number })[];
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onReorder?: (orders: { id: string; display_order: number }[]) => void;
@@ -71,8 +71,22 @@ const SortableTaskRow = ({
       ) : (
         <td className="w-10 px-6 py-4"></td>
       )}
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-        {task.title}
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+        <div
+          style={{ paddingLeft: `${(task as any).depth * 24}px` }}
+          className="flex items-center"
+        >
+          {(task as any).depth > 0 && (
+            <span className="text-gray-400 mr-2">└</span>
+          )}
+          {task.title}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {task.calculated_start_date || "-"}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {task.calculated_end_date || "-"}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         <span
@@ -169,6 +183,12 @@ export const TaskListView: React.FC<TaskListViewProps> = ({
             <th className="w-10 px-6 py-3"></th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Title
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Planned Start
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Planned End
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status

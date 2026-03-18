@@ -8,26 +8,28 @@ export const ProjectManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { projects, isLoading, error, fetchProjects, createProject } =
     useProjectUseCase();
-  const [newProjectName, setNewProjectName] = React.useState("");
-  const [isCreating, setIsCreating] = React.useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
   const handleOpenProject = (projectName: string) => {
-    navigate(`/projects/${encodeURIComponent(projectName)}`);
+    const path = `/projects/${encodeURIComponent(projectName)}`;
+    console.log("Navigating to:", path);
+    navigate(path);
   };
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProjectName.trim()) return;
-
+    const targetName = newProjectName.trim();
+    if (!targetName) return;
     setIsCreating(true);
     try {
-      await createProject(newProjectName.trim());
+      await createProject(targetName);
       setNewProjectName("");
-      handleOpenProject(newProjectName.trim());
+      handleOpenProject(targetName);
     } catch (err) {
       console.error("Failed to create project", err);
     } finally {

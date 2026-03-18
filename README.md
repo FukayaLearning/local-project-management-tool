@@ -10,7 +10,9 @@ It utilizes Git as a backend storage mechanism to provide powerful history manag
 - **File-Based**: Data is stored in human-readable JSON and CSV formats, managed by Git.
 - **Powerful History**: Robust Undo/Redo functionality powered by Git integration.
 - **Project Management**: Create and switch between multiple projects. Each project is managed as a separate Git repository within its own directory.
-- **Gantt Chart**: Visualize task schedules with a Gantt chart. Parent tasks automatically aggregate child task date ranges. Includes an Inazuma (progress) line to compare actual progress against the plan.
+- **Gantt Chart**: Visualize task schedules with a Gantt chart. Parent tasks automatically aggregate child task date ranges.
+- **Advanced Scheduling**: Supports automated scheduling based on resource constraints, including productivity ratios, intra-day task continuation, and gap-filling (dispatching lower priority tasks during high priority task wait times).
+- **Progress Tracking**: Includes an Inazuma (progress) line to compare actual progress against the plan based on status and progress rates.
 - **Smart Initialization**: Automatically guides you to project creation on first launch.
 
 ## 📂 Directory Structure

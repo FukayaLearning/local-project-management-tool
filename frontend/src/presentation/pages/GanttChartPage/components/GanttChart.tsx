@@ -7,7 +7,6 @@ import {
   generateTimelineDates,
   flattenTasksWithHierarchy,
   calculateTimelineRange,
-  calculateParentDateRange,
   HierarchicalTask,
 } from "../../../../domain/services/ganttChartService";
 import { TimelineHeader } from "./TimelineHeader";
@@ -118,20 +117,13 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   );
   const hierarchicalTasks = flattenTasksWithHierarchy(localTasks);
 
-  // Calculate parent date ranges
+  // Use pre-calculated dates from scheduledTasks
   const taskWithResolvedDates = hierarchicalTasks.map((task) => {
-    if (task.hasChildren) {
-      const children = localTasks.filter((t) => t.parent_id === task.id);
-      const range = calculateParentDateRange(children);
-      if (range) {
-        return {
-          ...task,
-          start_date: task.start_date || range.startDate,
-          due_date: task.due_date || range.endDate,
-        };
-      }
-    }
-    return task;
+    return {
+      ...task,
+      start_date: task.calculated_start_date || task.start_date,
+      due_date: task.calculated_end_date || task.due_date,
+    };
   });
 
   const totalWidth = timelineDates.length * dayWidth;
