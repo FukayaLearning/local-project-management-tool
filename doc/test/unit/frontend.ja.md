@@ -30,6 +30,7 @@
 |                        | UNIT-FE-UC-TASK-003 | タスク作成成功           | 新規作成されたタスクがリストに追加される               | PASS |
 |                        | UNIT-FE-UC-TASK-004 | サブタスク作成成功       | parent_idを指定して作成されたタスクが反映される        | PASS |
 |                        | UNIT-FE-UC-TASK-005 | タスク順序変更成功       | 並び替えAPIが呼ばれ、タスク一覧が再取得される          | PASS |
+|                        | UNIT-FE-UC-TASK-006 | スケジュール一括適用成功 | bulkUpdate APIが呼ばれ、タスク一覧が再反映される       | PASS |
 | **useSettingsUseCase** | UNIT-FE-UC-SET-001  | 設定取得成功             | プロジェクト設定がstateに反映されること                | PASS |
 |                        | UNIT-FE-UC-SET-002  | 設定更新成功             | 更新後の設定がstateに反映されること                    | PASS |
 | **useProjectUseCase**  | UNIT-FE-UC-PROJ-001 | プロジェクト一覧取得成功 | APIから取得したプロジェクト一覧がstateに反映されること | PASS |

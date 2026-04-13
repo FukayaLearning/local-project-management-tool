@@ -40,6 +40,8 @@
 | **UNIT-BE-TASK-005** | タスク削除               | `project_name`, `task_id`                       | Repo.delete() -> True, Git.commit() -> Success                           | Repo.deleteとGit.commitが呼ばれ、Trueが返ること。                                 | PASS |
 | **UNIT-BE-TASK-006** | タスク作成(親タスク指定) | `project_name`, `TaskCreateDTO(parent_id="P1")` | Repo.save() -> Task, Git.commit() -> Success                             | 親タスクID(parent_id)が設定された状態でタスクが生成・保存されること。             | PASS |
 | **UNIT-BE-TASK-007** | タスク順序変更           | `project_name`, `List[TaskOrderUpdateDTO]`      | Repo.update_orders() -> True, Git.commit() -> Success                    | Repo.update_ordersとGit.commitが呼ばれ、Trueが返ること。                          | PASS |
+| **UNIT-BE-TASK-008** | タスク一括更新(日付)     | `project_name`, `List[TaskBulkUpdateDTO]`       | Repo.bulk_update() -> True, Git.commit() -> Success                      | Repo.bulk_updateとGit.commitが呼ばれ、Trueが返ること。                            | PASS |
+| **UNIT-BE-TASK-009** | 未定義フィールド保持検証 | 未定義カラムを含むCSVデータ                     | Repo.save() / Repo.get_all()                                             | CSVの未知のフィールドがロード・セーブ後も完全に維持されていること。               | PASS |
 
 ### 2.3 ProjectUseCase
 
