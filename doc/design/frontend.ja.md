@@ -82,6 +82,7 @@ URLパスパラメーター `projectName` を取得し、各ユースケース�
   - プロジェクトの設定値に基づき、スケジュール計算済みのタスク一覧（予定日付き）を表示。
   - `TaskDetailModal`: タスクの詳細編集モーダル。
   - CSVエクスポート機能への導線を配置。
+  - **「Apply Schedule to CSV」ボタン**: `useTaskUseCase.applySchedule` を呼び出し、現在計算されている `calculated_start_date` / `calculated_end_date` を `start_date` / `due_date` としてバックエンドへ一括送信し、永続化する。
   - 開発モード（`VITE_DEBUG_MODE=true`）時はユーザー操作に応じたデバッグログを出力。
 - `GanttChartPage`: ガントチャート表示。
   - 依存する `GanttChartService` を用いて、親子関係や進捗を示すイナズマ線の計算と描画を実行。

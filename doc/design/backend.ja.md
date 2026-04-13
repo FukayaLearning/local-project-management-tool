@@ -45,7 +45,7 @@ backend/app/
 
 ### 3.1 エンティティ/値オブジェクト (Domain)
 
-- `Task`: ID, Title, Status, Dates, ParentID, display_order, planned_hours, actual_hours, progress 等を保持。
+- `Task`: ID, Title, Status, Dates, ParentID, display_order, planned_hours, actual_hours, progress 等を保持。Pydanticの `ConfigDict(extra='allow')` を指定し、CSVの未定義カラムを動的に保持する。
 - `BasicSettings`: タスク状態定義、タスク種別定義、担当者定義、1日投入時間、休日定義を保持。グローバル設定。
 - `ProjectSettings`: プロジェクト名、基本設定のオーバーライド値を保持。
 
@@ -176,13 +176,22 @@ backend/app/
   2. `TaskRepository.update_orders(orders)` で複数タスクの順序を一括で更新・保存する。
   3. **Git Commit**: `GitService.commit("Reorder tasks")` を実行。
 
+#### `PUT /api/v1/projects/{project_name}/tasks/bulk-update`
+
+- **関連Spec-ID**: `SPEC-VIEW-004-002`, `SPEC-HIST-001-001`
+- **処理フロー**:
+  1. `TaskUseCase.bulk_update_tasks(project_name, updates)` を呼び出す。
+  2. 渡されたIDリストに基づき、各タスクの `start_date`, `due_date` を一括更新する。
+  3. 未定義フィールド（extra領域）が損なわれないようにリポジトリ経由で更新を保存する。
+  4. **Git Commit**: `GitService.commit("Apply schedule to tasks")` を実行。
+
 #### `DELETE /api/v1/projects/{project_name}/tasks/{task_id}`
 
 - **関連Spec-ID**: `SPEC-TASK-002-005`, `SPEC-HIST-001-001`
 - **処理フロー**:
   1. `TaskUseCase.delete_task(project_name, task_id)` を呼び出す。
   2. `TaskRepository` で該当IDのレコードを物理削除する。
-  3. **Git Commit**: `GitService.commit(f"Delete task {id}")` を実行。
+  3. **Git Commit**: `GitService.commit(f"Delete task {task_id}")` を実行。
 
 ## 5. 外部連携 (Git管理)
 

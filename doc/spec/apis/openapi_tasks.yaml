@@ -197,6 +197,7 @@ components:
   schemas:
     TaskBase:
       type: object
+      additionalProperties: true
       properties:
         title:
           type: string
