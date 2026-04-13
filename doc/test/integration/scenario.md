@@ -108,3 +108,23 @@
 | 2    | Change assignee's productivity and save   | Task duration (days) correctly scales based on productivity (e.g., productivity 2.0 halves the duration).  | **IT-SCN-SCHED-002**   |
 | 3    | Add multiple short tasks                  | Next tasks start using remaining time within the same day (Intra-day continuation).                        | **IT-SCN-SCHED-003-1** |
 | 4    | Fix a high priority task to a future date | Lower priority tasks are automatically scheduled in the available gap before the fixed date (Gap-filling). | **IT-SCN-SCHED-003-2** |
+
+### Scenario 11: Undefined Field Preservation (Undefined Field Preservation)
+
+- **Related Requirements**: REQ-TASK-006
+
+| Step | Operation/Procedure                                                                          | Expected Result                                                                    | Test-ID              |
+| :--- | :------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- | :------------------- |
+| 1    | Place a CSV from external tool containing unknown columns (e.g., "Milestone") into a project | Task list is displayed normally                                                    | **IT-SCN-EXTRA-001** |
+| 2    | Edit any task content within the tool and save                                               | Other edits are saved while unknown columns and their values are maintained in CSV | **IT-SCN-EXTRA-002** |
+| 3    | Export the project                                                                           | The exported CSV contains the unknown columns                                      | **IT-SCN-EXTRA-003** |
+
+### Scenario 12: Apply Schedule (Apply Schedule)
+
+- **Related Requirements**: REQ-VIEW-004
+
+| Step | Operation/Procedure                              | Expected Result                                                                         | Test-ID              |
+| :--- | :----------------------------------------------- | :-------------------------------------------------------------------------------------- | :------------------- |
+| 1    | Import tasks with no dates or inconsistent dates | Automatically calculated schedules are shown on the Gantt chart                         | **IT-SCN-APPLY-001** |
+| 2    | Click "Apply Schedule to CSV" button             | Success message is shown, and calculated dates are saved back to CSV as start/due dates | **IT-SCN-APPLY-002** |
+| 3    | Return to the task list and verify updated dates | The list reflects the calculated date results in the date columns                       | **IT-SCN-APPLY-003** |

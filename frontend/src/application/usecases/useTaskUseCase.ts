@@ -148,6 +148,33 @@ export const useTaskUseCase = (settings?: BasicSettings | null) => {
     [fetchTasks, repository],
   );
 
+  const applySchedule = useCallback(
+    async (projectName: string) => {
+      if (scheduledTasks.length === 0) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const updates = scheduledTasks
+          .filter((t) => !t.parent_id) // Only update leaf tasks or manage parent dates via leaves
+          .map((t) => ({
+            id: t.id,
+            start_date: t.calculated_start_date || undefined,
+            due_date: t.calculated_end_date || undefined,
+          }));
+        await repository.bulkUpdate(projectName, updates);
+        await fetchTasks(projectName);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to apply schedule"),
+        );
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchTasks, repository, scheduledTasks],
+  );
+
   return {
     tasks,
     scheduledTasks,
@@ -158,6 +185,7 @@ export const useTaskUseCase = (settings?: BasicSettings | null) => {
     updateTask,
     deleteTask,
     reorderTasks,
+    applySchedule,
     exportTasks: (projectName: string) => {
       window.location.href = `/api/v1/projects/${encodeURIComponent(
         projectName,

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from typing import List
 from dependency_injector.wiring import inject, Provide
-from ..schemas.task import Task, TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO
+from ..schemas.task import Task, TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO, TaskBulkUpdateDTO
 from backend.app.application.usecases.task_usecase import TaskUseCase
 from backend.app.container import Container
 
@@ -71,6 +71,19 @@ def reorder_tasks(
     return {"message": "Tasks reordered successfully"}
 
 
+@router.put("/{project_name}/tasks/bulk-update")
+@inject
+def bulk_update_tasks(
+    project_name: str,
+    updates: List[TaskBulkUpdateDTO],
+    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
+):
+    success = usecase.bulk_update_tasks(project_name, updates)
+    if not success:
+        raise HTTPException(status_code=400, detail="Failed to update tasks")
+    return {"message": "Tasks updated successfully"}
+
+
 @router.put("/{project_name}/tasks/{task_id}", response_model=Task)
 @inject
 def update_task(
@@ -94,5 +107,3 @@ def delete_task(
 ):
     if not usecase.delete_task(project_name, task_id):
         raise HTTPException(status_code=404, detail="Task not found")
-
-

@@ -45,7 +45,7 @@ backend/app/
 
 ### 3.1 Entities/Value Objects (Domain)
 
-- `Task`: Holds ID, Title, Status, Dates, ParentID, display_order, planned_hours, actual_hours, progress, etc.
+- `Task`: Holds ID, Title, Status, Dates, ParentID, display_order, planned_hours, actual_hours, progress, etc. Specified with `ConfigDict(extra='allow')` to dynamically retain unknown CSV columns.
 - `BasicSettings`: Holds task status definitions, task type definitions, assignee definitions, daily work hours, holiday definitions. Global settings.
 - `ProjectSettings`: Holds project name and override values for basic settings.
 
@@ -168,13 +168,17 @@ backend/app/
   2. Update record with corresponding ID via `TaskRepository`.
   3. **Git Commit**: Execute `GitService.commit(f"Update task {title}")`.
 
-#### `PUT /api/v1/projects/{project_name}/tasks/reorder`
+| **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` updates the `display_order` of multiple tasks at once. Git commit after update. | REQ-TASK-005, REQ-HIST-001 |
+| **SPEC-TASK-004-002** | Task | Task Export | API | `GET /api/v1/projects/{project_name}/tasks/export` to download all tasks of the project as CSV. Includes retained custom fields. | REQ-TASK-004 |
 
-- **Related Spec-ID**: `SPEC-TASK-004-001`, `SPEC-HIST-001-001`
+#### `PUT /api/v1/projects/{project_name}/tasks/bulk-update`
+
+- **Related Spec-ID**: `SPEC-VIEW-004-002`, `SPEC-HIST-001-001`
 - **Flow**:
-  1. Call `TaskUseCase.reorder_tasks(project_name, orders)`.
-  2. Update and save multiple task orders at once via `TaskRepository.update_orders(orders)`.
-  3. **Git Commit**: Execute `GitService.commit("Reorder tasks")`.
+  1. Call `TaskUseCase.bulk_update_tasks(project_name, updates)`.
+  2. Batch update `start_date` and `due_date` for each task based on the provided IDs.
+  3. Ensure extra fields are preserved during save via repository.
+  4. **Git Commit**: Execute `GitService.commit("Apply schedule to tasks")`.
 
 #### `DELETE /api/v1/projects/{project_name}/tasks/{task_id}`
 

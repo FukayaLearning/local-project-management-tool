@@ -17,8 +17,15 @@ export const GanttChartPage: React.FC<GanttChartPageProps> = ({
   projectName,
 }) => {
   const { globalSettings, fetchGlobalSettings } = useSettingsUseCase();
-  const { scheduledTasks, tasks, isLoading, error, fetchTasks, reorderTasks } =
-    useTaskUseCase(globalSettings);
+  const {
+    scheduledTasks,
+    tasks,
+    isLoading,
+    error,
+    fetchTasks,
+    reorderTasks,
+    applySchedule,
+  } = useTaskUseCase(globalSettings);
   const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
   const [showInazumaLine, setShowInazumaLine] = useState(false);
   const [referenceDate, setReferenceDate] = useState(
@@ -72,6 +79,13 @@ export const GanttChartPage: React.FC<GanttChartPageProps> = ({
             disabled={dayWidth >= MAX_DAY_WIDTH}
           >
             Zoom In
+          </button>
+          <button
+            onClick={() => applySchedule(projectName)}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium"
+            title="Update all task start/due dates based on current schedule"
+          >
+            Apply Schedule to CSV
           </button>
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input

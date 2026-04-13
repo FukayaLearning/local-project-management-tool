@@ -19,6 +19,7 @@ vi.mock("../../../infrastructure/api/repositories/taskApiRepository", () => {
   TaskApiRepository.prototype.update = vi.fn();
   TaskApiRepository.prototype.delete = vi.fn();
   TaskApiRepository.prototype.updateOrders = vi.fn();
+  TaskApiRepository.prototype.bulkUpdate = vi.fn();
   return { TaskApiRepository };
 });
 
@@ -130,5 +131,48 @@ describe("useTaskUseCase", () => {
       [{ id: "1", display_order: 1 }],
     );
     expect(TaskApiRepository.prototype.getAll).toHaveBeenCalledWith("ProjectA");
+  });
+
+  it("applies schedule successfully", async () => {
+    const mockTasks = [
+      {
+        id: "1",
+        title: "Task 1",
+        calculated_start_date: "2024-01-01",
+        calculated_end_date: "2024-01-02",
+      },
+      {
+        id: "2",
+        title: "Task 2",
+        calculated_start_date: "2024-01-02",
+        calculated_end_date: "2024-01-03",
+      },
+    ];
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue(mockTasks);
+    // @ts-ignore
+    TaskApiRepository.prototype.bulkUpdate.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    // Fetch tasks first to populate the state
+    await act(async () => {
+      await result.current.fetchTasks("ProjectA");
+    });
+
+    // Trigger applySchedule
+    await act(async () => {
+      await result.current.applySchedule("ProjectA");
+    });
+
+    expect(TaskApiRepository.prototype.bulkUpdate).toHaveBeenCalledWith(
+      "ProjectA",
+      [
+        { id: "1", start_date: "2024-01-01", due_date: "2024-01-02" },
+        { id: "2", start_date: "2024-01-02", due_date: "2024-01-03" },
+      ],
+    );
+    // Should re-fetch after update
+    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalledTimes(2);
   });
 });

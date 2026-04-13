@@ -4,7 +4,7 @@ from backend.app.domain.repositories.task_repository import ITaskRepository
 from backend.app.domain.repositories.git_repository import IGitRepository
 from backend.app.domain.repositories.settings_repository import ISettingsRepository
 from backend.app.domain.entities.task import Task
-from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO
+from backend.app.application.dtos.task_dto import TaskCreateDTO, TaskUpdateDTO, TaskOrderUpdateDTO, TaskBulkUpdateDTO
 
 
 class TaskUseCase:
@@ -45,23 +45,15 @@ class TaskUseCase:
 
     def create_task(self, project_name: str, dto: TaskCreateDTO) -> Task:
         project_dir = self._get_project_dir(project_name)
-        task = Task(
-            title=dto.title,
-            status=dto.status,
-            assignee_id=dto.assignee_id,
-            start_date=dto.start_date,
-            due_date=dto.due_date,
-            parent_id=dto.parent_id,
-            description=dto.description,
-            task_type=dto.task_type,
-            planned_hours=dto.planned_hours,
-            display_order=dto.display_order,
-            actual_start_date=dto.actual_start_date,
-            actual_end_date=dto.actual_end_date,
-            scheduling_rule=dto.scheduling_rule,
-            dependencies=dto.dependencies or [],
-            progress_history=dto.progress_history or [],
-        )
+        data = dto.model_dump()
+        # Ensure dependencies and progress_history are at least empty lists 
+        # (they might be None if not provided in DTO but Task entity expects them)
+        if data.get("dependencies") is None:
+            data["dependencies"] = []
+        if data.get("progress_history") is None:
+            data["progress_history"] = []
+            
+        task = Task(**data)
 
         saved_task = self.task_repository.save(project_dir, task)
         self._ensure_git_initialized(project_dir)
@@ -96,6 +88,24 @@ class TaskUseCase:
         if result:
             self.git_repository.commit(f"Delete task {task_id}", project_dir)
         return result
+
+    def bulk_update_tasks(self, project_name: str, updates: List[TaskBulkUpdateDTO]) -> bool:
+        project_dir = self._get_project_dir(project_name)
+        all_tasks = self.task_repository.get_all(project_dir)
+        task_map = {t.id: t for t in all_tasks}
+        
+        updated_any = False
+        for update in updates:
+            if update.id in task_map:
+                task = task_map[update.id]
+                task.start_date = update.start_date
+                task.due_date = update.due_date
+                self.task_repository.update(project_dir, task)
+                updated_any = True
+        
+        if updated_any:
+            self.git_repository.commit("Apply schedule to tasks", project_dir)
+        return updated_any
 
     def get_task_file_path(self, project_name: str) -> str:
         project_dir = self._get_project_dir(project_name)

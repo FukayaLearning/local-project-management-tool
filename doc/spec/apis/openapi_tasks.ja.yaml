@@ -159,6 +159,52 @@ paths:
                   - display_order
       responses:
         "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /projects/{project_name}/tasks/bulk-update:
+    put:
+      summary: タスクの一括更新
+      description: 指定プロジェクトの複数タスク（日付等）を一括更新し、Gitコミットする。
+      operationId: bulkUpdateTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  start_date:
+                    type: string
+                    format: date
+                    nullable: true
+                  due_date:
+                    type: string
+                    format: date
+                    nullable: true
+                required:
+                  - id
+      responses:
+        "200":
           description: 更新成功
           content:
             application/json:
@@ -197,6 +243,7 @@ components:
   schemas:
     TaskBase:
       type: object
+      additionalProperties: true
       properties:
         title:
           type: string

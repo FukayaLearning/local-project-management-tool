@@ -122,6 +122,15 @@ sequenceDiagram
     Git-->>BE: コミット完了
     BE-->>FE: 200 OK (タスクデータ)
     FE-->>User: 画面を更新
+
+    User->>FE: 「Apply Schedule to CSV」ボタンを押下
+    FE->>BE: PUT /api/v1/projects/{project_name}/tasks/bulk-update
+    BE->>FS: data/{project_name}/tasks.csv を一括更新
+    FS-->>BE: 完了
+    BE->>Git: git add . && git commit (Apply schedule to tasks)
+    Git-->>BE: コミット完了
+    BE-->>FE: 200 OK
+    FE-->>User: 日付の更新を一覧へ反映
 ```
 
 - **要件一覧**
@@ -136,7 +145,8 @@ sequenceDiagram
   | **SPEC-TASK-002-005** | Task | タスク削除 | API | `DELETE /api/v1/projects/{project_name}/tasks/{task_id}` でタスクを削除する。削除後にGitコミットする。 | REQ-TASK-001, REQ-HIST-001 |
   | **SPEC-TASK-003-001** | Task | 階層構造 | データ構造 | `parent_id` カラムを持ち、親タスクのIDを保持する。 | REQ-TASK-003 |
   | **SPEC-TASK-004-001** | Task | タスク順序 | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` で複数タスクの `display_order` を一括更新する。更新後にGitコミットする。 | REQ-TASK-005, REQ-HIST-001 |
-  | **SPEC-TASK-004-002** | Task | タスクエクスポート | API | `GET /api/v1/projects/{project_name}/tasks/export` でプロジェクトの全タスクをCSVとしてダウンロードする。 | REQ-TASK-004 |
+  | **SPEC-TASK-004-002** | Task | タスクエクスポート | API | `GET /api/v1/projects/{project_name}/tasks/export` でプロジェクトの全タスクをCSVとしてダウンロードする。インポート時に保持した未定義フィールドも含まれる。 | REQ-TASK-004 |
+  | **SPEC-TASK-006-001** | Task | 未定義フィールド保持 | 実装方針 | Pydanticモデルの `extra='allow'` 設定を使用し、CSVの未知のカラムデータをオブジェクト内で保持する。保存・更新時もこれらを維持してCSVに書き戻す。 | REQ-TASK-006 |
 
 ### 3.3 可視化・チャート (VIEW)
 
@@ -152,6 +162,8 @@ sequenceDiagram
   | **SPEC-VIEW-003-001** | View | 自動スケジューリング | 計算ロジック | 優先度、先行タスク、見積工数、休日設定に基づき、最短開始日・終了日を自動計算する。トポロジカルソートとリソース（担当者）ごとのタイムライン管理を用いる。 | REQ-VIEW-003 |
   | **SPEC-VIEW-003-002** | View | 自動スケジューリング | 生産性調整 | 担当者の `productivity_ratio` を用いて、実質的な作業工数を算出し（工数 / 生産性）、スケジュールを調整する。 | REQ-VIEW-003 |
   | **SPEC-VIEW-003-003** | View | 自動スケジューリング | 当日中継続・ギャップ充填 | 1日の残り時間を活用した翌タスクの開始、および高優先度タスクの待機時間への低優先度タスクの詰め込みを行う。 | REQ-VIEW-003 |
+  | **SPEC-VIEW-004-001** | View | スケジュール再計算 | 計算ロジック | 外部インポートデータ等で日付が不整合な場合、現在の `display_order` に基づいて依存関係がないタスクも順次スケジューリングする。フロントエンドの `taskCalculationService` で計算を行う。 | REQ-VIEW-004 |
+  | **SPEC-VIEW-004-002** | View | スケジュール一括適用 | API | フロントエンドで計算されたスケジュールを `PUT /api/v1/projects/{project_name}/tasks/bulk-update` で一括保存する。 | REQ-VIEW-004 |
 
 ### 3.4 履歴管理 (HIST)
 

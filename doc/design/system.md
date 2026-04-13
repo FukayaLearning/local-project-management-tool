@@ -122,6 +122,15 @@ sequenceDiagram
     Git-->>BE: Commit complete
     BE-->>FE: 200 OK (task data)
     FE-->>User: Update screen
+
+    User->>FE: Press "Apply Schedule to CSV" button
+    FE->>BE: PUT /api/v1/projects/{project_name}/tasks/bulk-update
+    BE->>FS: Batch update data/{project_name}/tasks.csv
+    FS-->>BE: Complete
+    BE->>Git: git add . && git commit (Apply schedule to tasks)
+    Git-->>BE: Commit complete
+    BE-->>FE: 200 OK
+    FE-->>User: Reflect updated dates in the list
 ```
 
 - **Requirement List**
@@ -136,7 +145,8 @@ sequenceDiagram
   | **SPEC-TASK-002-005** | Task | Task Delete | API | `DELETE /api/v1/projects/{project_name}/tasks/{task_id}` deletes a task. Git commit after deletion. | REQ-TASK-001, REQ-HIST-001 |
   | **SPEC-TASK-003-001** | Task | Hierarchy | Data Structure | Has `parent_id` column to hold parent task ID. | REQ-TASK-003 |
   | **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` updates the `display_order` of multiple tasks at once. Git commit after update. | REQ-TASK-005, REQ-HIST-001 |
-  | **SPEC-TASK-004-002** | Task | Task Export | API | Use `GET /api/v1/projects/{project_name}/tasks/export` to download all tasks of the project as CSV. | REQ-TASK-004 |
+  | **SPEC-TASK-004-002** | Task | Task Export | API | `GET /api/v1/projects/{project_name}/tasks/export` to download all tasks as CSV. Includes retained custom fields. | REQ-TASK-004 |
+  | **SPEC-TASK-006-001** | Task | Extra Field Retention | Strategy | Use Pydantic's `extra='allow'` to retain unknown column data from CSV. Maintain these fields during save/update. | REQ-TASK-006 |
 
 ### 3.3 Visualization & Charts (VIEW)
 
@@ -152,6 +162,8 @@ sequenceDiagram
   | **SPEC-VIEW-003-001** | View | Auto Scheduling | Calculation Logic | Auto-calculate start/end dates based on priority, dependencies, man-hours, and holidays using topological sort and resource timeline management. | REQ-VIEW-003 |
   | **SPEC-VIEW-003-002** | View | Auto Scheduling | Productivity Adjustment | Adjust schedule by calculating effective man-hours (hours / productivity) using the assignee's `productivity_ratio`. | REQ-VIEW-003 |
   | **SPEC-VIEW-003-003** | View | Auto Scheduling | Intra-day & Gap Filling | Start the next task using remaining time within a day, and fill gaps (waiting time for high priority tasks) with lower priority tasks. | REQ-VIEW-003 |
+  | **SPEC-VIEW-004-001** | View | Schedule Recalculation | Logic | Recalculate based on current `display_order` even for tasks without dependencies if dates are inconsistent. Calculation performed in frontend. | REQ-VIEW-004 |
+  | **SPEC-VIEW-004-002** | View | Batch Apply Schedule | API | Batch save frontend-calculated schedules via `PUT /api/v1/projects/{project_name}/tasks/bulk-update`. | REQ-VIEW-004 |
 
 ### 3.4 History Management (HIST)
 

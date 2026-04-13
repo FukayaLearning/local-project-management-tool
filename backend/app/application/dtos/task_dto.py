@@ -1,9 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import date
 from backend.app.domain.entities.settings import ProjectSettings, BasicSettings
 
 class TaskCreateDTO(BaseModel):
+    model_config = ConfigDict(extra='allow')
     title: str
     status: str
     assignee_id: Optional[str] = None
@@ -21,6 +22,7 @@ class TaskCreateDTO(BaseModel):
     progress_history: Optional[List[dict]] = None
     
 class TaskUpdateDTO(BaseModel):
+    model_config = ConfigDict(extra='allow')
     title: Optional[str] = None
     status: Optional[str] = None
     assignee_id: Optional[str] = None
@@ -42,6 +44,11 @@ class TaskUpdateDTO(BaseModel):
 class TaskOrderUpdateDTO(BaseModel):
     id: str
     display_order: int
+
+class TaskBulkUpdateDTO(BaseModel):
+    id: str
+    start_date: Optional[date] = None
+    due_date: Optional[date] = None
 
 class SettingsUpdateDTO(BaseModel):
     # Depending on requirements, we might update full project settings or just parts
