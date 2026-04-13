@@ -76,9 +76,13 @@ Provides a layout corresponding to two distinct contexts (Global / Project).
 
 Extracts the `projectName` URL path parameter to pass to use-cases for targeted data retrieval/updates.
 
-- `TaskListPage`: Lists tasks. Uses `useTaskUseCase`.
-  - Includes creation, inline-editing, and drag-and-drop item re-ordering.
-  - `TaskDetailModal`: Modal form for comprehensive task edits.
+- `TaskListPage`: Task list. Uses `useTaskUseCase`.
+  - Includes new creation, inline editing, and reordering by drag-and-drop.
+  - Provides real-time filtering by status, assignee, and title.
+  - Displays scheduled tasks (with planned dates) based on project settings.
+  - `TaskDetailModal`: Detailed editing modal for tasks.
+  - Includes a link/button for CSV export.
+  - Outputs debug logs based on user actions when in debug mode (`VITE_DEBUG_MODE=true`).
 - `GanttChartPage`: Renders a Gantt chart.
   - Depends on `GanttChartService` to calculate geometries for dependencies and the progress 'Inazuma' polyline.
   - Toggles zoom levels and allows drag-and-drop vertical repositioning.
