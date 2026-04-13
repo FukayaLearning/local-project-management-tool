@@ -178,7 +178,7 @@ This document is the operation manual and screen specification for the "Local Pr
   - **Search/Filter**:
     - Search by title (partial match) using the text box.
     - Filter by status and assignee using the dropdown lists.
-  - **Download CSV**: Click the "Download CSV" button to export all task data of the current project in CSV format.
+  - **Download CSV**: Click the "Download CSV" button to export all task data of the current project in CSV format. Custom fields (columns not defined in this tool) imported from external systems like Backlog are preserved in the exported CSV.
   - **Hierarchy**: Toggle subtask visibility by clicking the ▶ icon. When search/filters are applied, tasks are displayed as a flat list.
   - **Edit/Delete**: Execute actions via buttons on each row.
   - **Switch Project**: Use the dropdown in the menu bar to switch between projects.
@@ -264,6 +264,7 @@ This document is the operation manual and screen specification for the "Local Pr
     <div style="display:flex;gap:10px;align-items:center">
       <button>Zoom In</button>
       <button>Zoom Out</button>
+      <button style="background-color: #007bff; color: white; border: none;">Apply Schedule to CSV</button>
       <label><input type="checkbox" /> Show Progress Line</label>
     </div>
   </header>
@@ -274,7 +275,8 @@ This document is the operation manual and screen specification for the "Local Pr
 </div>
 
 - **Operations**
-  - **Reorder Tasks**: Drag and drop task rows on the left side to reorder them.
+  - **Reorder Tasks**: Drag and drop task rows on the left side to reorder them. Schedules for subsequent tasks are automatically re-calculated (previewed) based on dependencies and resource availability.
+  - **Apply Schedule**: Click the "Apply Schedule to CSV" button to formally apply the previewed schedule as the actual start and due dates of tasks and persist them to the CSV file.
   - **Toggle View**: Zoom in/out and toggle the Inazuma line visibility.
 
 ### Project Settings Page

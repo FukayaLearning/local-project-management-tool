@@ -30,6 +30,7 @@
 |                        | UNIT-FE-UC-TASK-003 | Create Task Success     | Newly created task is added to the list         | PASS   |
 |                        | UNIT-FE-UC-TASK-004 | Create Subtask Success  | Task created with parent_id reflects properly   | PASS   |
 |                        | UNIT-FE-UC-TASK-005 | Reorder Tasks Success   | Reorder API is called and task array is fetched | PASS   |
+|                        | UNIT-FE-UC-TASK-006 | Batch Apply Success     | bulkUpdate API is called and list is refreshed  | PASS   |
 | **useSettingsUseCase** | UNIT-FE-UC-SET-001  | Fetch Settings Success  | Project settings are reflected in state         | PASS   |
 |                        | UNIT-FE-UC-SET-002  | Update Settings Success | Updated settings are reflected in state         | PASS   |
 | **useProjectUseCase**  | UNIT-FE-UC-PROJ-001 | Fetch Projects Success  | Project list from API is reflected in state     | PASS   |

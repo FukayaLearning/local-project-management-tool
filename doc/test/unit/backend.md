@@ -39,6 +39,8 @@
 | **UNIT-BE-TASK-005** | Delete Task               | `project_name`, `task_id`                       | Repo.delete() -> True, Git.commit() -> Success                           | Repo.delete and Git.commit are called; returns True.                              | PASS   |
 | **UNIT-BE-TASK-006** | Create Task (with parent) | `project_name`, `TaskCreateDTO(parent_id="P1")` | Repo.save() -> Task, Git.commit() -> Success                             | Task is created with parent_id assigned.                                          | PASS   |
 | **UNIT-BE-TASK-007** | Reorder Tasks             | `project_name`, `List[TaskOrderUpdateDTO]`      | Repo.update_orders() -> True, Git.commit() -> Success                    | Repo.update_orders and Git.commit are called; returns True.                       | PASS   |
+| **UNIT-BE-TASK-008** | Bulk Update Tasks         | `project_name`, `TaskBulkUpdateDTO`             | Repo.bulk_update() -> Success, Git.commit() -> Success                   | Repo.bulk_update and Git.commit are called; returns success status.               | PASS   |
+| **UNIT-BE-TASK-009** | Create Task with Extra    | `project_name`, `DTO with extra fields`         | Repo.save() -> Task with extra                                           | Extra fields are preserved in the returned Task and saved to CSV.                 | PASS   |
 
 ### 2.3 ProjectUseCase
 
@@ -56,6 +58,7 @@
 
 - **Target Class**: `backend.app.domain.entities.task.Task`
 
-| Test-ID                | Summary             | Input Data            | Expected Result/Behavior                                          | Result |
-| :--------------------- | :------------------ | :-------------------- | :---------------------------------------------------------------- | :----- |
-| **UNIT-BE-ENTITY-001** | Task Initialization | Mandatory fields only | ID is auto-generated; Optional fields are None or default values. | PASS   |
+| Test-ID                | Summary             | Input Data               | Expected Result/Behavior                                           | Result |
+| :--------------------- | :------------------ | :----------------------- | :----------------------------------------------------------------- | :----- |
+| **UNIT-BE-ENTITY-001** | Task Initialization | Mandatory fields only    | ID is auto-generated; Optional fields are None or default values.  | PASS   |
+| **UNIT-BE-ENTITY-002** | Extra Fields Allow  | Data with unknown fields | Unknown fields are accessible and preserved in the model instance. | PASS   |

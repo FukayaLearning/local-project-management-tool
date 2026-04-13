@@ -81,7 +81,8 @@ Extracts the `projectName` URL path parameter to pass to use-cases for targeted 
   - Provides real-time filtering by status, assignee, and title.
   - Displays scheduled tasks (with planned dates) based on project settings.
   - `TaskDetailModal`: Detailed editing modal for tasks.
-  - Includes a link/button for CSV export.
+  - Includes a link/button for CSV export. Retains unknown fields from external systems.
+  - **"Apply Schedule to CSV" Button**: Calls `useTaskUseCase.applySchedule` to persist calculated dates to CSV in batch.
   - Outputs debug logs based on user actions when in debug mode (`VITE_DEBUG_MODE=true`).
 - `GanttChartPage`: Renders a Gantt chart.
   - Depends on `GanttChartService` to calculate geometries for dependencies and the progress 'Inazuma' polyline.

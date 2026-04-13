@@ -39,20 +39,23 @@
 
 ### 2.2 Task Management (TASK)
 
-| Req-ID           | Category        | Feature Name      | Details / Behavior                                                                                             | Priority | Notes |
-| :--------------- | :-------------- | :---------------- | :------------------------------------------------------------------------------------------------------------- | :------- | :---- |
-| **REQ-TASK-001** | Task Management | Task List Display | Registered tasks shall be displayed in a list format. Deletion, search, filter, and sort shall be available.   | High     |       |
-| **REQ-TASK-002** | Task Management | Task Create/Edit  | New task creation and editing of existing tasks shall be possible. IDs shall be auto-generated (uuid4).        | High     |       |
-| **REQ-TASK-003** | Task Management | Hierarchy Display | Hierarchical tree display based on parent-child relationships of tasks shall be possible.                      | Medium   |       |
-| **REQ-TASK-004** | Task Management | CSV I/O           | Task data shall be saved and loaded in CSV format. The save location shall be `data/<project-name>/tasks.csv`. | High     |       |
-| **REQ-TASK-005** | Task Management | Task Reordering   | Tasks shall be reorderable via drag-and-drop in the task list and Gantt chart.                                 | High     |       |
+| Req-ID           | Category        | Feature Name          | Details / Behavior                                                                                                                       | Priority | Notes |
+| :--------------- | :-------------- | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :------- | :---- |
+| **REQ-TASK-001** | Task Management | Task List Display     | Registered tasks shall be displayed in a list format. Deletion, search, filter, and sort shall be available.                             | High     |       |
+| **REQ-TASK-002** | Task Management | Task Create/Edit      | New task creation and editing of existing tasks shall be possible. IDs shall be auto-generated (uuid4).                                  | High     |       |
+| **REQ-TASK-003** | Task Management | Hierarchy Display     | Hierarchical tree display based on parent-child relationships of tasks shall be possible.                                                | Medium   |       |
+| **REQ-TASK-004** | Task Management | CSV I/O               | Task data shall be saved and loaded in CSV format. Custom fields not managed by this tool shall be preserved and restored during export. | High     |       |
+| **REQ-TASK-005** | Task Management | Task Reordering       | Tasks shall be reorderable via drag-and-drop in the task list and Gantt chart.                                                           | High     |       |
+| **REQ-TASK-006** | Task Management | Extra Field Retention | Custom columns in CSVs from external systems (e.g., Backlog) shall be retained and exported without data loss.                           | High     |       |
 
 ### 2.3 Visualization / Charts (VIEW)
 
-| Req-ID           | Category      | Feature Name        | Details / Behavior                                                                                                              | Priority | Notes |
-| :--------------- | :------------ | :------------------ | :------------------------------------------------------------------------------------------------------------------------------ | :------- | :---- |
-| **REQ-VIEW-001** | Visualization | Gantt Chart Display | Task schedules (planned start/end) shall be displayed in Gantt chart format. Parent task period aggregation shall be performed. | High     |       |
-| **REQ-VIEW-002** | Visualization | Inazuma Line        | Progress status shall be displayed as an Inazuma line based on actual dates and progress rates.                                 | Medium   |       |
+| Req-ID           | Category      | Feature Name         | Details / Behavior                                                                                                              | Priority | Notes |
+| :--------------- | :------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :------- | :---- |
+| **REQ-VIEW-001** | Visualization | Gantt Chart Display  | Task schedules (planned start/end) shall be displayed in Gantt chart format. Parent task period aggregation shall be performed. | High     |       |
+| **REQ-VIEW-002** | Visualization | Inazuma Line         | Progress status shall be displayed as an Inazuma line based on actual dates and progress rates.                                 | Medium   |       |
+| **REQ-VIEW-003** | Visualization | Auto Scheduling      | Planned dates shall be auto-calculated based on priority, dependencies, and resource productivity (Gap-filling support).        | High     |       |
+| **REQ-VIEW-004** | Visualization | Batch Apply Schedule | Calculated schedules shall be persistable to CSV (batch update) to ensure consistency with display order.                       | High     |       |
 
 ### 2.4 History Management (HIST)
 
