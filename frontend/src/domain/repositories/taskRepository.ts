@@ -10,4 +10,8 @@ export interface ITaskRepository {
     projectName: string,
     orders: { id: string; display_order: number }[],
   ): Promise<void>;
+  bulkUpdate(
+    projectName: string,
+    updates: { id: string; start_date?: string; due_date?: string }[],
+  ): Promise<void>;
 }

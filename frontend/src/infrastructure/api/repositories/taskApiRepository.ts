@@ -55,4 +55,14 @@ export class TaskApiRepository implements ITaskRepository {
       orders,
     );
   }
+
+  async bulkUpdate(
+    projectName: string,
+    updates: { id: string; start_date?: string; due_date?: string }[],
+  ): Promise<void> {
+    return ApiClient.put<void>(
+      `/projects/${encodeURIComponent(projectName)}/tasks/bulk-update`,
+      updates,
+    );
+  }
 }
