@@ -43,6 +43,11 @@ class TaskOrderUpdateDTO(BaseModel):
     id: str
     display_order: int
 
+class TaskBulkUpdateDTO(BaseModel):
+    id: str
+    start_date: Optional[date] = None
+    due_date: Optional[date] = None
+
 class SettingsUpdateDTO(BaseModel):
     # Depending on requirements, we might update full project settings or just parts
     project_name: Optional[str] = None

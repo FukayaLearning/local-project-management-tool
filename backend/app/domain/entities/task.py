@@ -1,9 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 import uuid
 from datetime import date
 
 class Task(BaseModel):
+    model_config = ConfigDict(extra='allow')
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     status: str

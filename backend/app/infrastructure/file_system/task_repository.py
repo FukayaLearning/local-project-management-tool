@@ -25,34 +25,43 @@ class TaskFileRepository(ITaskRepository):
 
     def _row_to_task(self, row: pd.Series) -> Task:
         data = row.to_dict()
+        # Clean up empty strings to None
         for k, v in data.items():
             if v == "":
                 data[k] = None
 
+        # Handle known numeric/list fields
         if data.get("planned_hours") is not None:
-            data["planned_hours"] = float(data["planned_hours"])
+            try:
+                data["planned_hours"] = float(data["planned_hours"])
+            except ValueError:
+                data["planned_hours"] = None
         if data.get("actual_hours") is not None:
-            data["actual_hours"] = float(data["actual_hours"])
+            try:
+                data["actual_hours"] = float(data["actual_hours"])
+            except ValueError:
+                data["actual_hours"] = None
         if data.get("progress") is not None:
-            data["progress"] = int(float(data["progress"]))
+            try:
+                data["progress"] = int(float(data["progress"]))
+            except ValueError:
+                data["progress"] = 0
         if data.get("display_order") is not None:
-            data["display_order"] = int(float(data["display_order"]))
+            try:
+                data["display_order"] = int(float(data["display_order"]))
+            except ValueError:
+                data["display_order"] = 0
 
         import json
-        if data.get("dependencies"):
-            try:
-                if isinstance(data["dependencies"], str):
-                    data["dependencies"] = json.loads(data["dependencies"].replace("'", '"'))
-            except Exception:
-                data["dependencies"] = []
-        
-        if data.get("progress_history"):
-            try:
-                if isinstance(data["progress_history"], str):
-                    # Handle both single/double quotes if necessary, though model_dump(mode='json') uses double
-                    data["progress_history"] = json.loads(data["progress_history"].replace("'", '"'))
-            except Exception:
-                data["progress_history"] = []
+        for list_field in ["dependencies", "progress_history"]:
+            if data.get(list_field):
+                try:
+                    if isinstance(data[list_field], str):
+                        data[list_field] = json.loads(data[list_field].replace("'", '"'))
+                except Exception:
+                    data[list_field] = []
+            elif list_field in data:
+                data[list_field] = []
 
         return Task(**data)
 
