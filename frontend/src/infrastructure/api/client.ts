@@ -7,6 +7,15 @@ export class ApiClient {
     options?: RequestInit,
   ): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+
+    if (isDebug) {
+      console.log(`--- DEBUG API REQUEST ---`);
+      console.log(`Method: ${options?.method || "GET"}`);
+      console.log(`URL: ${url}`);
+      if (options?.body) console.log(`Body:`, options.body);
+    }
+
     const defaultHeaders = {
       "Content-Type": "application/json",
     };
@@ -21,6 +30,11 @@ export class ApiClient {
     };
 
     const response = await fetch(url, config);
+
+    if (isDebug) {
+      console.log(`--- DEBUG API RESPONSE ---`);
+      console.log(`Status: ${response.status}`);
+    }
 
     if (!response.ok) {
       const errorBody = await response.text();

@@ -159,7 +159,9 @@ export const useTaskUseCase = (settings?: BasicSettings | null) => {
     deleteTask,
     reorderTasks,
     exportTasks: (projectName: string) => {
-      window.location.href = `/api/v1/projects/${projectName}/tasks/export`;
+      window.location.href = `/api/v1/projects/${encodeURIComponent(
+        projectName,
+      )}/tasks/export`;
     },
   };
 };

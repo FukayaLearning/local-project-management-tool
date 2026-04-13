@@ -45,6 +45,8 @@ export const TaskListPage: React.FC<TaskListPageProps> = ({ projectName }) => {
   }, [fetchGlobalSettings, fetchProjectSettings, fetchTasks, projectName]);
 
   const handleCreateClick = () => {
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+    if (isDebug) console.log("--- DEBUG USER ACTION --- Click New Task");
     setEditingTask(null);
     setIsModalOpen(true);
   };
@@ -157,7 +159,15 @@ export const TaskListPage: React.FC<TaskListPageProps> = ({ projectName }) => {
               </option>
             ))}
           </select>
-          <Button variant="secondary" onClick={() => exportTasks(projectName)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+              if (isDebug)
+                console.log("--- DEBUG USER ACTION --- Click Download CSV");
+              exportTasks(projectName);
+            }}
+          >
             Download CSV
           </Button>
           <Button onClick={handleCreateClick}>+ New Task</Button>

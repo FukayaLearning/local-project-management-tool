@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Routes,
   Route,
@@ -31,7 +31,8 @@ function ProjectLayout() {
     return <Navigate to="/projects" replace />;
   }
 
-  const decodedProjectName = decodeURIComponent(projectName);
+  // useParams already provides decoded parameters, no need to decode again.
+  const decodedProjectName = projectName;
 
   const getCurrentPage = () => {
     if (location.pathname.includes("/gantt")) return "gantt";
@@ -40,6 +41,8 @@ function ProjectLayout() {
   };
 
   const handleNavigate = (page: string) => {
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+    if (isDebug) console.log(`--- DEBUG USER ACTION --- Navigation: ${page}`);
     const encoded = encodeURIComponent(decodedProjectName);
     if (page === "tasks") navigate(`/projects/${encoded}`);
     if (page === "gantt") navigate(`/projects/${encoded}/gantt`);
@@ -114,6 +117,9 @@ function GlobalLayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigate = (page: string) => {
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+    if (isDebug)
+      console.log(`--- DEBUG USER ACTION --- Global Navigation: ${page}`);
     if (page === "projects") navigate("/projects");
     if (page === "global_settings") navigate("/settings");
   };

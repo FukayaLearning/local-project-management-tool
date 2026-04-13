@@ -74,7 +74,7 @@ Use these skills to perform complex tasks:
 
 ## Critical Files
 
-- `backend/src/main.py`: Entry point and DI configuration.
+- `backend/app/main.py`: Entry point and DI configuration.
 - `frontend/src/main.tsx`: Frontend entry point.
 - `doc/design/requirement.ja.md`: Functional requirements (Japanese).
 - `doc/design/traceability_matrix.md`: Core traceability mapping.

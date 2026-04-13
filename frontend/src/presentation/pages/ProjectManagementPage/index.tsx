@@ -16,6 +16,9 @@ export const ProjectManagementPage: React.FC = () => {
   }, [fetchProjects]);
 
   const handleOpenProject = (projectName: string) => {
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+    if (isDebug)
+      console.log(`--- DEBUG USER ACTION --- Open Project: ${projectName}`);
     const path = `/projects/${encodeURIComponent(projectName)}`;
     console.log("Navigating to:", path);
     navigate(path);
@@ -25,6 +28,9 @@ export const ProjectManagementPage: React.FC = () => {
     e.preventDefault();
     const targetName = newProjectName.trim();
     if (!targetName) return;
+    const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
+    if (isDebug)
+      console.log(`--- DEBUG USER ACTION --- Create Project: ${targetName}`);
     setIsCreating(true);
     try {
       await createProject(targetName);

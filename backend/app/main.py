@@ -13,7 +13,43 @@ async def lifespan(app: FastAPI):
     yield
 
 
+import os
+import json
+import logging
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("api_debug")
+
+class DebugMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if os.getenv("ENV_DEBUG") != "true":
+            return await call_next(request)
+
+        # Log Request
+        body = await request.body()
+        logger.info(f"--- DEBUG REQUEST ---")
+        logger.info(f"Method: {request.method}")
+        logger.info(f"URL: {request.url}")
+        logger.info(f"Headers: {request.headers}")
+        if body:
+            try:
+                logger.info(f"Body: {json.loads(body)}")
+            except:
+                logger.info(f"Body: {body.decode('utf-8', errors='replace')}")
+
+        response = await call_next(request)
+
+        # Log Response (Limited as reading streaming response is tricky in BaseHTTPMiddleware)
+        # Note: In a real world, you might want to wrap the response body.
+        logger.info(f"--- DEBUG RESPONSE ---")
+        logger.info(f"Status: {response.status_code}")
+        return response
+
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(DebugMiddleware)
 
 origins = [
     "http://localhost:3000",

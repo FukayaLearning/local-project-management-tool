@@ -74,7 +74,7 @@
 
 ## 重要なファイル
 
-- `backend/src/main.py`: エントリーポイントおよびDI設定。
+- `backend/app/main.py`: エントリーポイントおよびDI設定。
 - `frontend/src/main.tsx`: フロントエンドエントリーポイント。
 - `doc/design/requirement.ja.md`: 機能要求の真実のソース。
 - `doc/design/traceability_matrix.md`: 実装状況の追跡（トレーサビリティマトリックス）。
