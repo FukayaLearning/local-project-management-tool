@@ -136,6 +136,7 @@ sequenceDiagram
   | **SPEC-TASK-002-005** | Task | タスク削除 | API | `DELETE /api/v1/projects/{project_name}/tasks/{task_id}` でタスクを削除する。削除後にGitコミットする。 | REQ-TASK-001, REQ-HIST-001 |
   | **SPEC-TASK-003-001** | Task | 階層構造 | データ構造 | `parent_id` カラムを持ち、親タスクのIDを保持する。 | REQ-TASK-003 |
   | **SPEC-TASK-004-001** | Task | タスク順序 | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` で複数タスクの `display_order` を一括更新する。更新後にGitコミットする。 | REQ-TASK-005, REQ-HIST-001 |
+  | **SPEC-TASK-004-002** | Task | タスクエクスポート | API | `GET /api/v1/projects/{project_name}/tasks/export` でプロジェクトの全タスクをCSVとしてダウンロードする。 | REQ-TASK-004 |
 
 ### 3.3 可視化・チャート (VIEW)
 

@@ -168,6 +168,31 @@ paths:
                   message:
                     type: string
 
+  /projects/{project_name}/tasks/export:
+    get:
+      summary: Export tasks
+      description: Download all tasks of the project as a CSV file.
+      operationId: exportTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      responses:
+        "200":
+          description: Success
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Project or task file not found
+
 components:
   schemas:
     TaskBase:

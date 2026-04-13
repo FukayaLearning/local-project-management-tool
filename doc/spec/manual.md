@@ -173,10 +173,13 @@ This document is the operation manual and screen specification for the "Local Pr
 </div>
 
 - **Operations**
-  - **Reorder Tasks**: Drag and drop task rows to reorder them.
+  - **Reorder Tasks**: Drag and drop task rows to reorder them (only when no search/filter is applied).
   - **Add Task**: Click "Add Task" to open the task creation modal.
-  - **Search/Filter**: Search by title and filter by status.
-  - **Hierarchy**: Toggle subtask visibility by clicking the ▶ icon.
+  - **Search/Filter**:
+    - Search by title (partial match) using the text box.
+    - Filter by status and assignee using the dropdown lists.
+  - **Download CSV**: Click the "Download CSV" button to export all task data of the current project in CSV format.
+  - **Hierarchy**: Toggle subtask visibility by clicking the ▶ icon. When search/filters are applied, tasks are displayed as a flat list.
   - **Edit/Delete**: Execute actions via buttons on each row.
   - **Switch Project**: Use the dropdown in the menu bar to switch between projects.
   - **Undo/Redo**: Use the Undo/Redo buttons to cancel or redo the last operation.

@@ -136,6 +136,7 @@ sequenceDiagram
   | **SPEC-TASK-002-005** | Task | Task Delete | API | `DELETE /api/v1/projects/{project_name}/tasks/{task_id}` deletes a task. Git commit after deletion. | REQ-TASK-001, REQ-HIST-001 |
   | **SPEC-TASK-003-001** | Task | Hierarchy | Data Structure | Has `parent_id` column to hold parent task ID. | REQ-TASK-003 |
   | **SPEC-TASK-004-001** | Task | Task Reordering | API | `PUT /api/v1/projects/{project_name}/tasks/reorder` updates the `display_order` of multiple tasks at once. Git commit after update. | REQ-TASK-005, REQ-HIST-001 |
+  | **SPEC-TASK-004-002** | Task | Task Export | API | Use `GET /api/v1/projects/{project_name}/tasks/export` to download all tasks of the project as CSV. | REQ-TASK-004 |
 
 ### 3.3 Visualization & Charts (VIEW)
 
