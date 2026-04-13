@@ -1,0 +1,169 @@
+paths:
+  /projects:
+    get:
+      summary: List Projects
+      description: Returns the list of projects (directories) under data/.
+      operationId: listProjects
+      tags:
+        - projects
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Project name
+    post:
+      summary: Create New Project
+      description: Creates project directory, initializes Git, setting/task files, and creates initial commit.
+      operationId: createProject
+      tags:
+        - projects
+      requestBody:
+        description: Project creation info
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_name:
+                  type: string
+                  description: Project name
+              required:
+                - project_name
+      responses:
+        "201":
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project_name:
+                    type: string
+        "400":
+          description: Validation error (empty, prohibited chars, duplicate)
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.yaml#/components/schemas/Error"
+
+  /projects/{project_name}/settings:
+    get:
+      summary: Get Project Settings
+      description: Retrieve settings for the specified project.
+      operationId: getProjectSettings
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+        "404":
+          description: Project not found
+    put:
+      summary: Update Project Settings
+      description: Update settings for the specified project and Git commit.
+      operationId: updateProjectSettings
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      requestBody:
+        description: Settings to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectSettings"
+      responses:
+        "200":
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects/{project_name}/undo:
+    post:
+      summary: Undo (revert last change)
+      description: Reverts the last commit in the specified project's Git repository.
+      operationId: undoProject
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Undo successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: Cannot undo (only initial commit remains)
+
+  /projects/{project_name}/redo:
+    post:
+      summary: Redo (redo reverted change)
+      description: Redoes a reverted change in the specified project's Git repository.
+      operationId: redoProject
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Redo successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: Cannot redo
+
+components:
+  schemas:
+    ProjectSettings:
+      type: object
+      properties:
+        project_name:
+          type: string
+          description: Project name
+        basic_settings_override:
+          $ref: "../apis/openapi_common.yaml#/components/schemas/BasicSettings"
+          description: Override values for global basic settings (null uses global settings)
+          nullable: true

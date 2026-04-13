@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: Local Project Management Tool API
+  version: 2.0.0
+  description: オフラインプロジェクト管理ツールのAPI仕様書
+
+paths:
+  /settings:
+    $ref: "./apis/openapi_settings.ja.yaml#/paths/~1settings"
+  /projects:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects"
+  /projects/{project_name}/settings:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects~1{project_name}~1settings"
+  /projects/{project_name}/undo:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects~1{project_name}~1undo"
+  /projects/{project_name}/redo:
+    $ref: "./apis/openapi_projects.ja.yaml#/paths/~1projects~1{project_name}~1redo"
+  /projects/{project_name}/tasks:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1projects~1{project_name}~1tasks"
+  /projects/{project_name}/tasks/{task_id}:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1projects~1{project_name}~1tasks~1{task_id}"
+  /projects/{project_name}/tasks/reorder:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1projects~1{project_name}~1tasks~1reorder"
+  /projects/{project_name}/tasks/export:
+    $ref: "./apis/openapi_tasks.ja.yaml#/paths/~1projects~1{project_name}~1tasks~1export"

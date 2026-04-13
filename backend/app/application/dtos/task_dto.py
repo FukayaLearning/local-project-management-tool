@@ -1,0 +1,56 @@
+from pydantic import BaseModel, ConfigDict
+from typing import Optional, List
+from datetime import date
+from backend.app.domain.entities.settings import ProjectSettings, BasicSettings
+
+class TaskCreateDTO(BaseModel):
+    model_config = ConfigDict(extra='allow')
+    title: str
+    status: str
+    assignee_id: Optional[str] = None
+    start_date: Optional[date] = None
+    due_date: Optional[date] = None
+    parent_id: Optional[str] = None
+    description: Optional[str] = None
+    task_type: Optional[str] = None
+    planned_hours: Optional[float] = None
+    display_order: int = 0
+    actual_start_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
+    scheduling_rule: Optional[str] = "priority"
+    dependencies: Optional[List[str]] = None
+    progress_history: Optional[List[dict]] = None
+    
+class TaskUpdateDTO(BaseModel):
+    model_config = ConfigDict(extra='allow')
+    title: Optional[str] = None
+    status: Optional[str] = None
+    assignee_id: Optional[str] = None
+    start_date: Optional[date] = None
+    due_date: Optional[date] = None
+    parent_id: Optional[str] = None
+    description: Optional[str] = None
+    task_type: Optional[str] = None
+    planned_hours: Optional[float] = None
+    actual_hours: Optional[float] = None
+    progress: Optional[int] = None
+    display_order: Optional[int] = None
+    actual_start_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
+    scheduling_rule: Optional[str] = None
+    dependencies: Optional[List[str]] = None
+    progress_history: Optional[List[dict]] = None
+
+class TaskOrderUpdateDTO(BaseModel):
+    id: str
+    display_order: int
+
+class TaskBulkUpdateDTO(BaseModel):
+    id: str
+    start_date: Optional[date] = None
+    due_date: Optional[date] = None
+
+class SettingsUpdateDTO(BaseModel):
+    # Depending on requirements, we might update full project settings or just parts
+    project_name: Optional[str] = None
+    basic_settings_override: Optional[BasicSettings] = None

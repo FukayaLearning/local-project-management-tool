@@ -1,0 +1,178 @@
+import { DependencyProvider } from "../../providers/DependencyProvider";
+import { TaskApiRepository } from "../../../infrastructure/api/repositories/taskApiRepository";
+import { useTaskUseCase } from "../useTaskUseCase";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+// Mock the dependencies provider
+vi.mock("../../providers/DependencyProvider", () => ({
+  useDependencies: () => ({
+    taskRepository: new TaskApiRepository(),
+  }),
+  DependencyProvider: ({ children }: any) => children,
+}));
+
+// Mock the module
+vi.mock("../../../infrastructure/api/repositories/taskApiRepository", () => {
+  const TaskApiRepository = vi.fn();
+  TaskApiRepository.prototype.getAll = vi.fn();
+  TaskApiRepository.prototype.create = vi.fn();
+  TaskApiRepository.prototype.update = vi.fn();
+  TaskApiRepository.prototype.delete = vi.fn();
+  TaskApiRepository.prototype.updateOrders = vi.fn();
+  TaskApiRepository.prototype.bulkUpdate = vi.fn();
+  return { TaskApiRepository };
+});
+
+describe("useTaskUseCase", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("fetches tasks successfully", async () => {
+    const mockTasks = [{ id: "1", title: "Task 1", status: "New" }];
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue(mockTasks);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    // Initial state
+    expect(result.current.tasks).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
+
+    // Trigger fetch
+    await act(async () => {
+      await result.current.fetchTasks("ProjectA");
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.tasks).toEqual(mockTasks);
+    });
+    expect(result.current.error).toBeNull();
+  });
+
+  it("handles fetch error", async () => {
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockRejectedValue(
+      new Error("Fetch failed"),
+    );
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.fetchTasks("ProjectA");
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.tasks).toEqual([]);
+      expect(result.current.error).toEqual(new Error("Fetch failed"));
+    });
+  });
+
+  it("creates task successfully", async () => {
+    const newTask = { title: "New Task", status: "New" };
+    const createdTask = { id: "2", ...newTask };
+    // @ts-ignore
+    TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.createTask("ProjectA", newTask as any);
+    });
+
+    await waitFor(() => {
+      expect(result.current.tasks).toContainEqual(createdTask);
+    });
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(
+      "ProjectA",
+      newTask,
+    );
+  });
+
+  it("creates task with parent successfully", async () => {
+    const newTask = { title: "Sub Task", status: "New", parent_id: "parent-1" };
+    const createdTask = { id: "3", ...newTask };
+    // @ts-ignore
+    TaskApiRepository.prototype.create.mockResolvedValue(createdTask);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.createTask("ProjectA", newTask as any);
+    });
+
+    await waitFor(() => {
+      expect(result.current.tasks).toContainEqual(createdTask);
+    });
+    expect(TaskApiRepository.prototype.create).toHaveBeenCalledWith(
+      "ProjectA",
+      newTask,
+    );
+  });
+
+  it("reorders tasks successfully", async () => {
+    // @ts-ignore
+    TaskApiRepository.prototype.updateOrders.mockResolvedValue(undefined);
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue([]);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    await act(async () => {
+      await result.current.reorderTasks("ProjectA", [
+        { id: "1", display_order: 1 },
+      ]);
+    });
+
+    expect(TaskApiRepository.prototype.updateOrders).toHaveBeenCalledWith(
+      "ProjectA",
+      [{ id: "1", display_order: 1 }],
+    );
+    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalledWith("ProjectA");
+  });
+
+  it("applies schedule successfully", async () => {
+    const mockTasks = [
+      {
+        id: "1",
+        title: "Task 1",
+        calculated_start_date: "2024-01-01",
+        calculated_end_date: "2024-01-02",
+      },
+      {
+        id: "2",
+        title: "Task 2",
+        calculated_start_date: "2024-01-02",
+        calculated_end_date: "2024-01-03",
+      },
+    ];
+    // @ts-ignore
+    TaskApiRepository.prototype.getAll.mockResolvedValue(mockTasks);
+    // @ts-ignore
+    TaskApiRepository.prototype.bulkUpdate.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useTaskUseCase());
+
+    // Fetch tasks first to populate the state
+    await act(async () => {
+      await result.current.fetchTasks("ProjectA");
+    });
+
+    // Trigger applySchedule
+    await act(async () => {
+      await result.current.applySchedule("ProjectA");
+    });
+
+    expect(TaskApiRepository.prototype.bulkUpdate).toHaveBeenCalledWith(
+      "ProjectA",
+      [
+        { id: "1", start_date: "2024-01-01", due_date: "2024-01-02" },
+        { id: "2", start_date: "2024-01-02", due_date: "2024-01-03" },
+      ],
+    );
+    // Should re-fetch after update
+    expect(TaskApiRepository.prototype.getAll).toHaveBeenCalledTimes(2);
+  });
+});

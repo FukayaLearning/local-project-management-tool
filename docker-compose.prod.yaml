@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: prod
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/workspace/backend/data
+    environment:
+      - ENV=production
+      - ENV_DEBUG=${ENV_DEBUG:-false}
+
+  frontend:
+    build:
+      context: ./frontend
+      target: prod
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+      - VITE_DEBUG_MODE=${VITE_DEBUG_MODE:-false}

@@ -1,0 +1,71 @@
+# フロントエンド単体試験仕様書
+
+## 1. テスト方針
+
+- **ツール**: Vitest, React Testing Library
+- **網羅基準**:
+  - 主要なUIコンポーネント（Button, Input, Select, Modal）のレンダリングとイベントハンドリング
+  - ユースケース（useTaskUseCase, useSettingsUseCase）の状態管理とAPI呼び出し
+  - ページコンポーネント（TaskDetailModal, ProjectSettingsForm）のフォーム動作
+
+## 2. コンポーネント別テスト仕様
+
+### 2.1 共通コンポーネント
+
+| コンポーネント | Test-ID         | テスト概要       | 期待値/振る舞い                                    | 結果 |
+| :------------- | :-------------- | :--------------- | :------------------------------------------------- | :--- |
+| **Button**     | UNIT-FE-BTN-001 | 初期表示確認     | 指定したバリアント、サイズでボタンが表示されること | PASS |
+|                | UNIT-FE-BTN-002 | クリックイベント | クリック時にonClickハンドラが呼び出されること      | PASS |
+|                | UNIT-FE-BTN-003 | 非活性状態       | disabledプロパティでボタンが無効化されること       | PASS |
+| **Input**      | UNIT-FE-INP-001 | 初期表示確認     | ラベルと入力欄が表示されること                     | PASS |
+|                | UNIT-FE-INP-002 | エラー表示       | エラーメッセージが赤字で表示されること             | PASS |
+| **Select**     | UNIT-FE-SEL-001 | 初期表示確認     | 指定したオプションが表示され、選択可能であること   | PASS |
+
+### 2.2 ユースケース (Application Layer)
+
+| フック                 | Test-ID             | テスト概要               | 期待値/振る舞い                                        | 結果 |
+| :--------------------- | :------------------ | :----------------------- | :----------------------------------------------------- | :--- |
+| **useTaskUseCase**     | UNIT-FE-UC-TASK-001 | タスク取得成功           | APIから取得したタスクがstateに反映されること           | PASS |
+|                        | UNIT-FE-UC-TASK-002 | タスク取得失敗           | エラーstateが更新されること                            | PASS |
+|                        | UNIT-FE-UC-TASK-003 | タスク作成成功           | 新規作成されたタスクがリストに追加される               | PASS |
+|                        | UNIT-FE-UC-TASK-004 | サブタスク作成成功       | parent_idを指定して作成されたタスクが反映される        | PASS |
+|                        | UNIT-FE-UC-TASK-005 | タスク順序変更成功       | 並び替えAPIが呼ばれ、タスク一覧が再取得される          | PASS |
+|                        | UNIT-FE-UC-TASK-006 | スケジュール一括適用成功 | bulkUpdate APIが呼ばれ、タスク一覧が再反映される       | PASS |
+| **useSettingsUseCase** | UNIT-FE-UC-SET-001  | 設定取得成功             | プロジェクト設定がstateに反映されること                | PASS |
+|                        | UNIT-FE-UC-SET-002  | 設定更新成功             | 更新後の設定がstateに反映されること                    | PASS |
+| **useProjectUseCase**  | UNIT-FE-UC-PROJ-001 | プロジェクト一覧取得成功 | APIから取得したプロジェクト一覧がstateに反映されること | PASS |
+|                        | UNIT-FE-UC-PROJ-002 | プロジェクト作成成功     | 新規作成されたプロジェクトがリストに追加されること     | PASS |
+|                        | UNIT-FE-UC-PROJ-003 | Undo成功                 | Undo APIが呼ばれ、結果が返ること                       | PASS |
+|                        | UNIT-FE-UC-PROJ-004 | Redo成功                 | Redo APIが呼ばれ、結果が返ること                       | PASS |
+
+### 2.3 ページコンポーネント
+
+| コンポーネント            | Test-ID            | テスト概要         | 期待値/振る舞い                                           | 結果 |
+| :------------------------ | :----------------- | :----------------- | :-------------------------------------------------------- | :--- |
+| **TaskDetailModal**       | UNIT-FE-PG-TDM-001 | 新規作成モード表示 | 空のフォームが表示されること                              | PASS |
+|                           | UNIT-FE-PG-TDM-002 | 編集モード表示     | 既存タスクの情報がフォームに入力されていること            | PASS |
+|                           | UNIT-FE-PG-TDM-003 | 保存処理           | 入力内容でonSaveが呼び出されること                        | PASS |
+| **ProjectSettingsForm**   | UNIT-FE-PG-PSF-001 | 初期表示確認       | 現在の設定値がフォームに入力されていること                | PASS |
+|                           | UNIT-FE-PG-PSF-002 | 保存処理           | 変更された内容でonSaveが呼び出されること                  | PASS |
+|                           | UNIT-FE-PG-PSF-003 | バリデーション     | 必須項目が空の場合、保存ボタンが無効化されること          | PASS |
+| **ProjectCreatePage**     | UNIT-FE-PG-PCP-001 | 初期表示確認       | プロジェクト名入力欄が表示されること                      | PASS |
+|                           | UNIT-FE-PG-PCP-002 | プロジェクト作成   | 入力した名称でAPIが呼ばれ、完了後にリダイレクトされること | PASS |
+| **ProjectManagementPage** | UNIT-FE-PG-PMP-001 | 初期表示確認       | プロジェクト一覧が取得され表示されること                  | PASS |
+|                           | UNIT-FE-PG-PMP-002 | 新規作成画面遷移   | 「New Project」ボタン押下で新規作成画面へ遷移すること     | PASS |
+|                           | UNIT-FE-PG-PMP-003 | プロジェクト開く   | 各プロジェクトのOpenボタン押下で詳細画面に遷移すること    | PASS |
+| **GlobalSettingsPage**    | UNIT-FE-PG-GSP-001 | 初期表示確認       | グローバル設定が取得され表示されること                    | PASS |
+| **MenuBar**               | UNIT-FE-MNU-001    | 表示要素確認       | プロジェクト切替、Undo/Redoボタンが表示されること         | PASS |
+|                           | UNIT-FE-MNU-002    | プロジェクト切替   | 選択変更時にswitch APIが呼ばれ、リロードされること        | PASS |
+|                           | UNIT-FE-MNU-003    | Undo実行           | Undoボタン押下時にUndo APIが呼ばれること                  | PASS |
+|                           | UNIT-FE-MNU-004    | Redo実行           | Redoボタン押下時にRedo APIが呼ばれること                  | PASS |
+
+### 2.4 ドメインサービス (Domain Layer)
+
+| サービス              | Test-ID               | テスト概要           | 期待値/振る舞い                                             | 結果 |
+| :-------------------- | :-------------------- | :------------------- | :---------------------------------------------------------- | :--- |
+| **GanttChartService** | UNIT-FE-SVC-GANTT-001 | 親タスク期間集約     | 子タスクの最小start_date〜最大due_dateのDateRangeが返ること | PASS |
+|                       | UNIT-FE-SVC-GANTT-002 | バー位置計算         | 日付差×dayWidthに基づく正しいleftとwidthが返ること          | PASS |
+|                       | UNIT-FE-SVC-GANTT-003 | イナズマ線座標計算   | 進捗率に基づく正しい折れ線座標配列が返ること                | PASS |
+|                       | UNIT-FE-SVC-GANTT-004 | タイムライン日付生成 | 開始日〜終了日の連続する日付文字列配列が返ること            | PASS |
+|                       | UNIT-FE-SVC-GANTT-005 | タスク階層フラット化 | タスクが親から子へ並び、正しい深度(depth)が設定される       | PASS |
+|                       | UNIT-FE-SVC-GANTT-006 | タスク階層ソート     | フラット化される前にdisplay_order昇順で正しくソートされる   | PASS |

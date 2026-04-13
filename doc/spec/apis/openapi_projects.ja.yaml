@@ -1,0 +1,169 @@
+paths:
+  /projects:
+    get:
+      summary: プロジェクト一覧取得
+      description: data/ディレクトリ配下のプロジェクト（ディレクトリ）一覧を返却する。
+      operationId: listProjects
+      tags:
+        - projects
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: プロジェクト名
+    post:
+      summary: プロジェクト新規作成
+      description: プロジェクトディレクトリの作成、Git初期化、設定/タスクファイルの初期化、初期コミットを行う。
+      operationId: createProject
+      tags:
+        - projects
+      requestBody:
+        description: プロジェクト作成情報
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_name:
+                  type: string
+                  description: プロジェクト名
+              required:
+                - project_name
+      responses:
+        "201":
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project_name:
+                    type: string
+        "400":
+          description: バリデーションエラー（空文字、禁止文字、重複）
+          content:
+            application/json:
+              schema:
+                $ref: "../apis/openapi_common.ja.yaml#/components/schemas/Error"
+
+  /projects/{project_name}/settings:
+    get:
+      summary: プロジェクト設定取得
+      description: 指定プロジェクトの設定を取得する。
+      operationId: getProjectSettings
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+        "404":
+          description: プロジェクトが見つからない
+    put:
+      summary: プロジェクト設定更新
+      description: 指定プロジェクトの設定を更新し、Gitコミットする。
+      operationId: updateProjectSettings
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
+      requestBody:
+        description: 更新する設定内容
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectSettings"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSettings"
+
+  /projects/{project_name}/undo:
+    post:
+      summary: Undo（直前の変更を取り消す）
+      description: 指定プロジェクトのGitリポジトリで直前のコミットを取り消す。
+      operationId: undoProject
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 取り消し成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: Undo不可（初期コミットまでしかない場合）
+
+  /projects/{project_name}/redo:
+    post:
+      summary: Redo（取り消した変更をやり直す）
+      description: 指定プロジェクトのGitリポジトリで取り消した変更をやり直す。
+      operationId: redoProject
+      tags:
+        - projects
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: やり直し成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: Redo不可
+
+components:
+  schemas:
+    ProjectSettings:
+      type: object
+      properties:
+        project_name:
+          type: string
+          description: プロジェクト名
+        basic_settings_override:
+          $ref: "../apis/openapi_common.ja.yaml#/components/schemas/BasicSettings"
+          description: グローバル基本設定の上書き値（nullの場合はグローバル設定を使用）
+          nullable: true

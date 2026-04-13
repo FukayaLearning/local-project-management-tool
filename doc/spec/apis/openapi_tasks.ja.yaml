@@ -1,0 +1,310 @@
+paths:
+  /projects/{project_name}/tasks:
+    get:
+      summary: タスク一覧取得
+      description: 指定プロジェクトの全タスクデータをCSVから読み込み返却する。
+      operationId: listTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "404":
+          description: プロジェクトが見つからない
+    post:
+      summary: タスク作成
+      description: 指定プロジェクトにタスクを新規作成し、Gitコミットする。
+      operationId: createTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /projects/{project_name}/tasks/{task_id}:
+    get:
+      summary: タスク詳細取得
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: タスクが見つからない
+    put:
+      summary: タスク更新
+      description: 指定プロジェクトのタスクを更新し、Gitコミットする。
+      operationId: updateTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      summary: タスク削除
+      description: 指定プロジェクトのタスクを削除し、Gitコミットする。
+      operationId: deleteTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: 削除成功
+
+  /projects/{project_name}/tasks/reorder:
+    put:
+      summary: タスク順序の一括更新
+      description: 指定プロジェクトの複数タスクの display_order を一括更新し、Gitコミットする。
+      operationId: reorderTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  display_order:
+                    type: integer
+                required:
+                  - id
+                  - display_order
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /projects/{project_name}/tasks/bulk-update:
+    put:
+      summary: タスクの一括更新
+      description: 指定プロジェクトの複数タスク（日付等）を一括更新し、Gitコミットする。
+      operationId: bulkUpdateTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  start_date:
+                    type: string
+                    format: date
+                    nullable: true
+                  due_date:
+                    type: string
+                    format: date
+                    nullable: true
+                required:
+                  - id
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /projects/{project_name}/tasks/export:
+    get:
+      summary: タスクエクスポート
+      description: 指定されたプロジェクトの全タスクをCSV形式でダウンロードする。
+      operationId: exportTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: プロジェクト名
+      responses:
+        "200":
+          description: 成功
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: プロジェクトまたはタスクファイルが見つからない
+
+components:
+  schemas:
+    TaskBase:
+      type: object
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+        assignee_id:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        parent_id:
+          type: string
+          nullable: true
+        display_order:
+          type: integer
+          default: 0
+        planned_hours:
+          type: number
+          nullable: true
+        actual_hours:
+          type: number
+          nullable: true
+        progress:
+          type: integer
+          default: 0
+          description: 進捗率（0-100）
+        description:
+          type: string
+          nullable: true
+        task_type:
+          type: string
+          nullable: true
+        actual_start_date:
+          type: string
+          format: date
+          nullable: true
+        actual_end_date:
+          type: string
+          format: date
+          nullable: true
+
+    TaskInput:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+      required:
+        - title
+        - status
+
+    Task:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id

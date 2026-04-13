@@ -1,0 +1,18 @@
+services:
+  e2e-tests:
+    build:
+      context: ${E2E_DIR:-.}
+      dockerfile: Dockerfile
+    environment:
+      - CI=true
+    volumes:
+      - ${E2E_DIR}/scripts:/app/scripts
+      - ${E2E_DIR}/result:/app/result
+      - ${REPO_ROOT}/backend/data:/app/backend/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /app/node_modules
+    # Network: When run with other compose files, it joins their default network.
+    # Depends_on: Will be handled by the fact we bring up app first or use depends_on here if we know service names.
+    # We can omit depends_on if we ensure app is up in script, or include it if we know the service names (frontend vs proxy).
+    # Since service names differ (frontend in prod, proxy in dev), we might leave depends_on out or use profiles/overrides,
+    # but simplest is to just rely on the script ensuring the app is waiting.

@@ -1,0 +1,310 @@
+paths:
+  /projects/{project_name}/tasks:
+    get:
+      summary: List Tasks
+      description: Reads from CSV and returns all task data for the specified project.
+      operationId: listTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "404":
+          description: Project not found
+    post:
+      summary: Create Task
+      description: Creates a new task in the specified project and Git commits.
+      operationId: createTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /projects/{project_name}/tasks/{task_id}:
+    get:
+      summary: Get Task Detail
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Task not found
+    put:
+      summary: Update Task
+      description: Updates a task in the specified project and Git commits.
+      operationId: updateTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "200":
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      summary: Delete Task
+      description: Deletes a task from the specified project and Git commits.
+      operationId: deleteTask
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted successfully
+
+  /projects/{project_name}/tasks/reorder:
+    put:
+      summary: Batch Update Task Order
+      description: Batch updates display_order of multiple tasks in the specified project and Git commits.
+      operationId: reorderTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  display_order:
+                    type: integer
+                required:
+                  - id
+                  - display_order
+      responses:
+        "200":
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /projects/{project_name}/tasks/bulk-update:
+    put:
+      summary: Bulk Update Tasks
+      description: Batch updates multiple tasks (dates, etc.) in the specified project and Git commits.
+      operationId: bulkUpdateTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  start_date:
+                    type: string
+                    format: date
+                    nullable: true
+                  due_date:
+                    type: string
+                    format: date
+                    nullable: true
+                required:
+                  - id
+      responses:
+        "200":
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /projects/{project_name}/tasks/export:
+    get:
+      summary: Export tasks
+      description: Download all tasks of the project as a CSV file.
+      operationId: exportTasks
+      tags:
+        - tasks
+      parameters:
+        - name: project_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project name
+      responses:
+        "200":
+          description: Success
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Project or task file not found
+
+components:
+  schemas:
+    TaskBase:
+      type: object
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+        assignee_id:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        parent_id:
+          type: string
+          nullable: true
+        display_order:
+          type: integer
+          default: 0
+        planned_hours:
+          type: number
+          nullable: true
+        actual_hours:
+          type: number
+          nullable: true
+        progress:
+          type: integer
+          default: 0
+          description: Progress rate (0-100)
+        description:
+          type: string
+          nullable: true
+        task_type:
+          type: string
+          nullable: true
+        actual_start_date:
+          type: string
+          format: date
+          nullable: true
+        actual_end_date:
+          type: string
+          format: date
+          nullable: true
+
+    TaskInput:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+      required:
+        - title
+        - status
+
+    Task:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id
