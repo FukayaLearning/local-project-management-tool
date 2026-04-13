@@ -45,23 +45,15 @@ class TaskUseCase:
 
     def create_task(self, project_name: str, dto: TaskCreateDTO) -> Task:
         project_dir = self._get_project_dir(project_name)
-        task = Task(
-            title=dto.title,
-            status=dto.status,
-            assignee_id=dto.assignee_id,
-            start_date=dto.start_date,
-            due_date=dto.due_date,
-            parent_id=dto.parent_id,
-            description=dto.description,
-            task_type=dto.task_type,
-            planned_hours=dto.planned_hours,
-            display_order=dto.display_order,
-            actual_start_date=dto.actual_start_date,
-            actual_end_date=dto.actual_end_date,
-            scheduling_rule=dto.scheduling_rule,
-            dependencies=dto.dependencies or [],
-            progress_history=dto.progress_history or [],
-        )
+        data = dto.model_dump()
+        # Ensure dependencies and progress_history are at least empty lists 
+        # (they might be None if not provided in DTO but Task entity expects them)
+        if data.get("dependencies") is None:
+            data["dependencies"] = []
+        if data.get("progress_history") is None:
+            data["progress_history"] = []
+            
+        task = Task(**data)
 
         saved_task = self.task_repository.save(project_dir, task)
         self._ensure_git_initialized(project_dir)

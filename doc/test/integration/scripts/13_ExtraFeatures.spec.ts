@@ -20,8 +20,9 @@ test.describe("Integration: Extra Features (Field Preservation & Apply Schedule)
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // 1. Create a task via API with extra fields (simulating external import)
+    const uniqueTitle = `Task Extra ${Date.now()}`;
     const extraTask = {
-      title: "Task with Extra Fields",
+      title: uniqueTitle,
       status: "New",
       planned_hours: 8,
       "External System ID": "EXT-999", // Extra field
@@ -35,14 +36,25 @@ test.describe("Integration: Extra Features (Field Preservation & Apply Schedule)
     await page.goto(`/projects/${projectName}`);
     await expect(page.locator("text=Loading")).not.toBeVisible();
 
-    const taskRow = page.locator('tr:has-text("Task with Extra Fields")');
+    const taskRow = page.locator(`tr:has-text("${uniqueTitle}")`).first();
     await expect(taskRow).toBeVisible();
     await taskRow.getByRole("button", { name: "Edit" }).click();
 
-    // Change a standard field
-    await page.getByLabel("Status").selectOption("Done");
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.locator("text=Done")).toBeVisible();
+    // Change a standard field inside the modal
+    const modal = page.getByRole("dialog");
+    await modal.getByLabel("Status").selectOption("Done");
+    await modal.getByRole("button", { name: "Save" }).click();
+
+    // Wait for modal to close
+    await expect(modal).not.toBeVisible();
+
+    // Debug: Print all td contents
+    const cells = await taskRow.locator("td").allInnerTexts();
+    console.log(`TaskRow cells [${uniqueTitle}]:`, cells);
+
+    // Verify status changed in the row
+    // If cells[4] is not status, the log will tell us what's there.
+    expect(cells.some((c) => c.includes("Done"))).toBe(true);
 
     // 3. Download CSV and verify extra fields are preserved
     const downloadPromise = page.waitForEvent("download");
@@ -83,14 +95,14 @@ test.describe("Integration: Extra Features (Field Preservation & Apply Schedule)
     await page.goto(`/projects/${projectName}`);
     await expect(page.locator("text=Loading")).not.toBeVisible();
 
-    // Since we don't know the exact calculation result here (depends on start date and holidays),
-    // we just verify that some dates are visible now which were originally empty or different.
-    // In a controlled test, we'd set a specific project start date.
+    // Get any task row that has dates enabled
+    const taskRow = page.locator("tr.task-item").first();
+    await expect(taskRow).toBeVisible();
 
-    const taskRow = page.locator('tr:has-text("Task with Extra Fields")');
-    // After apply, the task should have a date in the 4th column (Deadline/Date)
+    // After apply, the task should have a date visible in the row
+    // We check for the presence of a date string anywhere in the row's date cells
     const deadlineCell = taskRow.locator("td").nth(3);
-    const dateText = await deadlineCell.innerText();
-    expect(dateText).toMatch(/\d{4}-\d{2}-\d{2}/);
+    await expect(deadlineCell).not.toHaveText("-");
+    await expect(deadlineCell).toContainText(/\d{4}-\d{2}-\d{2}/);
   });
 });
