@@ -44,6 +44,40 @@ export const TaskListPage: React.FC<TaskListPageProps> = ({ projectName }) => {
     fetchTasks(projectName);
   }, [fetchGlobalSettings, fetchProjectSettings, fetchTasks, projectName]);
 
+  const filteredTasks = useMemo(() => {
+    let result = [...scheduledTasks];
+    if (searchTerm) {
+      result = result.filter((t) =>
+        t.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
+    if (statusFilter !== "all") {
+      result = result.filter((t) => t.status === statusFilter);
+    }
+    if (assigneeFilter !== "all") {
+      if (assigneeFilter === "unassigned") {
+        result = result.filter((t) => !t.assignee_id);
+      } else {
+        result = result.filter((t) => t.assignee_id === assigneeFilter);
+      }
+    }
+
+    const isFiltering =
+      searchTerm !== "" || statusFilter !== "all" || assigneeFilter !== "all";
+    if (!isFiltering) {
+      return flattenTasksWithHierarchy(result);
+    }
+    return result;
+  }, [scheduledTasks, searchTerm, statusFilter, assigneeFilter]);
+
+  const isReorderable =
+    searchTerm === "" && statusFilter === "all" && assigneeFilter === "all";
+
+  const assignees =
+    projectSettings?.basic_settings_override?.assignees ||
+    globalSettings?.assignees ||
+    [];
+
   const handleCreateClick = () => {
     const isDebug = import.meta.env.VITE_DEBUG_MODE === "true";
     if (isDebug) console.log("--- DEBUG USER ACTION --- Click New Task");
@@ -85,42 +119,6 @@ export const TaskListPage: React.FC<TaskListPageProps> = ({ projectName }) => {
       <div className="p-8 text-center text-red-600">Error: {error.message}</div>
     );
   }
-
-  const filteredTasks = useMemo(() => {
-    let result = [...scheduledTasks];
-    if (searchTerm) {
-      result = result.filter((t) =>
-        t.title.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-    if (statusFilter !== "all") {
-      result = result.filter((t) => t.status === statusFilter);
-    }
-    if (assigneeFilter !== "all") {
-      if (assigneeFilter === "unassigned") {
-        result = result.filter((t) => !t.assignee_id);
-      } else {
-        result = result.filter((t) => t.assignee_id === assigneeFilter);
-      }
-    }
-
-    // Apply hierarchy if not searching/filtering (or even if filtering, depending on UX choice)
-    // For simplicity, we use hierarchy when not filtering by text/status/assignee to keep D&D logic simple
-    const isFiltering =
-      searchTerm !== "" || statusFilter !== "all" || assigneeFilter !== "all";
-    if (!isFiltering) {
-      return flattenTasksWithHierarchy(result);
-    }
-    return result;
-  }, [scheduledTasks, searchTerm, statusFilter, assigneeFilter]);
-
-  const isReorderable =
-    searchTerm === "" && statusFilter === "all" && assigneeFilter === "all";
-
-  const assignees =
-    projectSettings?.basic_settings_override?.assignees ||
-    globalSettings?.assignees ||
-    [];
 
   return (
     <div className="max-w-6xl mx-auto p-6">
