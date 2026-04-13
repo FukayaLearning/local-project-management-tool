@@ -19,6 +19,22 @@ def list_tasks(
     return usecase.list_tasks(project_name)
 
 
+@router.get("/{project_name}/tasks/export")
+@inject
+def export_tasks(
+    project_name: str,
+    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
+):
+    file_path = usecase.get_task_file_path(project_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Task file not found")
+    return FileResponse(
+        path=file_path,
+        filename=f"{project_name}_tasks.csv",
+        media_type="text/csv",
+    )
+
+
 @router.get("/{project_name}/tasks/{task_id}", response_model=Task)
 @inject
 def get_task(
@@ -80,17 +96,3 @@ def delete_task(
         raise HTTPException(status_code=404, detail="Task not found")
 
 
-@router.get("/{project_name}/tasks/export")
-@inject
-def export_tasks(
-    project_name: str,
-    usecase: TaskUseCase = Depends(Provide[Container.task_usecase]),
-):
-    file_path = usecase.get_task_file_path(project_name)
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Task file not found")
-    return FileResponse(
-        path=file_path,
-        filename=f"{project_name}_tasks.csv",
-        media_type="text/csv",
-    )
