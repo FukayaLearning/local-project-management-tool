@@ -148,6 +148,9 @@ sequenceDiagram
   | :--- | :--- | :--- | :--- | :--- | :--- |
   | **SPEC-VIEW-001-001** | View | Gantt Chart | Logic | Render bars based on planned start/end dates. Parent covers child duration. | REQ-VIEW-001 |
   | **SPEC-VIEW-002-001** | View | Progress Line | Logic | Calculate delay/advance coordinates based on progress rate at base date. | REQ-VIEW-002 |
+  | **SPEC-VIEW-003-001** | View | Auto Scheduling | Calculation Logic | Auto-calculate start/end dates based on priority, dependencies, man-hours, and holidays using topological sort and resource timeline management. | REQ-VIEW-003 |
+  | **SPEC-VIEW-003-002** | View | Auto Scheduling | Productivity Adjustment | Adjust schedule by calculating effective man-hours (hours / productivity) using the assignee's `productivity_ratio`. | REQ-VIEW-003 |
+  | **SPEC-VIEW-003-003** | View | Auto Scheduling | Intra-day & Gap Filling | Start the next task using remaining time within a day, and fill gaps (waiting time for high priority tasks) with lower priority tasks. | REQ-VIEW-003 |
 
 ### 3.4 History Management (HIST)
 

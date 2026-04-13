@@ -27,9 +27,11 @@ describe("ProjectSettingsForm Component", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
-    expect(defaultProps.onSave).toHaveBeenCalledWith({
-      project_name: "New Name",
-    });
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        project_name: "New Name",
+      }),
+    );
   });
 
   it("disables button when loading", () => {

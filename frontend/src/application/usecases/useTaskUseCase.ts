@@ -1,12 +1,24 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Task, TaskCreate, TaskUpdate } from "../../domain/entities/task";
 import { useDependencies } from "../providers/DependencyProvider";
+import { calculateScheduledTasks } from "../../domain/services/taskCalculationService";
+import { BasicSettings } from "../../types";
 
-export const useTaskUseCase = () => {
+export const useTaskUseCase = (settings?: BasicSettings | null) => {
   const { taskRepository: repository } = useDependencies();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const scheduledTasks = useMemo(() => {
+    if (!settings || tasks.length === 0) return tasks;
+    try {
+      return calculateScheduledTasks(tasks, settings);
+    } catch (err) {
+      console.error("Failed to calculate scheduled tasks", err);
+      return tasks;
+    }
+  }, [tasks, settings]);
 
   const fetchTasks = useCallback(
     async (projectName: string) => {
@@ -51,7 +63,36 @@ export const useTaskUseCase = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const updatedTask = await repository.update(projectName, id, task);
+        const existingTask = tasks.find((t) => t.id === id);
+        let updatedTaskData = { ...task };
+
+        // Auto-record progress history if progress changed
+        if (
+          task.progress !== undefined &&
+          existingTask &&
+          existingTask.progress !== task.progress
+        ) {
+          const today = new Date().toISOString().split("T")[0];
+          const history = existingTask.progress_history
+            ? [...existingTask.progress_history]
+            : [];
+          const existingEntryIndex = history.findIndex((h) => h.date === today);
+          if (existingEntryIndex >= 0) {
+            history[existingEntryIndex] = {
+              ...history[existingEntryIndex],
+              progress: task.progress,
+            };
+          } else {
+            history.push({ date: today, progress: task.progress });
+          }
+          updatedTaskData.progress_history = history;
+        }
+
+        const updatedTask = await repository.update(
+          projectName,
+          id,
+          updatedTaskData,
+        );
         setTasks((prev) => prev.map((t) => (t.id === id ? updatedTask : t)));
         return updatedTask;
       } catch (err) {
@@ -63,7 +104,7 @@ export const useTaskUseCase = () => {
         setIsLoading(false);
       }
     },
-    [repository],
+    [repository, tasks],
   );
 
   const deleteTask = useCallback(
@@ -109,6 +150,7 @@ export const useTaskUseCase = () => {
 
   return {
     tasks,
+    scheduledTasks,
     isLoading,
     error,
     fetchTasks,
@@ -116,5 +158,10 @@ export const useTaskUseCase = () => {
     updateTask,
     deleteTask,
     reorderTasks,
+    exportTasks: (projectName: string) => {
+      window.location.href = `/api/v1/projects/${encodeURIComponent(
+        projectName,
+      )}/tasks/export`;
+    },
   };
 };

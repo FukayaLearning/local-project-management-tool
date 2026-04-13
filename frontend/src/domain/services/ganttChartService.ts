@@ -114,7 +114,21 @@ export function calculateInazumaLinePoints(
         Math.max((refDate.getTime() - start.getTime()) / totalDuration, 0),
         1,
       );
-      const actualProgress = task.progress / 100;
+
+      // Get progress at referenceDate from history, or fallback to current progress
+      const actualProgressValue = (() => {
+        if (!task.progress_history || task.progress_history.length === 0) {
+          return task.progress;
+        }
+        // Find the latest history entry on or before referenceDate
+        const history = [...task.progress_history].sort((a, b) =>
+          b.date.localeCompare(a.date),
+        );
+        const entry = history.find((h) => h.date <= referenceDate);
+        return entry ? entry.progress : 0;
+      })();
+
+      const actualProgress = actualProgressValue / 100;
       const progressDifference = actualProgress - expectedProgress;
 
       const startDiffDays = Math.floor(

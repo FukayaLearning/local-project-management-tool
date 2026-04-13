@@ -95,6 +95,7 @@ export const MenuBar = (props: MenuBarProps) => {
           {context === "project" && (
             <div className="flex items-center space-x-4">
               <select
+                id="project-selector"
                 value={props.currentProject}
                 onChange={(e) => props.onSwitchProject(e.target.value)}
                 className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"

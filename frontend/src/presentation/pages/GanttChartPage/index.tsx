@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTaskUseCase } from "../../../application/usecases/useTaskUseCase";
+import { useSettingsUseCase } from "../../../application/usecases/useSettingsUseCase";
 import { GanttChart } from "./components/GanttChart";
 
 const DEFAULT_DAY_WIDTH = 40;
@@ -15,8 +16,9 @@ interface GanttChartPageProps {
 export const GanttChartPage: React.FC<GanttChartPageProps> = ({
   projectName,
 }) => {
-  const { tasks, isLoading, error, fetchTasks, reorderTasks } =
-    useTaskUseCase();
+  const { globalSettings, fetchGlobalSettings } = useSettingsUseCase();
+  const { scheduledTasks, tasks, isLoading, error, fetchTasks, reorderTasks } =
+    useTaskUseCase(globalSettings);
   const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
   const [showInazumaLine, setShowInazumaLine] = useState(false);
   const [referenceDate, setReferenceDate] = useState(
@@ -24,8 +26,9 @@ export const GanttChartPage: React.FC<GanttChartPageProps> = ({
   );
 
   useEffect(() => {
+    fetchGlobalSettings();
     fetchTasks(projectName);
-  }, [fetchTasks, projectName]);
+  }, [fetchGlobalSettings, fetchTasks, projectName]);
 
   const handleZoomIn = () => {
     setDayWidth((prev) => Math.min(prev + ZOOM_STEP, MAX_DAY_WIDTH));
@@ -94,7 +97,7 @@ export const GanttChartPage: React.FC<GanttChartPageProps> = ({
       </div>
 
       <GanttChart
-        tasks={tasks}
+        tasks={scheduledTasks}
         dayWidth={dayWidth}
         rowHeight={ROW_HEIGHT}
         showInazumaLine={showInazumaLine}

@@ -9,6 +9,7 @@ services:
       - ./backend/data:/workspace/backend/data
     environment:
       - ENV=production
+      - ENV_DEBUG=${ENV_DEBUG:-false}
 
   frontend:
     build:
@@ -16,3 +17,6 @@ services:
       target: prod
     ports:
       - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+      - VITE_DEBUG_MODE=${VITE_DEBUG_MODE:-false}

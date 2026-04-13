@@ -59,7 +59,7 @@ test.describe("Integration: History and Switching", () => {
     });
 
     // プロジェクトA選択
-    const projectSelect = page.locator("select");
+    const projectSelect = page.locator("#project-selector");
     await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_A);
 
     // タスク作成 (Project A)
@@ -108,7 +108,7 @@ test.describe("Integration: History and Switching", () => {
     });
 
     // プロジェクトA選択
-    const projectSelect = page.locator("select");
+    const projectSelect = page.locator("#project-selector");
     await switchProjectAndWaitForReload(page, projectSelect, TEST_PROJECT_A);
 
     // Undo用タスク作成

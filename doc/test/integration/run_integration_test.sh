@@ -9,6 +9,7 @@ TEST_FILES=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --demo) DEMO_MODE="true" ;;
+        --debug) DEBUG_MODE="true" ;;
         --run) shift; TEST_FILES="$1" ;; # Optional: specific test file
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -31,6 +32,7 @@ echo "Demo Mode: ${DEMO_MODE}"
 echo "Log File: ${LOG_FILE}"
 
 export DEMO_MODE="${DEMO_MODE}"
+export DEBUG_MODE="${DEBUG_MODE:-false}"
 
 
 
@@ -135,16 +137,15 @@ else
     docker run --rm -v "${REPO_ROOT}/backend/data:/data" alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true"
     
     # Use the root build script for consistency
-    "${REPO_ROOT}/build.sh"
+    "${REPO_ROOT}/build.sh" >> "${LOG_FILE}" 2>&1
     
     # Use the root run script for consistency
-    "${REPO_ROOT}/run.sh"
+    "${REPO_ROOT}/run.sh" >> "${LOG_FILE}" 2>&1
     
     echo "Waiting for App services to start..."
     sleep 10
     
     # 2. Run Tests in Container (Headless)
-    echo "Running Tests in Container (Self-contained)..."
     # Compose prod and e2e files. 
-    docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run -T --rm --build -e BASE_URL=http://frontend e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee "${LOG_FILE}"
+    ENV_DEBUG="${DEBUG_MODE}" VITE_DEBUG_MODE="${DEBUG_MODE}" docker compose -f docker-compose.prod.yaml -f doc/test/integration/docker-compose.e2e.yaml run -T --rm --build -e BASE_URL=http://frontend:80 e2e-tests npx playwright test -c scripts/playwright.config.ts $TEST_FILES 2>&1 | tee -a "${LOG_FILE}"
 fi

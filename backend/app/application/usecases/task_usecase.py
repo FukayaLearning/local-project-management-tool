@@ -58,6 +58,9 @@ class TaskUseCase:
             display_order=dto.display_order,
             actual_start_date=dto.actual_start_date,
             actual_end_date=dto.actual_end_date,
+            scheduling_rule=dto.scheduling_rule,
+            dependencies=dto.dependencies or [],
+            progress_history=dto.progress_history or [],
         )
 
         saved_task = self.task_repository.save(project_dir, task)
@@ -93,3 +96,7 @@ class TaskUseCase:
         if result:
             self.git_repository.commit(f"Delete task {task_id}", project_dir)
         return result
+
+    def get_task_file_path(self, project_name: str) -> str:
+        project_dir = self._get_project_dir(project_name)
+        return os.path.join(project_dir, "tasks.csv")
